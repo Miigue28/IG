@@ -98,3 +98,175 @@ El cauce gráfico tiene las siguientes etapas:
 
 ## 3.1 Programación y eventos en GLFW
 
+En las aplicaciones interactivas, un **evento** es la ocurrencia de un suceso relevante para la aplicación, hay varios tipos, entre los que destacamos:
+- **Teclado**: Pulsación o levantado de una tecla, de tipo carácter o de otras teclas.
+- **Ratón**: Pulsación o levantado de botones del ratón, movimiento del ratón, movimiento de la rueda del ratón para _scroll_.
+- **Cambio de tamaño**: Cambio de tamaño de alguna ventana de la aplicación.
+
+Las **funciones gestoras de eventos** (_event managers_, o _callbacks_) son funciones del programa que se invocan cuando ocurre un evento de un determinado tipo.
+
+El programa establece que tipos de eventos se quieren gestionar y qué funciones lo harán. Tras invocar a una de estas funciones, se dice que el correspondiente evento ya ha sido **procesado** o **gestionado**.
+
+```c++
+void VisualizarFrame(){}
+void FGE_CambioTamano(GLFWwindow* ventana, int nuevoAncho, int nuevoAlto){}
+void FGE_PulsarLevantarTecla(GLFWwindow* ventana, int tecla, ...){}
+void FGE_PulsarLevantarRaton(GLFWwindow* ventana, int boton, ...){}
+void Inicializa_GLFW(int argc, char* argv[]){}
+void Inicializa_OpenGL(){}
+void BucleEventos_GLFW(){}
+int main(int argc, char* argv[])
+{
+	Inicializa_GLFW(argc, argv); // Crea una ventana
+	Inicializa_OpenGL(); // Inicializa estado del cauce
+	BucleEventos_GLFW(); // Ejecuta el bucle
+	glfwTerminate(); // Cerrar la ventana
+}
+```
+
+Una aplicación OpenGL/GLFW ejecuta un **bucle principal** o **bucle de gestión de eventos** (en GLFW, el programador debe implementarlo explícitamente):
+- GLFW mantiene una **cola de eventos**, con información de cada evento que ya ha ocurrido pero que no ha sido gestionado aún por la aplicación.
+- En cada iteración se espera hasta que haya al menos un evento en la cola, entonces:
+	- Se extrae el siguiente evento de la cola; si hay designada una función gestora para ese tipo de evento se ejecuta dicha función.
+	- Si la ejecución de la función ha cambiado el modelo de escena o algún parámetro, se visualiza un cuadro nuevo.
+- El bucle termina típicamente cuando alguna función gestora se ordena cerrarla.
+
+```c++
+void Inicializa_GLFW(int argc, char* argv[])
+{
+	// Intenta inicializar, termina si no puede
+	if (!glfwInit())
+	{
+		cout << "Imposible inicializar GLFW\n\nSaliendo..." << end;
+		exit(1);
+	}
+	// Especificar que función se llamará ante un error de GLFW
+	glfwSetErrorCallback(ErrorGLFW);
+	// Crear la ventana, activar el rendering context
+	ventana_glfw = glfwCreateWindow(ventana_tam_x, ventana_tam_y, "Test", nullptr, nullptr);
+	glfwMakeContextCurrent(ventana_glfw); // Necesario para OpenGL
+	. . . 
+}
+```
+
+Una vez creada la ventana, se deben especificar los nombres de las funciones de nuestro programa que deben ser llamadas cuando ocurre un evento:
+
+```c++
+void Inicializa_GLFW(int argc, char* argv[])
+{
+	. . . 
+	// Definir cuales son las funciones gestoras de eventos
+	glfwSetWindowSizeCallback(ventana_glfw, FGE_CambioTamano);
+	glfwSetKeyCallback(ventana_glfw, FGE_PulsarLevantarTecla);
+	glfwSetMouseButtonCallback(ventana_glfw, FGE_PulsarLevantarBotonRaton);
+	glfwSetCursorPosCallback(ventala_glfw, FGE_MovimientoRaton);
+	glfwSetScrollCallback(ventana_glfw, FGE_Scroll);
+}
+```
+
+```c++
+void BucleEventos_GLFW()
+{
+	redibujar_ventana = true; // Dibujar la ventana por primera vez
+	terminar_programa = false; // Activar para terminar
+	while (!terminar_programa)
+	{
+		if (redibujar_ventana)
+		{
+			VisualizarFrame(); // Dibujar escena
+			redibujar_ventana = false; // Evitar que se dibuje continuamente
+		}
+		glfwWaitEvents(); // Esperar evento y llamar FGE
+		terminar_programa = terminar_programam || glfwWindowShouldClose(ventala_glfw);
+	}
+}
+```
+
+> `redibujar_ventana` y `terminar_programa` son variables lógicas globales.
+
+## 3.2 Tipos de Primitivas
+
+En OpenGL, cada primitiva o conjunto de primitivas se especifica mediante una secuencia ordenada de coordenadas de **vertices**, esto es, un punto de un espacio afín 3D. Se representa en memoria mediante una tupla de coordenadas en algún marco de coordenadas de dicho espacio afín. Además, puede tener asociados otros valores, llamados **atributos**.
+
+Existen tres tipos distintos de primitivas, así, una lista de $n$ coordenadas de vértices puede usarse para codificar:
+- Si $n \geq 1$, $n$ **puntos** aislados (`GL_POINTS`)
+- Si $n \geq 1$, uno o varios **segmentos** de recta, en concreto:
+	- Si $n$ par, $\frac{n}{2}$ segmentos independientes (`GL_LINES`)
+	- Si $n \geq 2$, $n-1$ segmentos formando una polilínea abierta (`GL_LINE_STRIP`)
+	- Si $n \geq 3$, $n$ segmentos formando una polilínea cerrada (`GL_LINE_LOOP`)
+- Si $n\geq 1 \land n \equiv 0 \mod 3$, $\frac{n}{3}$ **triángulos**, en concreto:
+	- Si $n \geq 3$, $n-2$ triángulos compartinedo aristas, cada triángulo comparte dos vértices con el anterior (`GL_TRIANGLE_STRIP`)
+	- Si $n \geq 3$, $n-1$ triángulos compartiendo un vértice (el primero de todos) y cada triángulo comparte dos vértices con el anterior (`GL_TRIANGLE_FAN`)
+
+> Cada primitiva de tipo triángulo es clasificada por OpenGL como **delantera**, si su vértices se visualizan en pantalla en el sentido contrario de las agujas del reloj, o **trasera**, si sus vértices se visualizan en pantalla en el sentido de las agujas del reloj. Este comportamiento de OpenGL puede ser configurado para no visualizar las caras traseras o no visualizar las delanteras (_face culling_).
+
+En el caso de las primitivas de tipo triángulos, OpenGL puede visualizarlos de varias formas, según el valor de un parámetro de configuración que se llama **modo de visualización de polígonos** y permite una de estas opciones:
+- **Modo puntos**: Cada triángulo se visualiza como un punto en cada vértice (`GL_POINT`).
+- **Modo líneas**: Cada triángulo se visualiza como una polilínea cerrada (`GL_LINE`).
+- **Modo relleno**: Cada triángulo se visualiza relleno de color (`GL_FILL`).
+
+> **Problema de vértices replicados**: Muchas veces necesitamos usar unas mismas coordenadas para varios vértices, lo que supone repetir vértices en la secuencia. Esto supone emplear más memoria y/o tiempo para visualizar del necesario.
+
+Las APIs de rasterización permiten especificar una secuencia de vértices (con repeticiones) a partir de una secuencia de vértices únicos:
+- Se parte de una secuencia $V_n$ de $n$ coordenadas arbitrarias de vértices $V_n = \{v_0, v_1, \dotsc, v_{n-1}\}$.
+- Se usa una secuencia $I_m$ de $m$ índices $I_m = \{i_0, i_1, \dotsc, i_{m-1}\}$ donde cada valor $i_j$ es un entero entre $0$ y $n-1$ (ambos incluidos). Puede tener índices repetidos.
+- La secuencia de vértices $V_n$ y la de índices determinan otra secuenci $S_m$ de $m$ vértices que tiene las mismas coordenadas de vértices $V_n$ pero en el orden especificado por los índices en $I_m$
+$$S_m = \{v_{i_0}, v_{i_1}, \dotsc, v_{i_{m-1}}\}$$
+
+## 3.3 Atributos de vértices
+
+Las coordenadas de su posición se considera un **atributo** de los vértices, pero en rasterización se pueden opcionalmente usar otros atributos, por ejemplo:
+- El **color** del vértice (una terna RGB con valores entre $0$ y $1$).
+- Las **coordenadas del vector normal**, un vector unitario con tres coordenadas reales que determina la orientación de la superficie de un objeto en el punto donde está el vértice. Se usa para iluminación.
+- Las **coordenadas de textura**, típicamente un par de valores reales que determinan que punto de la textura se fija al vértice.
+
+> En OpenGL a cada vértice siempre se la asocia una tupla por cada atributo, es decir, todo vértice tiene siempre asociado una posición, un color, una normal y unas coordenadas de textura (u otros atributos). Según la configuración del cauce, algunos atributos serán usados o no, pudiendo definir un único valor de un atributo para todos los vértices de una primitiva, o bien especificar un valor para cada vértice.
+
+> El valor de cada atributo está definido en cada pixel donde se proyecta la primitva. Estos valores se calculan durante la rasterización usando **interpolación**.
+
+
+## 3.4 Almacenamiento de vértices y atributos
+
+Cuando usamos arrays o tablas de coordenadas y atributos en memoria, tenemos dos opciones:
+- **Array of Structures, AOS**: Se usa un array donde cada entrada contiene las coordenadas de un vértice y todos sus atributos.
+- **Structure of Arrays, SOA**: Se usa una estructura con varios punteros a arrays. Uno de ellos contiene las coordenadas y los otros contienen cada uno una tabla de atributos.
+
+```c++
+struct
+{
+	float posicion[3],
+		  color[3],
+		  normal[3],
+		  coord_text[2];
+}
+secuenciaAOS[num_vertices];
+struct
+{
+	float posiciones[num_vertices*3], 
+		  colores[num_vertices*3],
+		  normales[num_vertices*3],
+		  coord_text[num_vertices*2];
+}
+secuanciaSOA;
+```
+
+Usaremos la librería estándar de C++ junto con la librería **GLM** para gestionar el almacenamiento de las tablas de atributos e índices de una secuencia de vértices en la aplicación.
+
+```c++
+#include<glm>
+std::vector<glm::vec3> posiciones; // Coordenadas de posición de los vértices
+std::vector<glm::vec3> colores; // Colores de los vértices
+std::vector<glm::vec3> normales; // Normales de los vértices
+std::vector<glm::vec2> coord_text; // Coordenadas de textura de los vértices
+std::vector<unsigned int> indices; // Indices
+```
+
+El almacenamiento de las tablas lo realizaremos en la GPU mediante los Vertex Buffer Objects
+
+> Un **Vertex Buffer Object** es una secuencia de bytes contiguos en la memoria de la GPU. Dicho bloque contiene una o varias tablas con coordenadas, colores u otros atributosde vértices.
+
+El uso de este bloque de memoria se hace exclusivamente a través de llamadas a OpenGL. Cada VBO tiene un valor entero único que denominamos **identificador** de VBO, de tipo `GLuint`. Un VBO puede tener atributos o puede tener índices, pero no ambos mezclados.
+
+
+
+
