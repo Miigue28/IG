@@ -690,3 +690,302 @@ void VisualizarFrame()
 Las funciones de OpenGL pueden activar una variable de estado con un código de error, que en condiciones normales vale `GL_NO_ERROR`. La función que lee ese código de error es `glGetError()`, la cual devuelve el valor de esa variable para posteriormente poner la variable a `GL_NO_ERROR`.
 
 > Para depurar programas se puede comprobar el error antes y después de cada trozo de código donde se sospeche que hay un error. Aunque para aislar la llamada errónea se deberá insertar comprobaciones dentro del trozo de código.
+
+## 4. Programación básica del cauce gráfico
+
+## 4.1 Shaders
+
+Hay, entre otros, dos pasos importantes del cauce gráfico de OpenGL que normalmente se ejecutan en la GPU:
+
+- **Transformación**: Se parte de las coordenadas de un vértice, y se calculan las coordenadas (normalizadas) de su proyección en la ventana.
+- **Sombreado**: El cálculo del color de un píxel.
+
+> Entre ambas etapas se situa la rasterización y el recortado de polígonos.
+
+Los **shaders** son programas que se ejecutan en las diversas etapas del cauce gráfico. Hay de varios tipos, en distintas etapas, pero nos centramos en dos:
+
+- **Vertex Shader**: Programa encargado de la transformación de coordenadas. Se ejecuta una vez para cáda vértice en el VAO a visualizar y produce como resultado las coordenadas normalizadas del vértice en la ventana y opcionalmente otros atributos.
+- **Fragment Shader**: Subprograma encargado del sombreado. Se ejecuta cada vez que se determina que una primitiva se proyecta en un pixel de la ventana y produce como resultado el color del pixel.
+
+### Etapas del cauce gráfico y shaders
+
+El cauce gráfico (_programmable pipeline_) incluye varias etapas y tipos de shaders (opcionales):
+
+- Procesamiento de vértices, **Vertex Processing**:
+	- Lectura de vértices y atributos de los VAOs.
+	- Procesado de cada vértice con el **Vertex Shader** (programables, obligatorio).
+	- Teselado con el **Tesselation Shader** (programables, opcionales).
+	- Procesado de primitivas con el **Geometry Shader** (programable, opcionales).
+- Post-procesado de vértices: Ensamblado de primitivas, recortado, división de perspectiva, transformación de viewport (no programable).
+
+> En este punto se obtienen las primitivas visibles ya proyectadas en el viewport, y se puede proceder con su rasterizado.
+
+- Rasterizado e interpolación de atributos (no programable).
+- Procesado de fragmentos con el **Fragment Shader** (programable, obligatorio).
+- Procesado de muestras, esto es, etapas adicionales que se ejecutan después (algunas antes) del procesado de fragmentos, incluyendo, por ejemplo, el test de profundidad (no programable).
+
+![](./resources/img08.png)
+
+## 4.2 Estructura de los shaders
+
+Necesitamos como mínimo, un texto fuente del **Vertex Shader** y otro del **Fragment Shader**. Los fuentes de los dos shaders deben estar almacenados en memoria en variables de tipo `char*`, aunque se pueden guardar en archivos en el sistema de archivos mediante la extensión `.glsl` y leerlos al inicio del programa.
+
+Los dos shaders deben compilarse usando llamadas a OpenGL, una vez compilados correctamente, los dos shaders se enlazan, creándose un **program objecto**. Cada objeto programa tiene asociado un identificador, esto es un entero positivo único.
+
+El código fuente de un shader tiene declaraciones de:
+
+- **Parámetros uniform**: Valores proporcionados por la aplicación, constantes para cada secuencia de vértices.
+- **Variables varying**: Valores calculados del vertex shader en cada vértices, e interpolados por el fragment shader en cada pixel. Se declaran con `out`, en el vertex shader, o con `in`, en el fragment shader.
+- **Atributos de vértices**: Son variables de entrada en el vertex shader. Se declaran con `in`.
+- **Función `main`**: Es la única función obligatoria.
+- **Funciones auxiliares**: Llamadas directa o indirectamente desde `main`.
+
+### Entradas y salidas según el tipo de shader
+
+> **Vertex Shader** (Se ejecutan una vez por vértice)
+
+- **Entradas**: 
+	- Parámetros `uniform`
+	- Atributos del vértice (`layout..in`): posición, color, etc.
+- **Salidas**:
+	- Variables varying(`out`): para ser interpoladas.
+	- Variable `gl_Position`: Coordenadas transformadas del vértice.
+
+> **Fragment Shaders** (Se ejecutan una vez por pixel)
+
+- **Entradas**:
+	- Parámetros `uniform`
+	- Variables varying(`in`): ya interpoladas en el pixel
+- **Salida**:
+	- Variable (`layout..out`) con color del pixel
+
+```c++
+// Declaración de la cadena con el texto fuente del vertex shader
+const char * fuente_vs = R"glsl(
+. . . 
+)glsl";
+// Declaración de la cadena con el texto fuente del fragment shader
+const char * fuente_fs = R"glsl(
+. . .
+)glsl";
+```
+
+### Ejemplo de shaders mínimos: Vertex Shader
+
+```c++
+#version 330 core
+// Parámetros uniform
+uniform mat4 u_mat_modelview; // matriz de transformación de posiciones
+uniform mat4 u_mat_proyeccion; // matriz de proyección
+uniform bool u_usar_color_plano; // 1 -> usar color plano, 0 -> usar interpolado
+// Atributos de vértice
+layout( location = 0 ) in vec3 atrib_posicion ; // atributo 0: posición
+layout( location = 1 ) in vec3 atrib_color ;
+// atributo 1: color RGB
+// Variables ’varying’
+out
+vec3 var_color
+; // color RGB del vértice
+flat out vec3 var_color_plano ; // idem (no se interpola)
+// Función principal
+void main()
+{
+var_color
+= atrib_color ;
+var_color_plano = atrib_color ;
+gl_Position
+= u_mat_proyeccion * u_mat_modelview *
+vec4( atrib_posicion, 1);
+}
+```
+
+### Ejemplo de shaders mínimos: Fragment Shader
+
+```c++
+
+#version 330 core
+// Parámetros uniform
+uniform bool u_usar_color_plano; // 1 -> usar color plano, 0 -> usar interpolado
+// Variables ’varying’
+in
+vec3 var_color ;
+// color interpolado en el pixel.
+flat in vec3 var_color_plano ; // color (plano) producido por el ’provoking vertex’
+// Salida (color del pixel)
+layout( location = 0 ) out vec4 out_color_fragmento ;
+// Función principal
+void main()
+{
+if ( u_usar_color_plano )
+out_color_fragmento = vec4( var_color_plano, 1 );
+else
+out_color_fragmento = vec4( var_color, 1 );
+}
+```
+
+## 4.3 Creación y ejecución de programas
+
+En OpenGL se usa el concepto de **Program Object** para referirse a una estructura de datos interna de OpenGL con información de los shaders en uso. Cada _program object_ tiene asociado un identificador único, creado mediante `glCreateProgram`.
+
+En todo momento existe un _program object_ activado (en uso para visualización), inicialmente es el $0$, aunque no es usable. Para cambiar el programa activo se usa `glUseProgram`. 
+
+> Una aplicación OpenGL debe de crear un objeto programa usable y activarlo antes de visualizar.
+
+Un _program object_ tendrá asociados varios shaders, la información de cada uno de ellos se encapsula en una estructura de datos interna de OpenGL que se llama **Shader Object**, o simplemente shader. Cada _shader object_ tiene asociado un identificador único, creado mediante `glCreateShader`.
+
+La aplicación debe de asociar a un _program object_ todos los _shader objects_ del mismo. Después debemos enlazar el _program object_ con `glLinkProgram`, tras lo que deberemos verificar si ha habido errores, con `glGetProgram`. Si los ha habido hay que obtener (con `glGetProgramInfoLog`) e imprimir el log de errores.
+
+Para cada uno de los shaders en un _program shader_ hay que:
+- Crear un nuevo identificador de shader, con `glCreateShader`.
+- Asociarle una cadena con su código fuente, con `glShaderSource`.
+- Compilar el shader con `glCompileShader`.
+- Verificar si ha habido errores al compilar, con `glGetShader`. Si los ha habido se debe obtener (con `glGetShaderInfoLog`) e imprimir el log de errores.
+- Asociar el _shader object_ a un _program object_ ya creado, con `glAttachShader`.
+
+> Como mínimo, esto se debe hacer con un fragment shader y un vertex shader. Opcionalmente se pueden asociar otros tipos de shaders.
+
+```c++
+// La clase Cauce encapsula un program object, y proporciona métodos para manipularlo
+GLuint Cauce::compilarAdjuntarShader(GLenum tipo_shader, const string & nombre_archivo)
+{
+	const GLchar * fuente_shader = leerArchivo( nombre_archivo );
+	const GLuint id_shader = glCreateShader( tipo_shader );
+	GLint longi = strlen( fuente_shader );
+	// Compilar el shader
+	glShaderSource(id_shader, 1, (const GLchar **) &fuente_shader, &longi);
+	glCompileShader(id_shader) ;
+	// Verificar e informar errores o warnings y, si procede, abortar
+	glGetShaderInfoLog(id_shader, longi_max, &report_length, report_buffer);
+	if (report_length > 0)
+		cout << "Errores o warnings: " << endl << report_buffer << endl ;
+	GLint compile_status;
+	glGetShaderiv( id_shader, GL_COMPILE_STATUS, &compile_status);
+	if (compile_status != GL_TRUE)
+		exit(1);
+	// Adjuntar el shader y devolver el nombre
+	glAttachShader(id_prog, id_shader);
+	return id_shader ;
+}
+// Este método usa el anterior para crear, compilar, enlazar y verificar el program object
+void Cauce::crearObjetoPrograma()
+{
+	// Crear y compilar los shaders
+	const std::string naf_frag = "...glsl" , naf_vert = "...glsl" ; // Nombre archivos de shaders
+	id_prog = glCreateProgram();
+	id_frag_shader = compilarAdjuntarShader(GL_FRAGMENT_SHADER, naf_frag);
+	id_vert_shader = compilarAdjuntarShader(GL_VERTEX_SHADER, naf_vert);
+	// Enlazar y verificar el objeto programa
+	glLinkProgram(id_prog);
+	GLint resultado ;
+	glGetProgramInfoLog(id_prog, longi_max, &report_length, report_buffer);
+	if (report_length > 0)
+		cout << "Errores o warnings:" << endl << report_buffer << endl ;
+	glGetProgramiv(id_prog, GL_LINK_STATUS, &resultado);
+	if (resultado != GL_TRUE)
+		exit(1);
+}
+GLint Cauce::leerLocation(const char * name)
+{
+	const GLint location = glGetUniformLocation(id_prog, name);
+	if (location == -1)
+		cout << "uniform '" << name << "' no declarado o no usado.";
+	return location ;
+}
+```
+
+Tras crear el objeto programa, se deben de leer las locations de los parámetros uniforms (y, si es necesario, darle valores iniciales):
+
+```c++
+// Activar el programa (debe estarlo)
+glUseProgram( id_prog );
+// Obtener las locations (a partir de los nombres, con leerLocation)
+loc_mat_modelado = leerLocation("u_mat_modelview");
+loc_mat_proyeccion = leerLocation("u_mat_proyeccion");
+loc_usar_color_plano = leerLocation("u_usar_color_plano");
+....
+// Inicializar los uniforms a valores iniciales (si necesario).
+glUniform1ui(loc_usar_color_plano, false);
+....
+```
+
+En la función de inicialización de OpenGL es necesario inicializar los punteros a funciones OpenGL de la versión 2.0 o
+posteriores e invocar la creación, compilación y enlazado de shaders a usar
+
+```c++
+#include <GL/glew.h>
+void Inicializa_OpenGL()
+{
+	Inicializar_GLEW() ;
+	// Hacer el resto de inicializaciones (igual que antes)
+	.......
+	// Compilar shaders, crear ’cauce’
+	Cauce * cauce = new Cauce();
+}
+```
+
+Una vez creado un programa, para usarlo debemos activarlo, para ello usamos el siguiente método
+
+```c++
+void Cauce::activar() { glUseProgram( id_prog ); }
+```
+
+Para fijar los parámetros, usamos métodos especificos que dan valor a los parámetros `uniform`. Por tanto, el programa puede quedar así:
+
+```c++
+void VisualizarEscena()
+{
+	cauce->activar() ;
+	cauce->fijarParametro1( .... ); // (ejemplo)
+	cauce->fijarParametro2( .....); // (ejemplo)
+	// enviar secuencias de vértices
+	. . .
+}
+```
+
+## 4.4 Funciones auxiliares
+
+Finalmente, para leer un archivo, se puede usar esta función:
+
+```c++
+char * LeerArchivo( const char * nombreArchivo )
+{
+	// Intentar abrir stream, si no se puede informar y abortar
+	ifstream file(nombreArchivo, ios::in|ios::binary|ios::ate);
+	if (!file.is_open())
+	{ 
+		cout << "Imposible abrir archivo para lectura (" << nombreArchivo << ")" << endl ;
+		exit(1);
+	}
+	// Reservar memoria para guardar archivo completo
+	size_t numBytes = file.tellg();
+	// Leer tamaño total en bytes
+	char * bytes = new char [numBytes+1]; // reservar memoria dinámica
+	// Leer bytes
+	file.seekg(0, ios::beg);
+	// Posicionar lectura al inicio
+	file.read(bytes, numBytes);
+	// Cerrar stream de lectura
+	file.close();
+	// Añadir cero al final
+	bytes[numBytes] = 0 ;
+	// Devolver puntero al primer elemento
+	return bytes ;
+}
+```
+
+En Linux y Windows es necesario leer punteros a las funciones de OpenGL nuevas de la versión 2.0 o posteriores. Para eso usamos la librería `GLEW`.
+
+```c++
+void Inicializa_GLEW()
+{
+#ifndef __APPLE__
+	// Hacer init de GLEW y comprobar errores
+	GLenum codigoError = glewInit();
+	if ( codigoError != GLEW_OK )
+	{
+		cout << "Imposible inicializar 'GLEW': " << glewGetErrorString(codigoError) << endl ;
+		exit(1);
+	}
+#endif
+}
+```
