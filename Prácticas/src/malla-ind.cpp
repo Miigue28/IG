@@ -243,10 +243,8 @@ void MallaInd::visualizarModoSeleccionGL()
 
 MallaPLY::MallaPLY(const std::string &nombre_arch)
 {
-   ponerNombre(std::string("malla leída del archivo '") + nombre_arch + "'");
-
-   // COMPLETAR: práctica 2: leer archivo PLY e inicializar la malla
-   // ..........................
+   ponerNombre(std::string("Malla leída del archivo '") + nombre_arch + "'");
+   LeerPLY(nombre_arch, vertices, triangulos);
 
    // COMPLETAR: práctica 4: invocar  a 'calcularNormales' para el cálculo de normales
    // .................
@@ -257,7 +255,6 @@ MallaPLY::MallaPLY(const std::string &nombre_arch)
 
 Cubo::Cubo() : MallaInd("Cubo 8 vértices")
 {
-
    vertices =
    {
       {-1.0, -1.0, -1.0}, // 0
@@ -269,10 +266,10 @@ Cubo::Cubo() : MallaInd("Cubo 8 vértices")
       {+1.0, +1.0, -1.0}, // 6
       {+1.0, +1.0, +1.0}, // 7
    };
-
    triangulos =
    {
-     {0, 1, 3}, {0, 3, 2}, // X-
+     {0, 1, 3}, 
+     {0, 3, 2}, // X-
      {4, 7, 5},
      {4, 6, 7}, // X+ (+4)
      {0, 5, 1},
@@ -283,6 +280,143 @@ Cubo::Cubo() : MallaInd("Cubo 8 vértices")
      {0, 2, 6}, // Z-
      {1, 5, 7},
      {1, 7, 3} // Z+ (+1)
+   };
+}
+
+Tetraedro::Tetraedro() : MallaInd("Tetraedro 4 vértices")
+{
+   this->ponerColor({0.75, 0.0, 0.75});
+   vertices = 
+   {
+      {-1.0, -1.0, 0.0},// A
+      {1.0, -1.0, 0.0}, // B
+      {0.0, 1.0, 1.0},  // C
+      {0.0, -1.0, -1.0}   // D
+   };
+   triangulos =
+   {
+      {0, 1, 2},
+      {0, 1, 3},
+      {1, 2, 3},
+      {0, 2, 3}
+   };
+}
+
+CuboColores::CuboColores() : MallaInd("Cubo 8 vértices colorido")
+{
+   vertices =
+   {
+      {-1.0, -1.0, -1.0}, // 0
+      {-1.0, -1.0, +1.0}, // 1
+      {-1.0, +1.0, -1.0}, // 2
+      {-1.0, +1.0, +1.0}, // 3
+      {+1.0, -1.0, -1.0}, // 4
+      {+1.0, -1.0, +1.0}, // 5
+      {+1.0, +1.0, -1.0}, // 6
+      {+1.0, +1.0, +1.0}, // 7
+   };
+   triangulos =
+   {
+     {0, 1, 3}, 
+     {0, 3, 2}, // X-
+     {4, 7, 5},
+     {4, 6, 7}, // X+ (+4)
+     {0, 5, 1},
+     {0, 4, 5}, // Y-
+     {2, 3, 7},
+     {2, 7, 6}, // Y+ (+2)
+     {0, 6, 4},
+     {0, 2, 6}, // Z-
+     {1, 5, 7},
+     {1, 7, 3} // Z+ (+1)
+   };
+   col_ver =
+   {
+      {0.0, 0.0, 0.0},
+      {0.0, 0.0, +1.0},
+      {0.0, +1.0, 0.0}, 
+      {0.0, +1.0, +1.0}, 
+      {+1.0, 0.0, 0.0}, 
+      {+1.0, 0.0, +1.0}, 
+      {+1.0, +1.0, 0.0}, 
+      {+1.0, +1.0, +1.0}, 
+   };
+}
+
+CasaX::CasaX() : MallaInd("Casa 10 vértices colorida")
+{
+   vertices =
+   {
+      {-1.0, -1.0, -1.0}, // 0
+      {-1.0, -1.0, +1.0}, // 1
+      {-1.0, +1.0, -1.0}, // 2
+      {-1.0, +1.0, +1.0}, // 3
+      {+1.0, -1.0, -1.0}, // 4
+      {+1.0, -1.0, +1.0}, // 5
+      {+1.0, +1.0, -1.0}, // 6
+      {+1.0, +1.0, +1.0}, // 7
+      {0.0, +2.0, +1.0},  // 8
+      {0.0, +2.0, -1.0}   // 9
+   };
+   triangulos =
+   {
+     {0, 1, 3}, 
+     {0, 3, 2},
+     {4, 7, 5},
+     {4, 6, 7},
+     {0, 6, 4},
+     {0, 2, 6},
+     {1, 5, 7},
+     {1, 7, 3},
+     {3, 7, 8}, // Tejado delantero
+     {6, 2, 9}, // Tejado trasero
+     {3, 8, 9}, // Tejado izquierdo
+     {3, 2, 9},
+     {7, 8, 9}, // Tejado derecho
+     {7, 6, 9}
+   };
+   col_ver =
+   {
+      {-1.0, -1.0, -1.0},
+      {-1.0, -1.0, +1.0},
+      {-1.0, +1.0, -1.0},
+      {-1.0, +1.0, +1.0},
+      {+1.0, -1.0, -1.0},
+      {+1.0, -1.0, +1.0},
+      {+1.0, +1.0, -1.0},
+      {+1.0, +1.0, +1.0},
+      {0.0, +2.0, +1.0}, 
+      {0.0, +2.0, -1.0}  
+   };
+}
+
+Triangulo::Triangulo() : MallaInd("Triángulo 3 vértices")
+{
+   vertices =
+   {
+      {-0.5, 0.0, 0.0},
+      {+0.5, 0.0, 0.0},
+      {0.0, sqrt(2), 0.0}
+   };
+   triangulos = 
+   {
+      {0, 1, 2}
+   };
+}
+
+Cuadrado::Cuadrado() : MallaInd("Cuadrado 4 vértices")
+{
+   vertices = 
+   {
+      {-1.0, -1.0, 0.0},
+      {+1.0, +1.0, 0.0},
+      {-1.0, +1.0, 0.0},
+      {+1.0, -1.0, 0.0}
+   };
+   triangulos =
+   {
+      {0, 1, 2},
+      {0, 1, 3}
    };
 }
 

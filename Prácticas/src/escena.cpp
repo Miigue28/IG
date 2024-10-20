@@ -157,7 +157,7 @@ void Escena::visualizarGL()
 
       // Fijar el modo de polígonos a modo 'lineas'
       glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-      
+
       // Visualizar únicamente las aristas del objeto actual
       objeto->visualizarGeomGL();
    }
@@ -281,24 +281,31 @@ constexpr bool lunes = false;
 Escena1::Escena1()
 {
    using namespace std;
-   cout << "Creando objetos de la práctica 1." << endl;
+   cout << "Creando objetos de la Práctica 1" << endl;
 
    objetos.push_back(new Cubo());
+   objetos.push_back(new Tetraedro());
+   objetos.push_back(new CuboColores());
+   objetos.push_back(new CasaX());
+   objetos.push_back(new Triangulo());
+   objetos.push_back(new Cuadrado());
 
-   // COMPLETAR: práctica 1: añadir resto de objetos a la escena 1
-   //
-   // Añadir sentencias 'push_back' adicionales para agregar al
-   // array 'objetos' otros objetos de la práctica 1
-   //
-   // .......
 }
 
 // -------------------------------------------------------------------------
-// COMPLETAR: práctica 2: completar constructor de 'Escena2'
-//
-// Añadir la implementación del constructor de la clase 'Escena2' para construir
-// los objetos que se indican en los guiones de las práctica 2
-// .......
+
+Escena2::Escena2()
+{
+   using namespace std;
+   cout << "Creando objectos de la Práctica 2" << endl;
+
+   objetos.push_back(new MallaPLY("beethoven.ply"));
+   objetos.push_back(new MallaPLY("big_dodge.ply"));
+   objetos.push_back(new MallaRevolPLY("peon.ply", 25));
+   objetos.push_back(new Cilindro(50, 50));
+   objetos.push_back(new Cono(50, 50));
+   objetos.push_back(new Esfera(50, 50));
+}
 
 // -------------------------------------------------------------------------
 // COMPLETAR: práctica 3: completar constructor de 'Escena3'
