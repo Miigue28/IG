@@ -41,6 +41,7 @@ class MallaRevol : public MallaInd
 {
 private:
    glm::vec3 rotateVertexYAxis(const double angle, const glm::vec3 & vertex);
+   glm::vec3 rotateVertexXAxis(const double angle, const glm::vec3 & vertex);
 protected:
    MallaRevol(){} // solo usable desde clases derivadas con constructores especificos
 
@@ -48,6 +49,15 @@ protected:
    void inicializar(
       const std::vector<glm::vec3> &perfil, // Tabla de vértices del perfil original
       const unsigned num_copias             // Número de copias del perfil
+   );
+   void inicializarX(
+      const std::vector<glm::vec3> &perfil, // Tabla de vértices del perfil original
+      const unsigned num_copias             // Número de copias del perfil
+   );
+   void inicializar(
+      const std::vector<glm::vec3> &perfil, // Tabla de vértices del perfil original
+      const unsigned num_copias,            // Número de copias del perfil
+      const double angle                    // Ángulo de rotación
    );
 };
 // ---------------------------------------------------------------------

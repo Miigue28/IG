@@ -66,12 +66,87 @@ void MallaRevol::inicializar(const std::vector<glm::vec3> &perfil, const unsigne
    }
 }
 
+// Método que crea las tablas de vértices, triángulos, normales y cc.de.tt.
+// a partir de un perfil y el número de copias que queremos de dicho perfil.
+void MallaRevol::inicializarX(const std::vector<glm::vec3> &perfil, const unsigned num_copias)
+{
+   using namespace glm;
+
+   const double angle = (2*M_PI)/(num_copias-1);
+   const size_t num_vertices = perfil.size();
+
+   // Creación de la tabla de vértices por revolución del perfil
+   for (size_t i = 0; i < num_copias; i++)
+   {
+      for (size_t j = 0; j < num_vertices; j++)
+      {
+         vec3 vertex = rotateVertexXAxis(angle*i, perfil[j]);
+         vertices.push_back(vertex);
+      }
+   }
+
+   size_t index;
+
+   // Creación de la tabla de triángulos
+   for (size_t i = 0; i < num_copias - 1; i++)
+   {
+      for (size_t j = 0; j < num_vertices - 1; j++)
+      {
+         index = i*num_vertices+j;
+         triangulos.push_back({index, index+num_vertices, index+num_vertices+1});
+         triangulos.push_back({index, index+num_vertices+1, index+1});
+      }
+   }
+}
+
+// Método que crea las tablas de vértices, triángulos, normales y cc.de.tt.
+// a partir de un perfil y el número de copias que queremos de dicho perfil.
+void MallaRevol::inicializar(const std::vector<glm::vec3> &perfil, const unsigned num_copias, const double angle)
+{
+   using namespace glm;
+
+   const double subangles = angle/(num_copias-1);
+   const size_t num_vertices = perfil.size();
+
+   // Creación de la tabla de vértices por revolución del perfil
+   for (size_t i = 0; i < num_copias; i++)
+   {
+      for (size_t j = 0; j < num_vertices; j++)
+      {
+         vec3 vertex = rotateVertexYAxis(subangles*i, perfil[j]);
+         vertices.push_back(vertex);
+      }
+   }
+
+   size_t index;
+
+   // Creación de la tabla de triángulos
+   for (size_t i = 0; i < num_copias - 1; i++)
+   {
+      for (size_t j = 0; j < num_vertices - 2; j++)
+      {
+         index = i*num_vertices+j;
+         triangulos.push_back({index, index+num_vertices, index+num_vertices+1});
+         triangulos.push_back({index, index+num_vertices+1, index+1});
+      }
+   }
+}
+
 glm::vec3 MallaRevol::rotateVertexYAxis(const double angle, const glm::vec3 & vertex)
 {
    glm::vec3 out;
    out.x = cos(angle)*vertex.x + sin(angle)*vertex.z;
    out.y = vertex.y;
    out.z = - sin(angle)*vertex.x + cos(angle)*vertex.z;
+   return out;
+}
+
+glm::vec3 MallaRevol::rotateVertexXAxis(const double angle, const glm::vec3 & vertex)
+{
+   glm::vec3 out;
+   out.x = vertex.x;
+   out.z = cos(angle)*vertex.z + sin(angle)*vertex.y;
+   out.y = - sin(angle)*vertex.z + cos(angle)*vertex.y;
    return out;
 }
 
