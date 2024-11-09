@@ -199,7 +199,6 @@ void AplicacionIG::visualizarFrame()
    CError();
 
    // Establecer color de fondoy limpiar la ventana
-
    glClearColor(0.2, 0.25, 0.3, 1.0);
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
    CError();

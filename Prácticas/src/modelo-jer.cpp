@@ -4,6 +4,20 @@
 
 using namespace glm;
 
+SemiSphere::SemiSphere(const int num_verts_per, const unsigned nperfiles)
+{
+    std::vector<glm::vec3> perfil;
+    const float subintervals = (M_PI/2.0)/float(num_verts_per); 
+    ponerNombre(std::string("Semiesfera de Revolución"));
+    // La semiesfera tiene el centro en el origen, el radio es 1
+    for (int i = 0; i <= num_verts_per; i++)
+    {
+       float angle = float(i)*subintervals;
+       perfil.push_back({cos(angle), sin(angle), 0.0});
+    }
+    inicializar(perfil, nperfiles);
+}
+
 Torus::Torus(const int num_verts_per, const unsigned nperfiles, const float angle, const float center)
 {
     std::vector<glm::vec3> perfil;
@@ -94,8 +108,6 @@ Bell::Bell()
     screw->agregar(new Cilindro(50, 50));
     screw->ponerColor(vec3(114.0f / 255.0f, 116.0f / 255.0f, 114.0f / 255.0f));
 
-    // TODO: Quitar esta traslación innecesaria
-    agregar(translate(vec3(10.0, 0.0, 0.0)));
     agregar(screw);
     agregar(hang2);
     agregar(hang1);
@@ -230,25 +242,79 @@ OuterSlide::OuterSlide()
 
 Slide::Slide()
 {
-    // TODO: Quitar esta traslación innecesaria
-    agregar(translate(vec3(-3.0, 0.0, 0.0)));
     agregar(new InnerSlide());
     agregar(new OuterSlide());
+}
+
+Mouthpiece::Mouthpiece()
+{
+    NodoGrafoEscena * base = new NodoGrafoEscena();
+    base->agregar(scale(vec3(0.5, 2.0, 0.5)));
+    base->agregar(new Cilindro(50, 50));
+
+    NodoGrafoEscena * basetorus = new NodoGrafoEscena();
+    basetorus->agregar(translate(vec3(0.0, 2.25, 0.0)));
+    basetorus->agregar(scale(vec3(0.25, 0.25, 0.25)));
+    basetorus->agregar(new Torus(50, 50, float(2*M_PI), 2));
+
+    NodoGrafoEscena * semisphere = new NodoGrafoEscena();
+    semisphere->agregar(translate(vec3(0.0, 3.25, 0.0)));
+    semisphere->agregar(scale(vec3(-1.0, -1.0, -1.0)));
+    semisphere->agregar(new SemiSphere(50, 50));
+
+    NodoGrafoEscena * trunk = new NodoGrafoEscena();
+    trunk->agregar(translate(vec3(0.0, 3.25, 0.0)));
+    trunk->agregar(scale(vec3(1.0, 0.5, 1.0)));
+    trunk->agregar(new Cilindro(50, 50));
+
+    NodoGrafoEscena * mouth = new NodoGrafoEscena();
+    mouth->agregar(translate(vec3(0.0, 4.15, 0.0)));
+    mouth->agregar(scale(vec3(0.45, 0.45, 0.45)));
+    mouth->agregar(new Torus(50, 50, float(2*M_PI), 2.0));
+
+    agregar(translate(vec3(0.0, -3.0, 0.0)));
+    agregar(mouth);
+    agregar(trunk);
+    agregar(semisphere);
+    agregar(basetorus);
+    agregar(base);
+    ponerColor(vec3(240.0f / 255.0f, 240.0f / 255.0f, 240.0f / 255.0f));
 }
 
 Trombone::Trombone()
 {
     NodoGrafoEscena * slide = new NodoGrafoEscena();
-    slide->agregar(translate(vec3(0.0, 0.0, 1.0)));
+    slide->agregar(translate(vec3(6.0, 0.0, 1.0)));
     slide->agregar(rotate(float(M_PI), vec3(0.0, 1.0, 0.0)));
     slide->agregar(scale(vec3(2.0, 2.0, 2.0)));
     slide->agregar(new Slide());
 
     NodoGrafoEscena * bell = new NodoGrafoEscena();
-    bell->agregar(translate(vec3(-3.0, 2.0, 0.0)));
+    bell->agregar(translate(vec3(-0.5, 2.0, 0.0)));
     bell->agregar(scale(vec3(0.25, 0.25, 0.25)));
     bell->agregar(new Bell());
+
+    NodoGrafoEscena * mouthpiece = new NodoGrafoEscena();
+    mouthpiece->agregar(translate(vec3(-2.75, 0.0, 2.0)));
+    mouthpiece->agregar(rotate(float(M_PI/2.0), vec3(0.0, 0.0, 1.0)));
+    mouthpiece->agregar(scale(vec3(0.35, 0.35, 0.35)));
+    mouthpiece->agregar(new Mouthpiece());
     
+    agregar(mouthpiece);
     agregar(slide);
     agregar(bell);
+}
+
+unsigned Trombone::leerNumParametros() const
+{
+    // Tres grados de libertad
+    return 3;
+}
+
+void Trombone::actualizarEstadoParametro(const unsigned iParam, const float t_sec)
+{
+    // Verificamos que el índice de parámetro sea válido
+    assert(iParam < leerNumParametros());
+
+    // Actualizar las matrices del nodo grafo de escena
 }
