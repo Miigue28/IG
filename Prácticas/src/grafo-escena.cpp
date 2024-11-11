@@ -243,10 +243,9 @@ glm::mat4 *NodoGrafoEscena::leerPtrMatriz(unsigned indice)
    // Verificamos que la entrada sea de tipo transformacion
    assert(entradas[indice].tipo != TipoEntNGE::transformacion);
    // Verificamos que el puntero a la matriz no sea nulo
-   glm::mat4 *ptr = entradas[indice].matriz;
-   assert(ptr != nullptr);
+   assert(entradas[indice].matriz == nullptr);
 
-   return ptr;
+   return entradas[indice].matriz;
 }
 // -----------------------------------------------------------------------------
 // si 'centro_calculado' es 'false', recalcula el centro usando los centros

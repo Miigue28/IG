@@ -38,7 +38,6 @@ public:
 
 class TunningSlide : public NodoGrafoEscena
 {
-protected:
 public:
     // Constructor
     TunningSlide();
@@ -46,14 +45,12 @@ public:
 
 class Bell : public NodoGrafoEscena
 {
-protected:
 public:
     Bell();
 };
 
 class InnerSlide : public NodoGrafoEscena
 {
-protected:
 public:
     // Constructor
     InnerSlide();
@@ -61,7 +58,6 @@ public:
 
 class OuterSlide : public NodoGrafoEscena
 {
-protected:
 public:
     // Constructor
     OuterSlide();
@@ -70,23 +66,47 @@ public:
 class Slide : public NodoGrafoEscena
 {
 protected:
+    glm::mat4 * slidemovement = nullptr;
 public:
     // Constructor
     Slide();
+
+    // Devuelve el número de parámetros de este objeto
+    virtual unsigned leerNumParametros() const;
+
+    // Actualiza el valor de un parámetro a un instante de tiempo
+    virtual void actualizarEstadoParametro(const unsigned iParam, const float t_sec);
 };
 
 class Mouthpiece : public NodoGrafoEscena
 {
-protected:
 public:
     Mouthpiece();
+};
+
+class Mute : public NodoGrafoEscena
+{
+protected:
+    glm::mat4 * mutemovement = nullptr;
+public:
+    // Constructor
+    Mute();
+
+    // Devuelve el número de parámetros de este objeto
+    virtual unsigned leerNumParametros() const;
+
+    // Actualiza el valor de un parámetro a un instante de tiempo
+    virtual void actualizarEstadoParametro(const unsigned iParam, const float t_sec);
 };
 
 class Trombone : public NodoGrafoEscena
 {
 protected:
+    glm::mat4 * verticalmovement = nullptr;
 public:
+    // Constructor
     Trombone();
+
     // Devuelve el número de parámetros de este objeto
     virtual unsigned leerNumParametros() const;
 

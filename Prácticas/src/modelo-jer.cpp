@@ -125,11 +125,13 @@ InnerSlide::InnerSlide()
     tube1->agregar(glm::translate(glm::vec3(+0.5, 0.0, 0.0)));
     tube1->agregar(glm::scale(glm::vec3(0.1, 3.0, 0.1)));
     tube1->agregar(new Cilindro(50, 50));
+    tube1->ponerColor(vec3(240.0f / 255.0f, 240.0f / 255.0f, 240.0f / 255.0f));
 
     NodoGrafoEscena * tube2 = new NodoGrafoEscena();
     tube2->agregar(glm::translate(glm::vec3(-0.5, 0.0, 0.0)));
     tube2->agregar(glm::scale(glm::vec3(0.1, 3.0, 0.1)));
     tube2->agregar(new Cilindro(50, 50));
+    tube1->ponerColor(vec3(240.0f / 255.0f, 240.0f / 255.0f, 240.0f / 255.0f));
 
     NodoGrafoEscena * clip1 = new NodoGrafoEscena();
     clip1->agregar(translate(vec3(+0.5, 3.0, 0.0)));
@@ -176,8 +178,6 @@ InnerSlide::InnerSlide()
     bellattach->agregar(new Cilindro(50, 50));
     bellattach->ponerColor(vec3(181.0f / 255.0f, 182.0f / 255.0f, 181.0f / 255.0f));
 
-    agregar(rotate(float(M_PI/2.0), vec3(1.0, 0.0, 0.0)));
-    agregar(rotate(-float(M_PI/2.0), vec3(0.0, 0.0, 1.0)));
     agregar(tube1);
     agregar(tube2);
     agregar(clip1);
@@ -225,14 +225,26 @@ OuterSlide::OuterSlide()
     hang->ponerColor(vec3(218.0f / 255.0f, 165.0f / 255.0f, 32.0f / 255.0f));
 
     NodoGrafoEscena * elbow = new NodoGrafoEscena();
-    elbow->agregar(rotate(float(M_PI/2.0), vec3(0.0, 1.0, 0.0)));
+    elbow->agregar(rotate(float(-M_PI/2.0), vec3(1.0, 0.0, 0.0)));
     elbow->agregar(scale(vec3(0.125, 0.125, 0.125)));
     elbow->agregar(new Torus(50, 50, float(M_PI), 4));
     elbow->ponerColor(vec3(181.0f / 255.0f, 182.0f / 255.0f, 181.0f / 255.0f));
 
+    NodoGrafoEscena * groundholdtrunk = new NodoGrafoEscena();
+    groundholdtrunk->agregar(translate(vec3(0.0, -0.73, 0.0)));
+    groundholdtrunk->agregar(scale(vec3(0.1, 0.1, 0.1)));
+    groundholdtrunk->agregar(new Cilindro(50, 50));
+    groundholdtrunk->ponerColor(vec3(0.0f / 255.0f, 0.0f / 255.0f, 0.0f / 255.0f));
+
+    NodoGrafoEscena * groundholdbase = new NodoGrafoEscena();
+    groundholdbase->agregar(translate(vec3(0.0, -0.73, 0.0)));
+    groundholdbase->agregar(scale(vec3(-0.1, -0.1, -0.1)));
+    groundholdbase->agregar(new SemiSphere(50, 50));
+    groundholdbase->ponerColor(vec3(0.0f / 255.0f, 0.0f / 255.0f, 0.0f / 255.0f));
+
+    agregar(groundholdbase);
+    agregar(groundholdtrunk);
     agregar(elbow);
-    agregar(rotate(float(M_PI/2.0), vec3(1.0, 0.0, 0.0)));
-    agregar(rotate(-float(M_PI/2.0), vec3(0.0, 0.0, 1.0)));
     agregar(tube1);
     agregar(tube2);
     agregar(hangdecorator1);
@@ -242,8 +254,37 @@ OuterSlide::OuterSlide()
 
 Slide::Slide()
 {
-    agregar(new InnerSlide());
-    agregar(new OuterSlide());
+    NodoGrafoEscena * inner = new NodoGrafoEscena();
+    inner->agregar(new InnerSlide());
+
+    NodoGrafoEscena * outer = new NodoGrafoEscena();
+    unsigned index = outer->agregar(translate(vec3(0.0, 0.0, 0.0)));
+    outer->agregar(new OuterSlide());
+
+    agregar(rotate(float(M_PI/2.0), vec3(1.0, 0.0, 0.0)));
+    agregar(rotate(-float(M_PI/2.0), vec3(0.0, 0.0, 1.0)));
+    agregar(outer);
+    agregar(inner);
+
+    //slidemovement = outer->leerPtrMatriz(index);
+}
+
+unsigned Slide::leerNumParametros() const
+{
+    // Un grado de libertad
+    return 0;
+}
+
+void Slide::actualizarEstadoParametro(const unsigned iParam, const float t_sec)
+{
+    // Verificamos que el índice de parámetro sea válido
+    assert(iParam < leerNumParametros());
+
+    // Actualizar las matrices del nodo grafo de escena
+    unsigned int min = 0, max = 5;
+    unsigned a = (min + max)/2, b = (max - min)/2;
+    //float n = 5;
+    *slidemovement = translate(vec3(0.0, a + b*sin(2*M_PI*t_sec), 0.0));
 }
 
 Mouthpiece::Mouthpiece()
@@ -272,13 +313,61 @@ Mouthpiece::Mouthpiece()
     mouth->agregar(scale(vec3(0.45, 0.45, 0.45)));
     mouth->agregar(new Torus(50, 50, float(2*M_PI), 2.0));
 
-    agregar(translate(vec3(0.0, -3.0, 0.0)));
     agregar(mouth);
     agregar(trunk);
     agregar(semisphere);
     agregar(basetorus);
     agregar(base);
     ponerColor(vec3(240.0f / 255.0f, 240.0f / 255.0f, 240.0f / 255.0f));
+}
+
+Mute::Mute()
+{
+    NodoGrafoEscena * cup = new NodoGrafoEscena();
+    cup->agregar(scale(vec3(1.0, 0.65, 1.0)));
+    cup->agregar(new SemiSphere(50, 50));
+
+    NodoGrafoEscena * trunk = new NodoGrafoEscena();
+    trunk->agregar(translate(vec3(0.0, -0.2, 0.0)));
+    trunk->agregar(scale(vec3(1.0, 0.2, 1.0)));
+    trunk->agregar(new Cilindro(50, 50));
+
+    NodoGrafoEscena * hold = new NodoGrafoEscena();
+    hold->agregar(translate(vec3(0.0, 0.85, 0.0)));
+    hold->agregar(scale(vec3(0.1, 0.1, 0.1)));
+    hold->agregar(new Torus(50, 50, float(2*M_PI), 2));
+
+    NodoGrafoEscena * holdtrunk = new NodoGrafoEscena();
+    holdtrunk->agregar(translate(vec3(0.0, 0.6, 0.0)));
+    holdtrunk->agregar(scale(vec3(0.1, 0.2, 0.1)));
+    holdtrunk->agregar(new Cilindro(50, 50));
+
+    int index = agregar(rotate(0.0f, vec3(0.0, 0.0, 1.0)));
+    agregar(holdtrunk);
+    agregar(hold);
+    agregar(trunk);
+    agregar(cup);
+    ponerColor(vec3(214.0f / 255.0f, 125.0f / 255.0f, 95.0f / 255.0f));
+
+    //mutemovement = leerPtrMatriz(index);
+}
+
+unsigned Mute::leerNumParametros() const
+{
+    // Un grado de libertad
+    return 0;
+}
+
+void Mute::actualizarEstadoParametro(const unsigned iParam, const float t_sec)
+{
+    // Verificamos que el índice de parámetro sea válido
+    assert(iParam < leerNumParametros());
+
+    // Actualizar las matrices del nodo grafo de escena
+    unsigned int min = 0, max = 5;
+    unsigned a = (min + max)/2, b = (max - min)/2;
+    //float n = 5;
+    *mutemovement *= rotate(float(M_PI/1000.0), vec3(0.0, 0.0, 1.0));
 }
 
 Trombone::Trombone()
@@ -295,20 +384,29 @@ Trombone::Trombone()
     bell->agregar(new Bell());
 
     NodoGrafoEscena * mouthpiece = new NodoGrafoEscena();
-    mouthpiece->agregar(translate(vec3(-2.75, 0.0, 2.0)));
+    mouthpiece->agregar(translate(vec3(-1.75, 0.0, 2.0)));
     mouthpiece->agregar(rotate(float(M_PI/2.0), vec3(0.0, 0.0, 1.0)));
     mouthpiece->agregar(scale(vec3(0.35, 0.35, 0.35)));
     mouthpiece->agregar(new Mouthpiece());
+
+    NodoGrafoEscena * mute = new NodoGrafoEscena();
+    mute->agregar(translate(vec3(0.85, 2.0, 0.0)));
+    mute->agregar(rotate(float(-M_PI/2.0), vec3(0.0, 0.0, 1.0)));
+    mute->agregar(new Mute());
     
+    int index = agregar(rotate(0.0f, vec3(0.0, 0.0, 1.0)));
+    agregar(mute);
     agregar(mouthpiece);
     agregar(slide);
     agregar(bell);
+
+    //verticalmovement = leerPtrMatriz(index);
 }
 
 unsigned Trombone::leerNumParametros() const
 {
     // Tres grados de libertad
-    return 3;
+    return 0;
 }
 
 void Trombone::actualizarEstadoParametro(const unsigned iParam, const float t_sec)
@@ -317,4 +415,16 @@ void Trombone::actualizarEstadoParametro(const unsigned iParam, const float t_se
     assert(iParam < leerNumParametros());
 
     // Actualizar las matrices del nodo grafo de escena
+    switch (iParam)
+    {
+    case 0:
+        unsigned int min = 0, max = 5;
+        unsigned a = (min + max)/2, b = (max - min)/2;
+        *verticalmovement = rotate(float(a + b*sin(2*M_PI*t_sec)), vec3(0.0, 0.0, 1.0));
+    break;
+    //case 1:
+    //break;
+    //case 2:
+    //break;
+    }
 }
