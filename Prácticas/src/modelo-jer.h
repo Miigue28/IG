@@ -103,6 +103,8 @@ class Trombone : public NodoGrafoEscena
 {
 protected:
     glm::mat4 * verticalmovement = nullptr;
+    Slide * slide_child = nullptr;
+    Mute * mute_child = nullptr;
 public:
     // Constructor
     Trombone();

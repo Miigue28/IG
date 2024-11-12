@@ -315,7 +315,7 @@ Escena3::Escena3()
    using namespace std;
    cout << "Creando objetos de la Práctica 3" << endl;
 
-   objetos.push_back(new Slide());
+   objetos.push_back(new Trombone());
 }
 
 // ----------------------------------------------------------------------------

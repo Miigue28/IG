@@ -241,9 +241,9 @@ glm::mat4 *NodoGrafoEscena::leerPtrMatriz(unsigned indice)
    // Verificamos que el índice está dentro de rango
    assert(indice < entradas.size());
    // Verificamos que la entrada sea de tipo transformacion
-   assert(entradas[indice].tipo != TipoEntNGE::transformacion);
+   assert(entradas[indice].tipo == TipoEntNGE::transformacion);
    // Verificamos que el puntero a la matriz no sea nulo
-   assert(entradas[indice].matriz == nullptr);
+   assert(entradas[indice].matriz != nullptr);
 
    return entradas[indice].matriz;
 }

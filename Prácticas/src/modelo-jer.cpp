@@ -266,13 +266,13 @@ Slide::Slide()
     agregar(outer);
     agregar(inner);
 
-    //slidemovement = outer->leerPtrMatriz(index);
+    slidemovement = outer->leerPtrMatriz(index);
 }
 
 unsigned Slide::leerNumParametros() const
 {
     // Un grado de libertad
-    return 0;
+    return 1;
 }
 
 void Slide::actualizarEstadoParametro(const unsigned iParam, const float t_sec)
@@ -281,10 +281,10 @@ void Slide::actualizarEstadoParametro(const unsigned iParam, const float t_sec)
     assert(iParam < leerNumParametros());
 
     // Actualizar las matrices del nodo grafo de escena
-    unsigned int min = 0, max = 5;
-    unsigned a = (min + max)/2, b = (max - min)/2;
-    //float n = 5;
-    *slidemovement = translate(vec3(0.0, a + b*sin(2*M_PI*t_sec), 0.0));
+    float min = 0, max = 3;
+    float a = (min + max)/2, b = (max - min)/2;
+    float n = 0.5;
+    *slidemovement = translate(vec3(0.0, -(a + b*sin(2*M_PI*n*t_sec)), 0.0));
 }
 
 Mouthpiece::Mouthpiece()
@@ -349,13 +349,13 @@ Mute::Mute()
     agregar(cup);
     ponerColor(vec3(214.0f / 255.0f, 125.0f / 255.0f, 95.0f / 255.0f));
 
-    //mutemovement = leerPtrMatriz(index);
+    mutemovement = leerPtrMatriz(index);
 }
 
 unsigned Mute::leerNumParametros() const
 {
     // Un grado de libertad
-    return 0;
+    return 1;
 }
 
 void Mute::actualizarEstadoParametro(const unsigned iParam, const float t_sec)
@@ -364,19 +364,20 @@ void Mute::actualizarEstadoParametro(const unsigned iParam, const float t_sec)
     assert(iParam < leerNumParametros());
 
     // Actualizar las matrices del nodo grafo de escena
-    unsigned int min = 0, max = 5;
-    unsigned a = (min + max)/2, b = (max - min)/2;
-    //float n = 5;
-    *mutemovement *= rotate(float(M_PI/1000.0), vec3(0.0, 0.0, 1.0));
+    float min = 0, max = M_PI/4.0;
+    float a = (min + max)/2, b = (max - min)/2;
+    float n = 1.25;
+    *mutemovement = rotate(-float(a + b*sin(2*M_PI*n*t_sec)), vec3(0.0, 0.0, 1.0));
 }
 
 Trombone::Trombone()
 {
     NodoGrafoEscena * slide = new NodoGrafoEscena();
+    slide_child = new Slide();
     slide->agregar(translate(vec3(6.0, 0.0, 1.0)));
     slide->agregar(rotate(float(M_PI), vec3(0.0, 1.0, 0.0)));
     slide->agregar(scale(vec3(2.0, 2.0, 2.0)));
-    slide->agregar(new Slide());
+    slide->agregar(slide_child);
 
     NodoGrafoEscena * bell = new NodoGrafoEscena();
     bell->agregar(translate(vec3(-0.5, 2.0, 0.0)));
@@ -390,23 +391,24 @@ Trombone::Trombone()
     mouthpiece->agregar(new Mouthpiece());
 
     NodoGrafoEscena * mute = new NodoGrafoEscena();
+    mute_child = new Mute();
     mute->agregar(translate(vec3(0.85, 2.0, 0.0)));
     mute->agregar(rotate(float(-M_PI/2.0), vec3(0.0, 0.0, 1.0)));
-    mute->agregar(new Mute());
+    mute->agregar(mute_child);
     
-    int index = agregar(rotate(0.0f, vec3(0.0, 0.0, 1.0)));
+    unsigned index = agregar(rotate(0.0f, vec3(0.0, 0.0, 1.0)));
     agregar(mute);
     agregar(mouthpiece);
     agregar(slide);
     agregar(bell);
 
-    //verticalmovement = leerPtrMatriz(index);
+    verticalmovement = leerPtrMatriz(index);
 }
 
 unsigned Trombone::leerNumParametros() const
 {
     // Tres grados de libertad
-    return 0;
+    return 3;
 }
 
 void Trombone::actualizarEstadoParametro(const unsigned iParam, const float t_sec)
@@ -414,17 +416,21 @@ void Trombone::actualizarEstadoParametro(const unsigned iParam, const float t_se
     // Verificamos que el índice de parámetro sea válido
     assert(iParam < leerNumParametros());
 
+    float min = -M_PI/6.0, max = M_PI/4.0;
+    float a = (min + max)/2, b = (max - min)/2;
+    float n = 0.25;
+
     // Actualizar las matrices del nodo grafo de escena
     switch (iParam)
     {
-    case 0:
-        unsigned int min = 0, max = 5;
-        unsigned a = (min + max)/2, b = (max - min)/2;
-        *verticalmovement = rotate(float(a + b*sin(2*M_PI*t_sec)), vec3(0.0, 0.0, 1.0));
-    break;
-    //case 1:
-    //break;
-    //case 2:
-    //break;
+        case 0:
+            *verticalmovement = rotate(float(a + b*sin(2*M_PI*n*t_sec)), vec3(0.0, 0.0, 1.0));
+        break;
+        case 1:
+            slide_child->actualizarEstadoParametro(0, t_sec);
+        break;
+        case 2:
+            mute_child->actualizarEstadoParametro(0, t_sec);
+        break;
     }
 }
