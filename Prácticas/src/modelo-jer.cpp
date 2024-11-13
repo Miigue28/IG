@@ -89,17 +89,17 @@ Bell::Bell()
     lowerdecorator2->agregar(new Cilindro(50, 50));
     lowerdecorator2->ponerColor(vec3(181.0f / 255.0f, 182.0f / 255.0f, 181.0f / 255.0f));
 
-    NodoGrafoEscena * hang1 = new NodoGrafoEscena();
-    hang1->agregar(translate(vec3(-17.0, -7.0, 0.0)));
-    hang1->agregar(scale(vec3(0.5, 6, 0.5)));
-    hang1->agregar(new Cilindro(50, 50));
-    hang1->ponerColor(vec3(181.0f / 255.0f, 182.0f / 255.0f, 181.0f / 255.0f));
+    NodoGrafoEscena * beam1 = new NodoGrafoEscena();
+    beam1->agregar(translate(vec3(-17.0, -7.0, 0.0)));
+    beam1->agregar(scale(vec3(0.5, 6, 0.5)));
+    beam1->agregar(new Cilindro(50, 50));
+    beam1->ponerColor(vec3(181.0f / 255.0f, 182.0f / 255.0f, 181.0f / 255.0f));
 
-    NodoGrafoEscena * hang2 = new NodoGrafoEscena();
-    hang2->agregar(translate(vec3(-9.0, -7.0, 0.0)));
-    hang2->agregar(scale(vec3(0.5, 6, 0.5)));
-    hang2->agregar(new Cilindro(50, 50));
-    hang2->ponerColor(vec3(181.0f / 255.0f, 182.0f / 255.0f, 181.0f / 255.0f));
+    NodoGrafoEscena * beam2 = new NodoGrafoEscena();
+    beam2->agregar(translate(vec3(-9.0, -7.0, 0.0)));
+    beam2->agregar(scale(vec3(0.5, 6, 0.5)));
+    beam2->agregar(new Cilindro(50, 50));
+    beam2->ponerColor(vec3(181.0f / 255.0f, 182.0f / 255.0f, 181.0f / 255.0f));
 
     NodoGrafoEscena * screw = new NodoGrafoEscena();
     screw->agregar(translate(vec3(-6.0, -8.0, 0.0)));
@@ -109,8 +109,8 @@ Bell::Bell()
     screw->ponerColor(vec3(114.0f / 255.0f, 116.0f / 255.0f, 114.0f / 255.0f));
 
     agregar(screw);
-    agregar(hang2);
-    agregar(hang1);
+    agregar(beam2);
+    agregar(beam1);
     agregar(lowerdecorator2);
     agregar(lowerdecorator1);
     agregar(upperdecorator);
@@ -122,16 +122,16 @@ Bell::Bell()
 InnerSlide::InnerSlide()
 {
     NodoGrafoEscena * tube1 = new NodoGrafoEscena();
-    tube1->agregar(glm::translate(glm::vec3(+0.5, 0.0, 0.0)));
-    tube1->agregar(glm::scale(glm::vec3(0.1, 3.0, 0.1)));
+    tube1->agregar(translate(glm::vec3(+0.5, 0.0, 0.0)));
+    tube1->agregar(scale(glm::vec3(0.1, 3.0, 0.1)));
     tube1->agregar(new Cilindro(50, 50));
-    tube1->ponerColor(vec3(240.0f / 255.0f, 240.0f / 255.0f, 240.0f / 255.0f));
+    tube1->ponerColor(vec3(227.0f / 255.0f, 228.0f / 255.0f, 229.0f / 255.0f));
 
     NodoGrafoEscena * tube2 = new NodoGrafoEscena();
-    tube2->agregar(glm::translate(glm::vec3(-0.5, 0.0, 0.0)));
-    tube2->agregar(glm::scale(glm::vec3(0.1, 3.0, 0.1)));
+    tube2->agregar(translate(vec3(-0.5, 0.0, 0.0)));
+    tube2->agregar(scale(vec3(0.1, 3.0, 0.1)));
     tube2->agregar(new Cilindro(50, 50));
-    tube1->ponerColor(vec3(240.0f / 255.0f, 240.0f / 255.0f, 240.0f / 255.0f));
+    tube1->ponerColor(vec3(227.0f / 255.0f, 228.0f / 255.0f, 229.0f / 255.0f));
 
     NodoGrafoEscena * clip1 = new NodoGrafoEscena();
     clip1->agregar(translate(vec3(+0.5, 3.0, 0.0)));
@@ -145,26 +145,26 @@ InnerSlide::InnerSlide()
     clip2->agregar(new Cilindro(50, 50));
     clip2->ponerColor(vec3(181.0f / 255.0f, 182.0f / 255.0f, 181.0f / 255.0f));
 
-    NodoGrafoEscena * hangdecorator1 = new NodoGrafoEscena();
-    hangdecorator1->agregar(translate(vec3(+0.4, 3.65, 0.0)));
-    hangdecorator1->agregar(rotate(float(M_PI/2.0), vec3(0.0, 0.0, 1.0)));
-    hangdecorator1->agregar(scale(vec3(0.13, 0.15, 0.13)));
-    hangdecorator1->agregar(new Cilindro(50, 50));
-    hangdecorator1->ponerColor(vec3(181.0f / 255.0f, 182.0f / 255.0f, 181.0f / 255.0f));
+    NodoGrafoEscena * beamdecorator1 = new NodoGrafoEscena();
+    beamdecorator1->agregar(translate(vec3(+0.4, 3.65, 0.0)));
+    beamdecorator1->agregar(rotate(float(M_PI/2.0), vec3(0.0, 0.0, 1.0)));
+    beamdecorator1->agregar(scale(vec3(0.13, 0.15, 0.13)));
+    beamdecorator1->agregar(new Cilindro(50, 50));
+    beamdecorator1->ponerColor(vec3(181.0f / 255.0f, 182.0f / 255.0f, 181.0f / 255.0f));
 
-    NodoGrafoEscena * hangdecorator2 = new NodoGrafoEscena();
-    hangdecorator2->agregar(translate(vec3(-0.25, 3.65, 0.0)));
-    hangdecorator2->agregar(rotate(float(M_PI/2.0), vec3(0.0, 0.0, 1.0)));
-    hangdecorator2->agregar(scale(vec3(0.13, 0.15, 0.13)));
-    hangdecorator2->agregar(new Cilindro(50, 50));
-    hangdecorator2->ponerColor(vec3(181.0f / 255.0f, 182.0f / 255.0f, 181.0f / 255.0f));
+    NodoGrafoEscena * beamdecorator2 = new NodoGrafoEscena();
+    beamdecorator2->agregar(translate(vec3(-0.25, 3.65, 0.0)));
+    beamdecorator2->agregar(rotate(float(M_PI/2.0), vec3(0.0, 0.0, 1.0)));
+    beamdecorator2->agregar(scale(vec3(0.13, 0.15, 0.13)));
+    beamdecorator2->agregar(new Cilindro(50, 50));
+    beamdecorator2->ponerColor(vec3(181.0f / 255.0f, 182.0f / 255.0f, 181.0f / 255.0f));
 
-    NodoGrafoEscena * hang = new NodoGrafoEscena();
-    hang->agregar(translate(vec3(+0.375, 3.65, 0.0)));
-    hang->agregar(rotate(float(M_PI/2.0), vec3(0.0, 0.0, 1.0)));
-    hang->agregar(scale(vec3(0.125, 0.75, 0.125)));
-    hang->agregar(new Cilindro(50, 50));
-    hang->ponerColor(vec3(218.0f / 255.0f, 165.0f / 255.0f, 32.0f / 255.0f));
+    NodoGrafoEscena * gripbeam = new NodoGrafoEscena();
+    gripbeam->agregar(translate(vec3(+0.375, 3.65, 0.0)));
+    gripbeam->agregar(rotate(float(M_PI/2.0), vec3(0.0, 0.0, 1.0)));
+    gripbeam->agregar(scale(vec3(0.125, 0.75, 0.125)));
+    gripbeam->agregar(new Cilindro(50, 50));
+    gripbeam->ponerColor(vec3(218.0f / 255.0f, 165.0f / 255.0f, 32.0f / 255.0f));
 
     NodoGrafoEscena * mouthpieceattach = new NodoGrafoEscena();
     mouthpieceattach->agregar(translate(vec3(+0.5, 3.5, 0.0)));
@@ -182,9 +182,9 @@ InnerSlide::InnerSlide()
     agregar(tube2);
     agregar(clip1);
     agregar(clip2);
-    agregar(hangdecorator1);
-    agregar(hangdecorator2);
-    agregar(hang);
+    agregar(beamdecorator1);
+    agregar(beamdecorator2);
+    agregar(gripbeam);
     agregar(mouthpieceattach);
     agregar(bellattach);
 }
@@ -192,37 +192,37 @@ InnerSlide::InnerSlide()
 OuterSlide::OuterSlide()
 {
     NodoGrafoEscena * tube1 = new NodoGrafoEscena();
-    tube1->agregar(glm::translate(glm::vec3(+0.5, 0.0, 0.0)));
-    tube1->agregar(glm::scale(glm::vec3(0.125, 3.0, 0.125)));
+    tube1->agregar(translate(vec3(+0.5, 0.0, 0.0)));
+    tube1->agregar(scale(vec3(0.125, 3.0, 0.125)));
     tube1->agregar(new Cilindro(50, 50));
     tube1->ponerColor(vec3(218.0f / 255.0f, 165.0f / 255.0f, 32.0f / 255.0f));
 
     NodoGrafoEscena * tube2 = new NodoGrafoEscena();
-    tube2->agregar(glm::translate(glm::vec3(-0.5, 0.0, 0.0)));
-    tube2->agregar(glm::scale(glm::vec3(0.125, 3.0, 0.125)));
+    tube2->agregar(translate(vec3(-0.5, 0.0, 0.0)));
+    tube2->agregar(scale(vec3(0.125, 3.0, 0.125)));
     tube2->agregar(new Cilindro(50, 50));
     tube2->ponerColor(vec3(218.0f / 255.0f, 165.0f / 255.0f, 32.0f / 255.0f));
 
-    NodoGrafoEscena * hangdecorator1 = new NodoGrafoEscena();
-    hangdecorator1->agregar(translate(vec3(+0.4, 2.75, 0.0)));
-    hangdecorator1->agregar(rotate(float(M_PI/2.0), vec3(0.0, 0.0, 1.0)));
-    hangdecorator1->agregar(scale(vec3(0.13, 0.15, 0.13)));
-    hangdecorator1->agregar(new Cilindro(50, 50));
-    hangdecorator1->ponerColor(vec3(181.0f / 255.0f, 182.0f / 255.0f, 181.0f / 255.0f));
+    NodoGrafoEscena * beamdecorator1 = new NodoGrafoEscena();
+    beamdecorator1->agregar(translate(vec3(+0.4, 2.75, 0.0)));
+    beamdecorator1->agregar(rotate(float(M_PI/2.0), vec3(0.0, 0.0, 1.0)));
+    beamdecorator1->agregar(scale(vec3(0.13, 0.15, 0.13)));
+    beamdecorator1->agregar(new Cilindro(50, 50));
+    beamdecorator1->ponerColor(vec3(181.0f / 255.0f, 182.0f / 255.0f, 181.0f / 255.0f));
 
-    NodoGrafoEscena * hangdecorator2 = new NodoGrafoEscena();
-    hangdecorator2->agregar(translate(vec3(-0.25, 2.75, 0.0)));
-    hangdecorator2->agregar(rotate(float(M_PI/2.0), vec3(0.0, 0.0, 1.0)));
-    hangdecorator2->agregar(scale(vec3(0.13, 0.15, 0.13)));
-    hangdecorator2->agregar(new Cilindro(50, 50));
-    hangdecorator2->ponerColor(vec3(181.0f / 255.0f, 182.0f / 255.0f, 181.0f / 255.0f));
+    NodoGrafoEscena * beamdecorator2 = new NodoGrafoEscena();
+    beamdecorator2->agregar(translate(vec3(-0.25, 2.75, 0.0)));
+    beamdecorator2->agregar(rotate(float(M_PI/2.0), vec3(0.0, 0.0, 1.0)));
+    beamdecorator2->agregar(scale(vec3(0.13, 0.15, 0.13)));
+    beamdecorator2->agregar(new Cilindro(50, 50));
+    beamdecorator2->ponerColor(vec3(181.0f / 255.0f, 182.0f / 255.0f, 181.0f / 255.0f));
 
-    NodoGrafoEscena * hang = new NodoGrafoEscena();
-    hang->agregar(translate(vec3(+0.375, 2.75, 0.0)));
-    hang->agregar(rotate(float(M_PI/2.0), vec3(0.0, 0.0, 1.0)));
-    hang->agregar(scale(vec3(0.125, 0.75, 0.125)));
-    hang->agregar(new Cilindro(50, 50));
-    hang->ponerColor(vec3(218.0f / 255.0f, 165.0f / 255.0f, 32.0f / 255.0f));
+    NodoGrafoEscena * gripbeam = new NodoGrafoEscena();
+    gripbeam->agregar(translate(vec3(+0.375, 2.75, 0.0)));
+    gripbeam->agregar(rotate(float(M_PI/2.0), vec3(0.0, 0.0, 1.0)));
+    gripbeam->agregar(scale(vec3(0.125, 0.75, 0.125)));
+    gripbeam->agregar(new Cilindro(50, 50));
+    gripbeam->ponerColor(vec3(218.0f / 255.0f, 165.0f / 255.0f, 32.0f / 255.0f));
 
     NodoGrafoEscena * elbow = new NodoGrafoEscena();
     elbow->agregar(rotate(float(-M_PI/2.0), vec3(1.0, 0.0, 0.0)));
@@ -247,9 +247,9 @@ OuterSlide::OuterSlide()
     agregar(elbow);
     agregar(tube1);
     agregar(tube2);
-    agregar(hangdecorator1);
-    agregar(hangdecorator2);
-    agregar(hang);
+    agregar(beamdecorator1);
+    agregar(beamdecorator2);
+    agregar(gripbeam);
 }
 
 Slide::Slide()
@@ -289,36 +289,36 @@ void Slide::actualizarEstadoParametro(const unsigned iParam, const float t_sec)
 
 Mouthpiece::Mouthpiece()
 {
-    NodoGrafoEscena * base = new NodoGrafoEscena();
-    base->agregar(scale(vec3(0.5, 2.0, 0.5)));
-    base->agregar(new Cilindro(50, 50));
+    NodoGrafoEscena * basecilinder = new NodoGrafoEscena();
+    basecilinder->agregar(scale(vec3(0.5, 2.0, 0.5)));
+    basecilinder->agregar(new Cilindro(50, 50));
 
     NodoGrafoEscena * basetorus = new NodoGrafoEscena();
     basetorus->agregar(translate(vec3(0.0, 2.25, 0.0)));
     basetorus->agregar(scale(vec3(0.25, 0.25, 0.25)));
     basetorus->agregar(new Torus(50, 50, float(2*M_PI), 2));
 
-    NodoGrafoEscena * semisphere = new NodoGrafoEscena();
-    semisphere->agregar(translate(vec3(0.0, 3.25, 0.0)));
-    semisphere->agregar(scale(vec3(-1.0, -1.0, -1.0)));
-    semisphere->agregar(new SemiSphere(50, 50));
+    NodoGrafoEscena * trunksemisphere = new NodoGrafoEscena();
+    trunksemisphere->agregar(translate(vec3(0.0, 3.25, 0.0)));
+    trunksemisphere->agregar(scale(vec3(-1.0, -1.0, -1.0)));
+    trunksemisphere->agregar(new SemiSphere(50, 50));
 
-    NodoGrafoEscena * trunk = new NodoGrafoEscena();
-    trunk->agregar(translate(vec3(0.0, 3.25, 0.0)));
-    trunk->agregar(scale(vec3(1.0, 0.5, 1.0)));
-    trunk->agregar(new Cilindro(50, 50));
+    NodoGrafoEscena * trunkcilinder = new NodoGrafoEscena();
+    trunkcilinder->agregar(translate(vec3(0.0, 3.25, 0.0)));
+    trunkcilinder->agregar(scale(vec3(1.0, 0.5, 1.0)));
+    trunkcilinder->agregar(new Cilindro(50, 50));
 
-    NodoGrafoEscena * mouth = new NodoGrafoEscena();
-    mouth->agregar(translate(vec3(0.0, 4.15, 0.0)));
-    mouth->agregar(scale(vec3(0.45, 0.45, 0.45)));
-    mouth->agregar(new Torus(50, 50, float(2*M_PI), 2.0));
+    NodoGrafoEscena * mouthtorus = new NodoGrafoEscena();
+    mouthtorus->agregar(translate(vec3(0.0, 4.15, 0.0)));
+    mouthtorus->agregar(scale(vec3(0.45, 0.45, 0.45)));
+    mouthtorus->agregar(new Torus(50, 50, float(2*M_PI), 2.0));
 
-    agregar(mouth);
-    agregar(trunk);
-    agregar(semisphere);
+    agregar(mouthtorus);
+    agregar(trunkcilinder);
+    agregar(trunksemisphere);
     agregar(basetorus);
-    agregar(base);
-    ponerColor(vec3(240.0f / 255.0f, 240.0f / 255.0f, 240.0f / 255.0f));
+    agregar(basecilinder);
+    ponerColor(vec3(227.0f / 255.0f, 228.0f / 255.0f, 229.0f / 255.0f));
 }
 
 Mute::Mute()
@@ -327,25 +327,25 @@ Mute::Mute()
     cup->agregar(scale(vec3(1.0, 0.65, 1.0)));
     cup->agregar(new SemiSphere(50, 50));
 
-    NodoGrafoEscena * trunk = new NodoGrafoEscena();
-    trunk->agregar(translate(vec3(0.0, -0.2, 0.0)));
-    trunk->agregar(scale(vec3(1.0, 0.2, 1.0)));
-    trunk->agregar(new Cilindro(50, 50));
+    NodoGrafoEscena * base = new NodoGrafoEscena();
+    base->agregar(translate(vec3(0.0, -0.2, 0.0)));
+    base->agregar(scale(vec3(1.0, 0.2, 1.0)));
+    base->agregar(new Cilindro(50, 50));
 
-    NodoGrafoEscena * hold = new NodoGrafoEscena();
-    hold->agregar(translate(vec3(0.0, 0.85, 0.0)));
-    hold->agregar(scale(vec3(0.1, 0.1, 0.1)));
-    hold->agregar(new Torus(50, 50, float(2*M_PI), 2));
+    NodoGrafoEscena * gripend = new NodoGrafoEscena();
+    gripend->agregar(translate(vec3(0.0, 0.85, 0.0)));
+    gripend->agregar(scale(vec3(0.1, 0.1, 0.1)));
+    gripend->agregar(new Torus(50, 50, float(2*M_PI), 2));
 
-    NodoGrafoEscena * holdtrunk = new NodoGrafoEscena();
-    holdtrunk->agregar(translate(vec3(0.0, 0.6, 0.0)));
-    holdtrunk->agregar(scale(vec3(0.1, 0.2, 0.1)));
-    holdtrunk->agregar(new Cilindro(50, 50));
+    NodoGrafoEscena * griptrunk = new NodoGrafoEscena();
+    griptrunk->agregar(translate(vec3(0.0, 0.6, 0.0)));
+    griptrunk->agregar(scale(vec3(0.1, 0.2, 0.1)));
+    griptrunk->agregar(new Cilindro(50, 50));
 
     int index = agregar(rotate(0.0f, vec3(0.0, 0.0, 1.0)));
-    agregar(holdtrunk);
-    agregar(hold);
-    agregar(trunk);
+    agregar(griptrunk);
+    agregar(gripend);
+    agregar(base);
     agregar(cup);
     ponerColor(vec3(214.0f / 255.0f, 125.0f / 255.0f, 95.0f / 255.0f));
 
@@ -364,9 +364,9 @@ void Mute::actualizarEstadoParametro(const unsigned iParam, const float t_sec)
     assert(iParam < leerNumParametros());
 
     // Actualizar las matrices del nodo grafo de escena
-    float min = 0, max = M_PI/4.0;
+    float min = 0, max = M_PI/6.0;
     float a = (min + max)/2, b = (max - min)/2;
-    float n = 1.25;
+    float n = 1;
     *mutemovement = rotate(-float(a + b*sin(2*M_PI*n*t_sec)), vec3(0.0, 0.0, 1.0));
 }
 
@@ -418,13 +418,13 @@ void Trombone::actualizarEstadoParametro(const unsigned iParam, const float t_se
 
     float min = -M_PI/6.0, max = M_PI/4.0;
     float a = (min + max)/2, b = (max - min)/2;
-    float n = 0.25;
+    float n = 0.15;
 
     // Actualizar las matrices del nodo grafo de escena
     switch (iParam)
     {
         case 0:
-            *verticalmovement = rotate(float(a + b*sin(2*M_PI*n*t_sec)), vec3(0.0, 0.0, 1.0));
+            *verticalmovement = rotate(float(a + b*sin(2*M_PI*n*t_sec)), vec3(1.0, 1.0, 1.0));
         break;
         case 1:
             slide_child->actualizarEstadoParametro(0, t_sec);
