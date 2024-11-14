@@ -1,3 +1,10 @@
+/**
+ * Nombre: Miguel Ángel Moreno Castro
+ * Titulación: DGIIM
+ * Email: miguelangelmc@correo.ugr.es
+ * DNI: 20070272
+**/
+
 // *********************************************************************
 // **
 // ** Asignatura: INFORMÁTICA GRÁFICA
@@ -68,30 +75,30 @@ public:
    MallaRevolPLY(const std::string &nombre_arch, const unsigned nperfiles);
 };
 
-class Cilindro : public MallaRevol
+class Cilinder : public MallaRevol
 {
 public:
-   Cilindro
+   Cilinder
    (
       const int num_verts_per, // Número de vértices del perfil original
       const unsigned nperfiles // Número de perfiles
    );
 };
 
-class Cono : public MallaRevol
+class Cone : public MallaRevol
 {
 public:
-   Cono
+   Cone
    (
       const int num_verts_per, // Número de vértices del perfil original
       const unsigned nperfiles // Número de perfiles
    );
 };
 
-class Esfera : public MallaRevol
+class Sphere : public MallaRevol
 {
 public:
-   Esfera
+   Sphere
    (
       const int num_verts_per, // Número de vértices del perfil original
       const unsigned nperfiles // Número de perfiles

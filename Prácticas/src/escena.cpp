@@ -1,3 +1,10 @@
+/**
+ * Nombre: Miguel Ángel Moreno Castro
+ * Titulación: DGIIM
+ * Email: miguelangelmc@correo.ugr.es
+ * DNI: 20070272
+**/
+
 // *********************************************************************
 // **
 // ** Asignatura: INFORMÁTICA GRÁFICA
@@ -303,9 +310,9 @@ Escena2::Escena2()
    objetos.push_back(new MallaPLY("beethoven.ply"));
    objetos.push_back(new MallaPLY("big_dodge.ply"));
    objetos.push_back(new MallaRevolPLY("peon.ply", 25));
-   objetos.push_back(new Cilindro(50, 50));
-   objetos.push_back(new Cono(50, 50));
-   objetos.push_back(new Esfera(50, 50));
+   objetos.push_back(new Cilinder(50, 50));
+   objetos.push_back(new Cone(50, 50));
+   objetos.push_back(new Sphere(50, 50));
 }
 
 // -------------------------------------------------------------------------

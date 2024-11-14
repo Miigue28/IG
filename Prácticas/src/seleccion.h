@@ -8,14 +8,14 @@
 // *********************************************************************
 // **
 // ** Asignatura: INFORMÁTICA GRÁFICA
-// **
-// ** Gestión de animaciones (declaraciones)
+// ** 
+// ** Funciones de gestión de la selección (declaración). 
 // ** Copyright (C) 2016-2024 Carlos Ureña
 // **
-// ** Declaraciones de las funciones:
-// **    + ActualizarEstado: actualiza el estado de un objeto 3D
-// **    + AnimacionesActivadas: indica si las animaciones están activadas o no
-// **    + ProcesarTeclaAnimacion: procesa una pulsación de una tecla estando baja la tecla 'A'
+// ** Declaración de las funciones:
+// **   + Seleccion
+// **   + FijarColVertsIdent
+// **   + LeerIdentEnPixel
 // **
 // ** This program is free software: you can redistribute it and/or modify
 // ** it under the terms of the GNU General Public License as published by
@@ -32,25 +32,21 @@
 // **
 // *********************************************************************
 
-#ifndef ANIMACION_H
-#define ANIMACION_H
+#ifndef SELECCION_H
+#define SELECCION_H
 
 #include "objeto3d.h"
-#include "ig-aux.h"
+#include "escena.h"
 
-// Función  que actuliza periodicamente el estado del objeto
-// Si el objeto no tiene parámetros: no hace nada y devuelve false
-// En otro caso:
-//    Calcula el tiempo real transcurrido desde la última llamada a esta función
-//    Actualiza el estado del objeto, usando ese tiempo transcurrido
 
-bool ActualizarEstado(Objeto3D &objeto);
+// calcula un color usando un identificador entero no negativo
+glm::vec4 ColorDesdeIdent( const int ident )  ; // 0 ≤ ident < 2^24
 
-// Devuelve true si las animaciones están activadas
-bool AnimacionesActivadas();
+// leer un identificador entero codificado en el color de un pixel en el
+// framebuffer activo actualmente
+int LeerIdentEnPixel( int xpix, int ypix );
 
-// Gestiona una tecla correspondiente a animaciones (se llama cuando se pulsa una
-// tecla la vez que la tecla 'A' está pulsada)
-bool ProcesarTeclaAnimacion(Objeto3D *objeto, int glfw_key);
 
-#endif // ANIMACION_H
+
+
+#endif // SELECCION_H
