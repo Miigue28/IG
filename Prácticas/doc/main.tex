@@ -1,0 +1,424 @@
+% \documentclass[11pt, a4paper, twoside]{article} % Usar para imprimir
+\documentclass[10pt, a4paper]{article}
+
+\input{preamble}
+
+\input{lettersfont}
+
+\input{macros}
+
+% ---------------------------------------------------------------------------
+% CONFIGURACIÓN DE LA PORTADA
+% ---------------------------------------------------------------------------
+
+\newcommand{\asignatura}{Informática Gráfica}
+
+\newcommand{\professor}{D. Carlos Ureña Almagro}
+
+\newcommand{\autor}{Miguel Ángel Moreno Castro}
+
+\newcommand{\grado}{Doble Grado en Ingeniería Informática y Matemáticas}
+
+\newcommand{\mail}{miguelangelmc@correo.ugr.es}
+
+\newcommand{\universidad}{Universidad de Granada}
+
+% ---------------------------------------------------------------------------
+% CONFIGURACIÓN PERSONALIZADA
+% ---------------------------------------------------------------------------
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ---------------------------------------------------------------------------
+% COMIENZO DEL DOCUMENTO
+% ---------------------------------------------------------------------------
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+% ---------------------------------------------------------------------------
+% PORTADA EXTERIOR
+% ---------------------------------------------------------------------------
+
+\newpagecolor{500}\afterpage{\restorepagecolor} % Color de la página
+\begin{titlepage}
+
+  % Título del documento
+	\parbox[t]{\textwidth}{
+	   	\raggedright % Texto alineado a la izquierda
+	   	\fontsize{40pt}{40pt}\selectfont\sffamily\color{white}{
+		  	\textbf{\Huge{Práctica 3}}\\
+			\textbf{Modelo Jerárquico}\\
+			\huge{\asignatura}\\
+			2024-25\\
+        }
+	}
+
+	\vfill
+
+	%% Autor e información del documento
+	\parbox[t]{\textwidth}{
+		\raggedright % Texto alineado a la izquierda
+		\sffamily\Large\color{white}
+        \grado\\
+		{\large \autor}\\
+        {\normalsize \mail}\\[15pt]
+		\includegraphics[width=130pt]{ugrlogo.pdf}
+	}
+
+\end{titlepage}
+
+% ---------------------------------------------------------------------------
+% ÍNDICE
+% ---------------------------------------------------------------------------
+
+\thispagestyle{empty}
+\tableofcontents
+\newpage
+
+% ---------------------------------------------------------------------------
+% CONTENIDO
+% ---------------------------------------------------------------------------
+
+\section{Modelo Jerárquico}
+
+\begin{center}
+\includegraphics[width=15cm]{resources/img01.png}
+\includegraphics[width=15cm]{resources/img02.png}
+\newpage
+\includegraphics[width=15cm]{resources/img03.png}
+\includegraphics[width=15cm]{resources/img04.png}
+\newpage
+\includegraphics[width=15cm]{resources/img05.png}
+\includegraphics[width=15cm]{resources/img06.png}
+\newpage
+\includegraphics[width=15cm]{resources/img07.png}
+\includegraphics[width=15cm]{resources/img08.png}
+\newpage
+\includegraphics[width=15cm]{resources/img09.png}
+\includegraphics[width=15cm]{resources/img10.png}
+\end{center}
+
+\newpage
+
+\section{Grafo PHIGS}
+
+\begin{center}
+	\includegraphics[width=15cm]{resources/img11.jpg}
+	\newpage
+	\includegraphics[width=15cm]{resources/img12.jpg}
+	\newpage
+	\includegraphics[width=15cm]{resources/img13.jpg}
+	\newpage
+	\includegraphics[width=15cm]{resources/img14.jpg}
+	\newpage
+	\includegraphics[width=15cm]{resources/img15.jpg}
+\end{center}
+
+\newpage
+
+\section{Nodos del Grafo PHIGS}
+
+\begin{enumerate}
+	\item \textbf{Clase:} SemiSphere
+	\begin{itemize}
+		\item \textbf{Rango de líneas:} 7-19
+	\end{itemize}
+	\item \textbf{Clase:} Torus
+	\begin{itemize}
+		\item \textbf{Rango de líneas:} 21-32
+	\end{itemize}
+	\item \textbf{Clase:} OuterBell
+	\begin{itemize}
+		\item \textbf{Rango de líneas:} 34-51
+	\end{itemize}
+	\item \textbf{Clase:} TunningSlide
+	\begin{itemize}
+		\item \textbf{Rango de líneas:} 53-60
+	\end{itemize}
+	\item \textbf{Clase:} Bell
+	\begin{itemize}
+		\item \textbf{Rango de líneas:} 62-120
+	\end{itemize}
+	\item \textbf{Objeto:} joint
+	\begin{itemize}
+		\item \textbf{Instanciado en Clase:} Bell
+		\item \textbf{Color:} (218, 165, 32)
+		\item \textbf{Rango de líneas:} 64-69
+	\end{itemize}
+	\item \textbf{Objeto:} upperdecorator
+	\begin{itemize}
+		\item \textbf{Instanciado en Clase:} Bell
+		\item \textbf{Color:} (181, 182, 181)
+		\item \textbf{Rango de líneas:} 71-76
+	\end{itemize}
+	\item \textbf{Objeto:} lowerdecorator1 
+	\begin{itemize}
+		\item \textbf{Instanciado en Clase:} Bell
+		\item \textbf{Color:} (181, 182, 181)
+		\item \textbf{Rango de líneas:} 78-83
+	\end{itemize}
+	\item \textbf{Objeto:} lowerdecorator2
+	\begin{itemize}
+		\item \textbf{Instanciado en Clase:} Bell
+		\item \textbf{Color:} (181, 182, 181)
+		\item \textbf{Rango de líneas:} 85-90
+	\end{itemize}
+	\item \textbf{Objeto:} beam1 
+	\begin{itemize}
+		\item \textbf{Instanciado en Clase:} Bell
+		\item \textbf{Color:} (181, 182, 181)
+		\item \textbf{Rango de líneas:} 92-96
+	\end{itemize}
+	\item \textbf{Objeto:} beam2
+	\begin{itemize}
+		\item \textbf{Instanciado en Clase:} Bell
+		\item \textbf{Color:} (181, 182, 181)
+		\item \textbf{Rango de líneas:} 98-102
+	\end{itemize}
+	\item \textbf{Objeto:} screw
+	\begin{itemize}
+		\item \textbf{Instanciado en Clase:} Bell
+		\item \textbf{Color:} (114, 116, 114)
+		\item \textbf{Rango de líneas:} 104-109
+	\end{itemize}
+	\item \textbf{Clase:} InnerSlide
+	\begin{itemize}
+		\item \textbf{Rango de líneas:} 122-190
+	\end{itemize}
+	\item \textbf{Objeto:} tube1
+	\begin{itemize}
+		\item \textbf{Instanciado en Clase:} InnerSlide
+		\item \textbf{Color:} (227, 228, 229)
+		\item \textbf{Rango de líneas:} 124-128
+	\end{itemize}
+	\item \textbf{Objeto:} tube2
+	\begin{itemize}
+		\item \textbf{Instanciado en Clase:} InnerSlide
+		\item \textbf{Color:} (227, 228, 229)
+		\item \textbf{Rango de líneas:} 130-134
+	\end{itemize}
+	\item \textbf{Objeto:} clip1
+	\begin{itemize}
+		\item \textbf{Instanciado en Clase:} InnerSlide
+		\item \textbf{Color:} (181, 182, 181)
+		\item \textbf{Rango de líneas:} 136-140
+	\end{itemize}
+	\item \textbf{Objeto:} clip2
+	\begin{itemize}
+		\item \textbf{Instanciado en Clase:} InnerSlide
+		\item \textbf{Color:} (181, 182, 181)
+		\item \textbf{Rango de líneas:} 142-146
+	\end{itemize}
+	\item \textbf{Objeto:} beamdecorator1
+	\begin{itemize}
+		\item \textbf{Instanciado en Clase:} InnerSlide
+		\item \textbf{Color:} (181, 182, 181)
+		\item \textbf{Rango de líneas:} 148-153
+	\end{itemize}
+	\item \textbf{Objeto:} beamdecorator2
+	\begin{itemize}
+		\item \textbf{Instanciado en Clase:} InnerSlide
+		\item \textbf{Color:} (181, 182, 181)
+		\item \textbf{Rango de líneas:} 155-160
+	\end{itemize}
+	\item \textbf{Objeto:} gripbeam
+	\begin{itemize}
+		\item \textbf{Instanciado en Clase:} InnerSlide
+		\item \textbf{Color:} (218, 165, 32)
+		\item \textbf{Rango de líneas:} 162-167
+	\end{itemize}
+	\item \textbf{Objeto:} mouthpieceattach
+	\begin{itemize}
+		\item \textbf{Instanciado en Clase:} InnerSlide
+		\item \textbf{Color:} (181, 182, 181)
+		\item \textbf{Rango de líneas:} 169-173
+	\end{itemize}
+	\item \textbf{Objeto:} bellattach
+	\begin{itemize}
+		\item \textbf{Instanciado en Clase:} InnerSlide
+		\item \textbf{Color:} (181, 182, 181)
+		\item \textbf{Rango de líneas:} 175-179
+	\end{itemize}
+	\item \textbf{Clase:} OuterSlide 
+	\begin{itemize}
+		\item \textbf{Rango de líneas:} 192-253
+	\end{itemize}
+	\item \textbf{Objeto:} tube1
+	\begin{itemize}
+		\item \textbf{Instanciado en Clase:} OuterSlide
+		\item \textbf{Color:} (218, 165, 32)
+		\item \textbf{Rango de líneas:} 194-198
+	\end{itemize}
+	\item \textbf{Objeto:} tube2
+	\begin{itemize}
+		\item \textbf{Instanciado en Clase:} OuterSlide
+		\item \textbf{Color:} (218, 165, 32)
+		\item \textbf{Rango de líneas:} 200-204
+	\end{itemize}
+	\item \textbf{Objeto:} beamdecorator1
+	\begin{itemize}
+		\item \textbf{Instanciado en Clase:} OuterSlide
+		\item \textbf{Color:} (181, 182, 181)
+		\item \textbf{Rango de líneas:} 206-211
+	\end{itemize}
+	\item \textbf{Objeto:} beamdecorator2
+	\begin{itemize}
+		\item \textbf{Instanciado en Clase:} OuterSlide
+		\item \textbf{Color:} (181, 182, 181)
+		\item \textbf{Rango de líneas:} 213-218
+	\end{itemize}
+	\item \textbf{Objeto:} gripbeam 
+	\begin{itemize}
+		\item \textbf{Instanciado en Clase:} OuterSlide
+		\item \textbf{Color:} (218, 165, 32)
+		\item \textbf{Rango de líneas:} 220-225
+	\end{itemize}
+	\item \textbf{Objeto:} elbow
+	\begin{itemize}
+		\item \textbf{Instanciado en Clase:} OuterSlide
+		\item \textbf{Color:} (181, 182, 181)
+		\item \textbf{Rango de líneas:} 227-231
+	\end{itemize}
+	\item \textbf{Objeto:} groundholdtrunk
+	\begin{itemize}
+		\item \textbf{Instanciado en Clase:} OuterSlide
+		\item \textbf{Color:} (0, 0, 0)
+		\item \textbf{Rango de líneas:} 233-237
+	\end{itemize}
+	\item \textbf{Objeto:} groundholdbase 
+	\begin{itemize}
+		\item \textbf{Instanciado en Clase:} OuterSlide
+		\item \textbf{Color:} (0, 0, 0)
+		\item \textbf{Rango de líneas:} 239-243
+	\end{itemize}
+	\item \textbf{Clase:} Slide
+	\begin{itemize}
+		\item \textbf{Grados de Libertad:} slidemovement
+		\item \textbf{Rango de líneas:} 255-270
+	\end{itemize}
+	\item \textbf{Clase:} Mouthpiece
+	\begin{itemize}
+		\item \textbf{Rango de líneas:} 290-322
+	\end{itemize}
+	\item \textbf{Objeto:} basecilinder 
+	\begin{itemize}
+		\item \textbf{Instanciado en Clase:} Mouthpiece
+		\item \textbf{Color:} (227, 229, 229)
+		\item \textbf{Rango de líneas:} 292-294
+	\end{itemize}
+	\item \textbf{Objeto:} basetorus
+	\begin{itemize}
+		\item \textbf{Instanciado en Clase:} Mouthpiece
+		\item \textbf{Color:} (227, 229, 229)
+		\item \textbf{Rango de líneas:} 296-299
+	\end{itemize}
+	\item \textbf{Objeto:} trunksemisphere
+	\begin{itemize}
+		\item \textbf{Instanciado en Clase:} Mouthpiece
+		\item \textbf{Color:} (227, 229, 229)
+		\item \textbf{Rango de líneas:} 301-304
+	\end{itemize}
+	\item \textbf{Objeto:} trunkcilinder 
+	\begin{itemize}
+		\item \textbf{Instanciado en Clase:} Mouthpiece
+		\item \textbf{Color:} (227, 229, 229)
+		\item \textbf{Rango de líneas:} 306-309
+	\end{itemize}
+	\item \textbf{Objeto:} mouthtorus
+	\begin{itemize}
+		\item \textbf{Instanciado en Clase:} Mouthpiece
+		\item \textbf{Color:} (227, 229, 229)
+		\item \textbf{Rango de líneas:} 311-314
+	\end{itemize}
+	\item \textbf{Clase:} Mute
+	\begin{itemize}
+		\item \textbf{Grados de Libertad:} mutemovement
+		\item \textbf{Rango de líneas:} 324-353
+	\end{itemize}
+	\item \textbf{Objeto:} cup
+	\begin{itemize}
+		\item \textbf{Instanciado en Clase:} Mute
+		\item \textbf{Color:} (214, 125, 95)
+		\item \textbf{Rango de líneas:} 326-328
+	\end{itemize}
+	\item \textbf{Objeto:} base
+	\begin{itemize}
+		\item \textbf{Instanciado en Clase:} Mute
+		\item \textbf{Color:} (214, 125, 95)
+		\item \textbf{Rango de líneas:} 330-333
+	\end{itemize}
+	\item \textbf{Objeto:} gripend
+	\begin{itemize}
+		\item \textbf{Instanciado en Clase:} Mute
+		\item \textbf{Color:} (214, 125, 95)
+		\item \textbf{Rango de líneas:} 335-338
+	\end{itemize}
+	\item \textbf{Objeto:} griptrunk 
+	\begin{itemize}
+		\item \textbf{Instanciado en Clase:} Mute
+		\item \textbf{Color:} (214, 125, 95)
+		\item \textbf{Rango de líneas:} 340-343
+	\end{itemize}
+	\item \textbf{Clase:} Trombone
+	\begin{itemize}
+		\item \textbf{Grados de Libertad:} wavingmovement
+		\item \textbf{Color:} (214, 125, 95)
+		\item \textbf{Rango de líneas:} 373-406
+	\end{itemize}
+\end{enumerate}
+
+\newpage
+
+\section{Grados de Libertad}
+
+\begin{enumerate}
+	\item \textbf{Trombone:} wavingmovement
+	
+	Rotación oscilante entorno al vector $(1, 1, 1)$ de un ángulo de $\frac{5}{12} \pi$ radianes y un periodo de 0.15 ciclos por segundo
+
+	\begin{equation*}
+		\begin{pmatrix}
+			\cos \theta + \frac{1}{3}(1 - \cos\theta) & \frac{1}{3} \sin \theta & \frac{1}{3} \sin \theta & 0 \\
+			\frac{1}{3} \sin \theta & \cos \theta + \frac{1}{3}(1 - \cos \theta) & \frac{1}{3} \sin & 0 \\
+			\frac{1}{3} \sin & \frac{1}{3} \sin & \cos \theta + \frac{1}{3} (1 - \cos \theta) & 0 \\
+			0 & 0 & 0 & 1
+		\end{pmatrix}
+	\end{equation*}
+	donde
+	\begin{equation*}
+		\theta = \frac{\pi}{24} + \frac{5\pi}{24} \sin(2 \pi T)
+	\end{equation*}
+	\item \textbf{Slide:} slidemovement
+	
+	Desplazamiento oscilante con respecto al eje Y con un periodo de 0.5 ciclos por segundos y una amplitud de 3 unidades de distancia
+
+	\begin{equation*}
+		\begin{pmatrix}
+			1 & 0 & 0 & d_x \\
+			0 & 1 & 0 & d_y \\
+			0 & 0 & 1 & d_z \\
+			0 & 0 & 0 & 1
+		\end{pmatrix}
+	\end{equation*}
+	donde
+	\begin{equation*}
+		(d_x, d_y, d_z) = (0, -\frac{3}{2} - \frac{3}{2}\sin(2\pi T), 0)
+	\end{equation*}
+	\item \textbf{Mute:} mutemovement
+	
+	Rotación oscilante entorno al eje Z de un ángulo de $\frac{\pi}{6}$ radianes y un periodo de 1 ciclo por segundos
+
+	\begin{equation*}
+		\begin{pmatrix}
+			\cos \theta & - \sin \theta & 0 & 0 \\
+			\sin \theta & \cos \theta  & 0 & 0 \\
+			0 & 0 & 1 & 0 \\
+			0 & 0 & 0 & 1
+		\end{pmatrix}
+	\end{equation*}
+	donde
+	\begin{equation*}
+		\theta = -\frac{\pi}{12} - \frac{\pi}{12}\sin(2 \pi t)
+	\end{equation*}
+\end{enumerate}
+\end{document}

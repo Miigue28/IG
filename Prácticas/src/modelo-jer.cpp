@@ -402,7 +402,7 @@ Trombone::Trombone()
     agregar(slide);
     agregar(bell);
 
-    verticalmovement = leerPtrMatriz(index);
+    wavingmovement = leerPtrMatriz(index);
 }
 
 unsigned Trombone::leerNumParametros() const
@@ -424,7 +424,7 @@ void Trombone::actualizarEstadoParametro(const unsigned iParam, const float t_se
     switch (iParam)
     {
         case 0:
-            *verticalmovement = rotate(float(a + b*sin(2*M_PI*n*t_sec)), vec3(1.0, 1.0, 1.0));
+            *wavingmovement = rotate(float(a + b*sin(2*M_PI*n*t_sec)), vec3(1.0, 1.0, 1.0));
         break;
         case 1:
             slide_child->actualizarEstadoParametro(0, t_sec);
