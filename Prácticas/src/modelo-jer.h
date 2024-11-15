@@ -1,3 +1,10 @@
+/**
+ * Nombre: Miguel Ángel Moreno Castro
+ * Titulación: DGIIM
+ * Email: miguelangelmc@correo.ugr.es
+ * DNI: 20070272
+**/
+
 #ifndef MODELO_JERARQUICO_HPP
 #define MODELO_JERARQUICO_HPP
 

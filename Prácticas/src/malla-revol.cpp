@@ -1,3 +1,10 @@
+/**
+ * Nombre: Miguel Ángel Moreno Castro
+ * Titulación: DGIIM
+ * Email: miguelangelmc@correo.ugr.es
+ * DNI: 20070272
+**/
+
 // *********************************************************************
 // **
 // ** Asignatura: INFORMÁTICA GRÁFICA
@@ -165,7 +172,7 @@ MallaRevolPLY::MallaRevolPLY(const std::string &nombre_arch, const unsigned nper
 // -----------------------------------------------------------------------------
 // Clase Cilindro
 
-Cilindro::Cilindro(const int num_verts_per, const unsigned nperfiles)
+Cilinder::Cilinder(const int num_verts_per, const unsigned nperfiles)
 {
    std::vector<glm::vec3> perfil;
 
@@ -182,7 +189,7 @@ Cilindro::Cilindro(const int num_verts_per, const unsigned nperfiles)
 // -----------------------------------------------------------------------------
 // Clase Cono
 
-Cono::Cono(const int num_verts_per, const unsigned nperfiles)
+Cone::Cone(const int num_verts_per, const unsigned nperfiles)
 {
    std::vector<glm::vec3> perfil;
 
@@ -199,7 +206,7 @@ Cono::Cono(const int num_verts_per, const unsigned nperfiles)
 // -----------------------------------------------------------------------------
 // Clase Esfera
 
-Esfera::Esfera(const int num_verts_per, const unsigned nperfiles)
+Sphere::Sphere(const int num_verts_per, const unsigned nperfiles)
 {
    std::vector<glm::vec3> perfil;
    const float subintervals = M_PI/float(num_verts_per);
