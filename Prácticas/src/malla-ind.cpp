@@ -588,3 +588,76 @@ MallaTorre::MallaTorre(unsigned n) : MallaInd("Malla Torre")
    triangulos.push_back({0, 3, 4});
    triangulos.push_back({4*n, 4*(n-1) + 3, 4*n + 3});
 }
+
+Leaflet::Leaflet(unsigned n) : MallaInd("Panfleto")
+{
+   assert(n > 0);
+
+   //vertices = 
+   //{
+   //   {0.0, 0.0, 0.0}, // 0
+   //   {1.0, 0.0, 0.0}, // 1
+   //   {2.0, 1.0, 0.0}, // 2
+   //   {3.0, 0.0, 0.0}, // 3
+   //   {4.0, 0.0, 0.0}, // 4
+   //   {0.0, 0.0, 2.0}, // 5
+   //   {1.0, 0.0, 2.0}, // 6
+   //   {2.0, 1.0, 2.0}, // 7
+   //   {3.0, 0.0, 2.0}, // 8
+   //   {4.0, 0.0, 2.0}  // 9
+   //};
+   //triangulos =
+   //{
+   //   {0, 1, 5},
+   //   {1, 5, 6},
+   //   {1, 2, 6},
+   //   {2, 6, 7},
+   //   {2, 3, 7},
+   //   {3, 7, 8},
+   //   {3, 4, 8},
+   //   {4, 8, 9}
+   //};
+   //col_ver = 
+   //{
+   //   {0.5, 0.5, 0.5}, // 0
+   //   {0.5, 0.5, 0.5}, // 1
+   //   {1.0, 1.0, 1.0}, // 2
+   //   {0.5, 0.5, 0.5}, // 3
+   //   {0.5, 0.5, 0.5}, // 4
+   //   {0.5, 0.5, 0.5}, // 5
+   //   {0.5, 0.5, 0.5}, // 6
+   //   {1.0, 1.0, 1.0}, // 7
+   //   {0.5, 0.5, 0.5}, // 8
+   //   {0.5, 0.5, 0.5}  // 9
+   //};
+
+   // Tabla de vértices
+   for (unsigned i = 0; i < n + 1; ++i)
+   {
+      vertices.push_back({0.0, 0.0, static_cast<float>(i)});
+      vertices.push_back({1.0, 0.0, static_cast<float>(i)});
+      vertices.push_back({2.0, 1.0, static_cast<float>(i)});
+      vertices.push_back({3.0, 0.0, static_cast<float>(i)});
+      vertices.push_back({4.0, 0.0, static_cast<float>(i)});
+   }
+
+   // Tabla de triángulos
+   for (unsigned i = 0; i < n; ++i)
+   {
+      for (unsigned j = 0; j < 4; ++j)
+      {
+         triangulos.push_back({5*i + j, 5*i + j + 1, 5*(i + 1) + j});
+         triangulos.push_back({5*i + j + 1, 5*(i + 1) + j, 5*(i + 1) + j + 1});
+      }
+   }
+
+   // Tabla de colores
+   for (unsigned i = 0; i < n + 1; ++i)
+   {
+      col_ver.push_back({0.5, 0.5, 0.5});
+      col_ver.push_back({0.5, 0.5, 0.5});
+      col_ver.push_back({1.0, 1.0, 1.0});
+      col_ver.push_back({0.5, 0.5, 0.5});
+      col_ver.push_back({0.5, 0.5, 0.5});
+   }
+}

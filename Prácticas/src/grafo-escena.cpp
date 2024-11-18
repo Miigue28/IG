@@ -399,3 +399,58 @@ void GrafoCubos::actualizarEstadoParametro(const unsigned iParam, const float t_
    // Actualizar la matriz del nodo grafo de escena
    *rotationalmovement = rotate(float(2*M_PI*t_sec), vec3(0.0, 1.0, 0.0));
 }
+
+CubePair::CubePair(float h, float w)
+{
+   using namespace glm;
+
+   NodoGrafoEscena *base = new NodoGrafoEscena();
+   base->agregar(scale(vec3(w, h, w)));
+   base->agregar(new Cubo());
+
+   NodoGrafoEscena *cubo_rotatorio = new NodoGrafoEscena();
+   unsigned visagraindex = cubo_rotatorio->agregar(rotate(0.0f, vec3(0.0, 0.0, 1.0)));
+   cubo_rotatorio->agregar(translate(vec3(w, h, 0.0)));
+   cubo_rotatorio->agregar(base);
+
+   rotatingmovement = cubo_rotatorio->leerPtrMatriz(visagraindex);
+
+   NodoGrafoEscena *cubo_escalable = new NodoGrafoEscena();
+   unsigned baseindex = cubo_escalable->agregar(scale(vec3(1.0, 1.0, 1.0)));
+   cubo_escalable->agregar(translate(vec3(-w, -h, 0.0)));
+   cubo_escalable->agregar(base);
+
+   scalingmovement = cubo_escalable->leerPtrMatriz(baseindex);
+
+   agregar(translate(vec3(2*w, 2*h, w)));
+   agregar(cubo_rotatorio);
+   agregar(cubo_escalable);
+}
+
+unsigned CubePair::leerNumParametros() const
+{
+   // Dos grados de libertad
+   return 2;
+}
+
+void CubePair::actualizarEstadoParametro(const unsigned iParam, const float t_sec)
+{
+   using namespace glm;
+
+   // Verificamos que el índice de parámetro sea válido
+   assert(iParam < leerNumParametros());
+
+   float min = -M_PI/2.0, max = M_PI/4.0;
+   float a = (min + max)/2, b = (max - min)/2;
+
+   // Actualizar las matrices del nodo grafo de escena
+   switch (iParam)
+   {
+   case 0:
+      *rotatingmovement = rotate(static_cast<float>(a + b*sin(2*M_PI*t_sec)), vec3(0.0, 0.0, 1.0));
+   break;
+   case 1:
+      *scalingmovement = scale(vec3(1.0, 1.0*abs(cos(t_sec)), 1.0));
+   break;
+   }
+}

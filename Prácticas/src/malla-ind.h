@@ -193,4 +193,13 @@ public:
    );
 };
 
+class Leaflet : public MallaInd
+{
+public:
+   Leaflet
+   (
+      unsigned n // Longitud del panfleto
+   );
+};
+
 #endif

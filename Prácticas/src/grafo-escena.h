@@ -146,4 +146,23 @@ public:
    virtual void actualizarEstadoParametro(const unsigned iParam, const float t_sec);
 };
 
+class CubePair : public NodoGrafoEscena
+{
+protected:
+   glm::mat4 *scalingmovement = nullptr;
+   glm::mat4 *rotatingmovement = nullptr;
+public:
+   CubePair
+   (
+      float h, // Altura
+      float w  // Anchura
+   );
+
+   // Devuelve el número de parámetros de este objeto
+   virtual unsigned leerNumParametros() const;
+   
+   // Actualiza el valor de un parámetro a un instante de tiempo
+   virtual void actualizarEstadoParametro(const unsigned iParam, const float t_sec);
+};
+
 #endif // GRAFO_ESCENA_HPP

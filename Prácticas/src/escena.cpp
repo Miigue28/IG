@@ -298,7 +298,8 @@ Escena1::Escena1()
    //objetos.push_back(new Triangulo());
    //objetos.push_back(new Cuadrado());
    //objetos.push_back(new PiramideL());
-   objetos.push_back(new EstrellaZ(8));
+   //objetos.push_back(new EstrellaZ(8));
+   objetos.push_back(new Leaflet(3));
 }
 
 // -------------------------------------------------------------------------
@@ -327,7 +328,8 @@ Escena3::Escena3()
    cout << "Creando objetos de la Práctica 3" << endl;
 
    //objetos.push_back(new GrafoEstrellaX(6));
-   objetos.push_back(new GrafoCubos());
+   //objetos.push_back(new GrafoCubos());
+   objetos.push_back(new CubePair(0.5f, 0.25f));
    objetos.push_back(new Trombone());
 }
 
