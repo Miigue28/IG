@@ -350,6 +350,83 @@ CuboColores::CuboColores() : MallaInd("Cubo 8 vértices colorido")
    };
 }
 
+EstrellaZ::EstrellaZ(unsigned n) : MallaInd("Estrella Z")
+{
+   assert(n > 1);
+
+   const float angle = (2*M_PI)/float(2*n);
+   const glm::vec3 center = {0.5, 0.5, 0};
+   const float radius = 0.5;
+
+   // Centro de la estrella
+   vertices.push_back(center);
+   col_ver.push_back({1.0, 1.0, 1.0});
+
+   // Tabla de vértices
+   for (unsigned i = 0; i < 2*n; i++)
+   {
+      if (i % 2 == 0)
+         vertices.push_back({center.x + radius*cos(i*angle),center.y + radius*sin(i*angle), 0.0});
+      else
+         vertices.push_back({center.x + (radius/2.0)*cos(i*angle), center.y + (radius/2.0f)*sin(i*angle), 0.0});
+   }
+
+   // Tabla de triangulos
+   for (unsigned i = 1; i < 2*n; i++)
+   {
+      triangulos.push_back({i, i+1, 0});
+   }
+   triangulos.push_back({2*n, 1, 0});
+
+   // Tabla de colores
+   for (unsigned i = 0; i < 2*n; i++)
+   {
+      col_ver.emplace_back(vertices.at(i+1));
+   }
+}
+
+PiramideEstrellaZ::PiramideEstrellaZ(unsigned n) : MallaInd("Pirámide Estrella Z")
+{
+   assert(n > 1);
+
+   const float angle = (2*M_PI)/float(2*n);
+   const glm::vec3 center = {0.5, 0.5, 0};
+   const glm::vec3 tip = {0.5, 0.5, 0.5};
+   const float radius = 0.5;
+
+   // Vértices
+   for (unsigned i = 0; i < 2*n; i++)
+   {
+      if (i % 2 == 0)
+         vertices.push_back({center.x + radius*cos(i*angle),center.y + radius*sin(i*angle), 0.0});
+      else
+         vertices.push_back({center.x + (radius/2.0)*cos(i*angle), center.y + (radius/2.0f)*sin(i*angle), 0.0});
+   }
+
+   // Centro de la estrella (2n)
+   vertices.push_back(center);
+
+   // Punta de la estrella (2n+1)
+   vertices.push_back(tip);
+
+   // Tabla de triangulos de la base
+   for (unsigned i = 0; i < 2*n; i++)
+   {
+      triangulos.push_back({i, (i+1) % (2*n), 2*n});
+      triangulos.push_back({i, (i+1) % (2*n), 2*n + 1});
+   }
+
+   // Tabla de colores
+   for (unsigned i = 0; i < 2*n; i++)
+   {
+      col_ver.emplace_back(vertices.at(i+1));
+   }
+   // Color del centro
+   col_ver.push_back({1.0, 1.0, 1.0});
+   // Color del vértice
+   col_ver.push_back({1.0, 1.0, 1.0});
+}
+
 CasaX::CasaX() : MallaInd("Casa 10 vértices colorida")
 {
    vertices =
@@ -427,4 +504,87 @@ Cuadrado::Cuadrado() : MallaInd("Cuadrado 4 vértices")
    };
 }
 
-// -----------------------------------------------------------------------------------------------
+PiramideL::PiramideL() : MallaInd("Pirámide cuya base tiene forma de L")
+{
+   vertices =
+   {
+      {0.0, 0.0, 0.0},
+      {2.0, 0.0, 0.0},
+      {2.0, 0.0, 1.0},
+      {1.0, 0.0, 1.0},
+      {1.0, 0.0, 2.0},
+      {0.0, 0.0, 2.0},
+      {1.0, 2.0, 1.0} // Ápice
+   };
+   triangulos =
+   {
+      {0, 1, 5}, // Base
+      {1, 2, 3}, // Base
+      {3, 4, 5}, // Base
+      {0, 1, 6},
+      {1, 2, 6},
+      {2, 3, 6},
+      {3, 4, 6},
+      {4, 5, 6},
+      {5, 0, 6}
+   };
+}
+
+RejillaY::RejillaY(unsigned n, unsigned m) : MallaInd("Rejilla Y")
+{
+   assert(n > 1 && m > 1);
+
+   const float rows = 1.0f/float(n-1);
+   const float columns = 1.0f/float(m-1);
+
+   // Tabla de vértices
+   for (unsigned i = 0; i < n; i++)
+   {
+      for (unsigned j = 0; j < m; j++)
+      {
+         vertices.push_back({i*rows, 0.0, j*columns});
+      }
+   }
+
+   // Tabla de triángulos
+   for (unsigned i = 0; i < n - 1; i++)
+   {
+      for (unsigned j = 0; j < m - 1; j++)
+      {
+         triangulos.push_back({i*m + j, i*m + j + 1, i*m + j + m + 1});
+         triangulos.push_back({i*m + j, i*m + j + m, i*m + j + m + 1});
+      }
+   }
+
+   // Tabla de colores
+   for (unsigned i = 0; i < n; i++)
+   {
+      for (unsigned j = 0; j < m; j++)
+      {
+         col_ver.push_back({i*rows, 0.0, j*columns});
+      }
+   }
+}
+
+MallaTorre::MallaTorre(unsigned n) : MallaInd("Malla Torre")
+{
+   assert(n > 0);
+
+   // Tabla de vértices
+   for (unsigned i = 0; i < n + 1; i++)
+   {
+      // Cuadrado
+      vertices.push_back({+0.5, static_cast<float>(i), +0.5});
+      vertices.push_back({+0.5, static_cast<float>(i), -0.5});
+      vertices.push_back({-0.5, static_cast<float>(i), -0.5});
+      vertices.push_back({-0.5, static_cast<float>(i), +0.5});
+   }
+
+   // Tabla de triángulos   
+   for (unsigned i = 0; i < 4*n - 1 ; ++i) {
+      triangulos.push_back({i, i + 1, i + 4});
+      triangulos.push_back({i + 1, i + 4, i + 5});
+   }
+   triangulos.push_back({0, 3, 4});
+   triangulos.push_back({4*n, 4*(n-1) + 3, 4*n + 3});
+}

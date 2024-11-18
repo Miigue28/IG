@@ -132,6 +132,24 @@ public:
    CuboColores();
 };
 
+class EstrellaZ : public MallaInd
+{
+public:
+   EstrellaZ
+   (
+      unsigned n // Número de puntas de la estrella
+   );
+};
+
+class PiramideEstrellaZ : public MallaInd
+{
+public:
+   PiramideEstrellaZ
+   (
+      unsigned n
+   );
+};
+
 class CasaX : public MallaInd
 {
 public:
@@ -150,6 +168,29 @@ public:
    Cuadrado();
 };
 
-// ---------------------------------------------------------------------
+class PiramideL : public MallaInd
+{
+public:
+   PiramideL();
+};
+
+class RejillaY : public MallaInd
+{
+public:
+   RejillaY
+   (
+      unsigned n, // Número de filas
+      unsigned m  // Número de columnas
+   );
+};
+
+class MallaTorre : public MallaInd
+{
+public:
+   MallaTorre
+   (
+      unsigned n // Número de plantas de la torre
+   );
+};
 
 #endif

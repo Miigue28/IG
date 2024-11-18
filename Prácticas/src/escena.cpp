@@ -291,13 +291,14 @@ Escena1::Escena1()
    using namespace std;
    cout << "Creando objetos de la Práctica 1" << endl;
 
-   objetos.push_back(new Cubo());
-   objetos.push_back(new Tetraedro());
-   objetos.push_back(new CuboColores());
-   objetos.push_back(new CasaX());
-   objetos.push_back(new Triangulo());
-   objetos.push_back(new Cuadrado());
-
+   //objetos.push_back(new Cubo());
+   //objetos.push_back(new Tetraedro());
+   //objetos.push_back(new CuboColores());
+   //objetos.push_back(new CasaX());
+   //objetos.push_back(new Triangulo());
+   //objetos.push_back(new Cuadrado());
+   //objetos.push_back(new PiramideL());
+   objetos.push_back(new EstrellaZ(8));
 }
 
 // -------------------------------------------------------------------------
@@ -307,12 +308,15 @@ Escena2::Escena2()
    using namespace std;
    cout << "Creando objectos de la Práctica 2" << endl;
 
-   objetos.push_back(new MallaPLY("beethoven.ply"));
-   objetos.push_back(new MallaPLY("big_dodge.ply"));
-   objetos.push_back(new MallaRevolPLY("peon.ply", 25));
-   objetos.push_back(new Cilinder(50, 50));
-   objetos.push_back(new Cone(50, 50));
-   objetos.push_back(new Sphere(50, 50));
+   //objetos.push_back(new MallaPLY("beethoven.ply"));
+   //objetos.push_back(new MallaPLY("big_dodge.ply"));
+   //objetos.push_back(new MallaRevolPLY("peon.ply", 25));
+   //objetos.push_back(new Cilinder(50, 50));
+   //objetos.push_back(new Cone(50, 50));
+   //objetos.push_back(new Sphere(50, 50));
+   objetos.push_back(new PiramideEstrellaZ(8));
+   //objetos.push_back(new RejillaY(3, 3));
+   //objetos.push_back(new MallaTorre(3));
 }
 
 // -------------------------------------------------------------------------
@@ -322,6 +326,8 @@ Escena3::Escena3()
    using namespace std;
    cout << "Creando objetos de la Práctica 3" << endl;
 
+   //objetos.push_back(new GrafoEstrellaX(6));
+   objetos.push_back(new GrafoCubos());
    objetos.push_back(new Trombone());
 }
 

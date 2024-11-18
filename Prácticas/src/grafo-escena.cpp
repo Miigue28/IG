@@ -36,6 +36,7 @@
 #include "grafo-escena.h"
 #include "aplicacion-ig.h"
 #include "seleccion.h" // para 'ColorDesdeIdent'
+#include "malla-revol.h"
 
 
 // Constructor para entrada de tipo Sub-objeto
@@ -298,4 +299,103 @@ bool NodoGrafoEscena::buscarObjeto(
 
    // ni este nodo ni ningún hijo es el buscado: terminar
    return false;
+}
+
+GrafoEstrellaX::GrafoEstrellaX(unsigned n)
+{
+   assert(n > 1);
+
+   using namespace glm;
+
+   const float angle = (2*M_PI)/static_cast<float>(2*n);
+   const float radius = 1.3;
+
+   NodoGrafoEscena *star = new NodoGrafoEscena();
+   star->agregar(translate(vec3(0.0, -1.3, 1.3)));
+   star->agregar(rotate(float(M_PI/2.0f), vec3(0.0, 1.0, 0.0)));
+   star->agregar(scale(vec3(1.3/0.5, 1.3/0.5, 1.0)));
+   star->agregar(new EstrellaZ(n));
+
+   NodoGrafoEscena *cone = new NodoGrafoEscena();
+   cone->agregar(translate(vec3(0.0, 0.0, radius)));
+   cone->agregar(rotate(static_cast<float>(M_PI/2.0f), vec3(1.0, 0.0, 0.0)));
+   cone->agregar(scale(vec3(0.14, 0.15, 0.14)));
+   cone->agregar(new Cone(15, 15));
+
+   unsigned index = agregar(rotate(0.0f, vec3(1.0, 0.0, 0.0)));
+   for (unsigned i = 0; i < n; ++i)
+   {
+      NodoGrafoEscena *tipcone = new NodoGrafoEscena();
+      tipcone->agregar(rotate(static_cast<float>(2*i*angle), vec3(1.0, 0.0, 0.0)));
+      tipcone->agregar(cone);
+
+      agregar(tipcone);
+   }
+   agregar(star);
+
+   rotationalmovement = leerPtrMatriz(index);
+}
+
+unsigned GrafoEstrellaX::leerNumParametros() const
+{
+   // Un grado de libertad
+   return 1;
+}
+
+void GrafoEstrellaX::actualizarEstadoParametro(const unsigned iParam, const float t_sec)
+{
+   using namespace glm;
+
+   // Verificamos que el índice de parámetro sea válido
+   assert(iParam < leerNumParametros());
+
+   float n = 2.5;
+
+   // Actualizar la matriz del nodo grafo de escena
+   *rotationalmovement = rotate(float(2*M_PI*n*t_sec), vec3(1.0, 0.0, 0.0));
+}
+
+GrafoCubos::GrafoCubos()
+{
+   using namespace glm;
+
+   NodoGrafoEscena *rejilla = new NodoGrafoEscena();
+   rejilla->agregar(translate(vec3(-0.5, -0.5, -0.5)));
+   rejilla->agregar(new RejillaY(10, 10));
+
+   NodoGrafoEscena *base = new NodoGrafoEscena();
+   base->agregar(rejilla);
+   base->agregar(translate(vec3(0.0,-0.7, 0.0)));
+   unsigned index = base->agregar(rotate(0.0f, vec3(0.0, 1.0, 0.0)));
+   base->agregar(scale(vec3(0.1, 0.2, 0.1)));
+   base->agregar(new Cubo());
+   rotationalmovement = base->leerPtrMatriz(index);
+
+   NodoGrafoEscena *tapas = new NodoGrafoEscena();
+   tapas->agregar(base);
+   tapas->agregar(rotate(static_cast<float>(M_PI), vec3(1.0, 0.0, 0.0)));
+   tapas->agregar(base);
+
+   agregar(tapas);
+   agregar(rotate(static_cast<float>(M_PI/2.0f), vec3(0.0, 0.0, 1.0)));
+   agregar(tapas);
+   agregar(rotate(static_cast<float>(M_PI/2.0f), vec3(1.0, 0.0, 0.0)));
+   agregar(tapas);
+}
+
+unsigned GrafoCubos::leerNumParametros() const
+{
+   // Un grado de libertad
+   return 1;
+}
+
+void GrafoCubos::actualizarEstadoParametro(const unsigned iParam, const float t_sec)
+{
+   using namespace glm;
+
+   // Verificamos que el índice de parámetro sea válido
+   assert(iParam < leerNumParametros());
+
+   // Actualizar la matriz del nodo grafo de escena
+   *rotationalmovement = rotate(float(2*M_PI*t_sec), vec3(0.0, 1.0, 0.0));
 }

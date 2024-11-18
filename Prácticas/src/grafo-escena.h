@@ -115,4 +115,35 @@ public:
    virtual void calcularCentroOC();
 };
 
+class GrafoEstrellaX : public NodoGrafoEscena
+{
+protected:
+   glm::mat4 *rotationalmovement = nullptr;
+public:
+   GrafoEstrellaX
+   (
+      unsigned n // Número de puntas
+   );
+
+   // Devuelve el número de parámetros de este objeto
+   virtual unsigned leerNumParametros() const;
+
+   // Actualiza el valor de un parámetro a un instante de tiempo
+   virtual void actualizarEstadoParametro(const unsigned iParam, const float t_sec);
+};
+
+class GrafoCubos : public NodoGrafoEscena
+{
+protected:
+   glm::mat4 *rotationalmovement = nullptr;
+public:
+   GrafoCubos();
+
+   // Devuelve el número de parámetros de este objeto
+   virtual unsigned leerNumParametros() const;
+   
+   // Actualiza el valor de un parámetro a un instante de tiempo
+   virtual void actualizarEstadoParametro(const unsigned iParam, const float t_sec);
+};
+
 #endif // GRAFO_ESCENA_HPP
