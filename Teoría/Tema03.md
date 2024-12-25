@@ -401,248 +401,152 @@ los valores $x_{ndc}, y_{ndc}$ y $z_{ndc}$ están los tres en el intervalo $[−
 
 ## 1.5 Transformación de viewport
 
-El siguiente paso consiste en calcular en que posiciones de la
-imagen se proyecta cada vértice:
-I Este paso se puede modelar como una transformación lineal
-que llamaremos transformación de viewport. El término
-viewport hace referencia a la zona rectangular de la ventana
-donde se proyectarán los polígonos que están en el cubo visible
-(un bloque rectangular de pixels)
-I Esta transformación produce coordenadas de dispositivo o de
-ventana (DC: device coordinates, o también llamadas screen
-coordinates, o window coordinates). Las coordenadas X e Y en
-DC se expresan en unidades de pixels.
-I La transformación de viewport es lineal y consta simplemente
-de escalados y traslaciones.
-I La coordenada Z se transforma y se conserva para poder hacer
-después eliminación de partes ocultas.
+El siguiente paso consiste en calcular en que posiciones de la imagen se proyecta cada vértice. Este paso se puede modelar como una transformación lineal que llamaremos **transformación de viewport**. 
 
-En coordenadas de dispositivo, podemos asociar una región
-cuadrada (de lado unidad) a cada pixel en el plano de la ventana. El
-viewport (en rojo) es un bloque rectangular de pixels, contenido en
-el bloque rectangular correspondiente a la ventana o imagen
-completa:
+> El término **viewport** hace referencia a la zona rectangular de la ventana donde se proyectarán los polígonos que están en el cubo visible (un bloque rectangular de pixels).
+
+Esta transformación produce **coordenadas de dispositivo** o de ventana (_device coordinates_, DC). 
+
+> Las coordenadas $X$ e $Y$ en DC se expresan en unidades de pixels.
+
+La transformación de viewport es lineal y consta simplemente de escalados y traslaciones. La coordenada $Z$ se transforma y se conserva para poder hacer después eliminación de partes ocultas.
+
+En coordenadas de dispositivo, podemos asociar una región cuadrada, de lado unidad, a cada pixel en el plano de la ventana. El viewport (rojo) es un bloque rectangular de pixels, contenido en el bloque rectangular correspondiente a la ventana o imagen completa:
 
 ![](./resources/img40.png)
 
-los centros de los pixels (puntos azules) tienen coordenadas de
-dispositivo con parte fraccionaria igual a 1/2. Los bordes entre pixels
-tienen coordenadas sin parte fraccionaria (enteras).
+Los centros de los pixels (puntos azules) tienen coordenadas de dispositivo con parte fraccionaria igual a $1/2$. Los bordes entre pixels tienen coordenadas sin parte fraccionaria (enteras).
 
 ### El espacio de coordenadas de dispositivo
 
-En 3D el espacio de coordenadas de dispositivo es un ortoedro. Se
-puede visualizar como aparece aquí, incluyendo el marco de
-coordenadas de dispositivo:
+En 3D el espacio de coordenadas de dispositivo es un ortoedro. Se puede visualizar como aparece aquí, incluyendo el marco de coordenadas de dispositivo:
 
 ![](./resources/img41.png)
 
-OpenGL tiene en su estado una matriz 4x4 que llamaremos V, y que
-depende de estos parámetros (ver fig.)
-xl ,yb número de columna y fila (enteros no negativos) del pixel que
-ocupa, en la ventana, la esquina inferior izquierda del viewport.
-w,h (width y height) número total (entero no negativo) de columnas
-y de filas de pixels (respectivamente) que ocupa el viewport.
-nd , f d rango de valores de salida en Z en DC. El valor nd es la
-profundidad más cercana posible al observador, y f d la más
-lejana. Por defecto nd = 0 y f d = 1.
-aunque los cuatro parámetros relevantes (xl ,yb ,w y h) son enteros,
-las coordenadas de dispositivos son valores reales, ya que las
-posiciones de los vértices en DC son en general no enteras (no
-coinciden necesariamente con los centros o bordes de los pixels).
+OpenGL tiene en su estado una matriz $4 \times 4$ que llamaremos $V$, y que depende de estos parámetros:
 
-Suponemos que la ventana tiene s x columnas y sy filas, y que el
-gestor de ventanas acepta coordenadas de pixels enteras no
-negativas:
+- El número de columna ($x_l$) y fila ($y_b$) del pixel que ocupa, en la ventana, la esquina inferior izquierda del viewport.
+- La anchura ($w$) y altura ($h$) en número total de columnas y de filas de pixels (respectivamente) que ocupa el viewport.
+- El rango de valores $n_d, f_d$ de salida en $Z$ en DC. El valor $n_d$ es la profundidad más cercana posible al observador, y $f_d$ la más lejana. Por defecto $n_d = 0$ y $f_d = 1$.
+
+> Aunque los cuatro parámetros relevantes ($x_l$ ,$y_b$ ,$w$ y $h$) son enteros, las coordenadas de dispositivos son valores reales, ya que las posiciones de los vértices en DC son en general no enteras (no coinciden necesariamente con los centros o bordes de los pixels).
+
+Suponemos que la ventana tiene $s_x$ columnas y $s_y$ filas, y que el gestor de ventanas acepta coordenadas de pixels enteras no negativas:
 
 ![](./resources/img42.png)
 
-se deben cumplir estas desigualdades:
-0
-0
-≤ xl
-≤ yb
-sx
-< xl + w ≤ s x
-< yb + h ≤ sy
+Se deben cumplir estas desigualdades:
+$$ 0 \leq x_l < x_l + w \leq s_x \hspace{1cm} 0 \leq y_b < y_b + h \leq s_y$$
 
 ### La trasnformación de viewport
 
-En NDC las coordenadas están en [−1, 1], luego hay que hacer:
-1. traslación de la esquina (−1, −1, −1) al origen.
-2. escalado uniforme (por 1/2) y por (w, h, f d − nd )
-3. traslación del origen a ( xl , yb , nd ).
-con lo cual la transformación D queda como:
-D = Tra[ xl , yb , nd ] · Esc[w, h, f d − nd ] · Esc[1/2] · Tra[1, 1, 1]
-por tanto, las coordenadas de dispositivo ( xdc , ydc , zdc , 1) se definen
-a partir de las normalizadas ( xndc , yndc , zndc , 1) de esta forma:
-xdc= ( xndc + 1)w/2 + xl
-ydc= (yndc + 1)h/2 + yb
-zdc= (zndc + 1)( f d − nd )/2 + nd
+En NDC las coordenadas están en $[−1, 1]$, luego hay que hacer:
+1. Traslación de la esquina $(−1, −1, −1)$ al origen.
+2. Escalado uniforme de razón $1/2$ más un escalado no uniforme respecto a ($w$, $h$, $f_d − n_d$)
+3. Traslación del origen a $(x_l , y_b , n_d)$.
 
-Por tanto, la matriz de viewport D debe definirse así:
- w
-w 
-0
-0
-xl +
-2 
- 2
-
-
-
-
-
-h 
- 0 h
-
-0
-yb +
-
-2
-2 
-
-
-D = 
-
-
-
-
-z f − zndc z f + zndc 
- 0 0
-
-
-
-2
-2
-
-
-
-
-0 0
-0
-1
-de forma que:
-( xdc , ydc , zdc , 1)t = D ( xndc , yndc , zndc , 1)t
+Con lo cual la transformación $D$ queda como:
+$$D = \begin{pmatrix} 1 & 0 & 0 & x_l \\ 0 & 1 & 0 & y_b \\ 0 & 0 & 1 & n_d \\ 0 & 0 & 0 & 1\end{pmatrix}\begin{pmatrix} w & 0 & 0 & 0 \\ 0 & h & 0 & 0 \\ 0 & 0 & f_d - n_d & 0 \\ 0 & 0 & 0 & 1\end{pmatrix}\begin{pmatrix} 1/2 & 0 & 0 & 0 \\ 0 & 1/2 & 0 & 0 \\ 0 & 0 & 1/2 & 0 \\ 0 & 0 & 0 & 1\end{pmatrix}\begin{pmatrix} 1 & 0 & 0 & 1 \\ 0 & 1 & 0 & 1 \\ 0 & 0 & 1 & 1 \\ 0 & 0 & 0 & 1\end{pmatrix}$$
+de forma que
+$$\begin{pmatrix} x_{dc} \\ y_{dc} \\ z_{dc} \\ 1 \end{pmatrix} = D\begin{pmatrix}x_{ndc} \\ y_{ndc} \\ z_{ndc} \\ 1 \end{pmatrix}$$
+
 
 ### Fijar la matriz de viewport en OpenGL
 
-En cualquier momento (independientemente del matrix mode activo
-en dicho momento) es posible cambiar la matriz D que OpenGL
-almacena como parte de su estado.
-Para ello llamamos a la función glViewport, declarada como sigue:
+En cualquier momento (independientemente del _matrix mode_ activo en dicho momento) es posible cambiar la matriz $D$ que OpenGL almacena como parte de su estado. Para ello llamamos a la función `glViewport`, declarada como sigue:
 
 ```c++
 glViewport(GLint xl , GLint yb , GLsizei w, GLsizei h);
 ```
 
-I Los rangos de valores permitidos para estos parámetros
-dependen de la implementación, del hardware subyacente y del
-gestor o librería de ventanas en uso.
-I Si w y/o h son demasiado grandes, no se produce error, pero se
-truncan.
-I Por defecto, OpenGL fija el viewport ocupando todos los pixels
-de la ventana.
+- Los rangos de valores permitidos para estos parámetros dependen de la implementación, del hardware subyacente y del gestor o librería de ventanas en uso.
+- Si $w$ y/o $h$ son demasiado grandes, no se produce error, pero se truncan.
+
+> Por defecto, OpenGL fija el viewport ocupando todos los pixels de la ventana.
 ## 1.6 Representación de cámaras
 
-La clase Camara encapsula todos los parámetros relacionados con
-la matriz de vista y proyección.
-I Es una clase base con funcionalidad mínima. Se derivan clases
-con funcionalidad más avanzada.
-I Incluye una matriz 4x4 de vista V y otra de proyección P.
-I El método activar(c) permite activar una cámara en un
-cauce c (referencia a una instancia de una clase derivada de
-Cauce). Este método simplemente fija la matrices en el cauce
-usando las que hay en la instancia.
-I El método actualizarMatrices es un método virtual, que se
-encarga de calcular V y P a partir de los parámetros específicos
-de cada tipo de cámara.
-I Por defecto, esta clase base define una cámara ortográfica que
-visualiza un cubo de lado 2 unidades en X y centro en el origen
-(en coords. de W ).
+La clase `Camara` encapsula todos los parámetros relacionados con la matriz de vista y proyección.
+- Es una clase base con funcionalidad mínima. Se derivan clases con funcionalidad más avanzada.
+- Incluye una matriz de vista $V$ y otra de proyección $P$.
+- El método `activar(c)` permite activar una cámara en un cauce `c` (referencia a una instancia de una clase derivada de `Cauce`). Este método simplemente fija la matrices en el cauce usando las que hay en la instancia.
+- El método `actualizarMatrices` es un método virtual, que se encarga de calcular `V` y `P` a partir de los parámetros específicos de cada tipo de cámara.
+
+> Por defecto, esta clase base define una cámara ortográfica que visualiza un cubo de lado $2$ unidades en $X$ y centro en el origen (en coordenadas de $W$).
 
 ```c++
 class Camara
 {
 public:
-// fija las matrices model-view y projection en el cauce
-void activar( Cauce & cauce ) ;
-// cambio el valor de ’ratio_vp’ (alto/ancho del viewport)
-void fijarRatioViewport( const float nuevo_ratio ) ;
-// lee la descripción de la cámara (y probablemente su estado)
-virtual std::string descripcion() ;
+	// Fija las matrices model-view y projection en el cauce
+	void activar(Cauce & cauce);
+	// Cambio el valor de ’ratio_vp’ (alto/ancho del viewport)
+	void fijarRatioViewport(const float nuevo_ratio);
+	// Lee la descripción de la cámara (y probablemente su estado)
+	virtual std::string descripcion();
 protected:
-bool
-matrices_actualizadas = false;// true si matrices actualizadas
-glm::mat4 matriz_vista = glm::mat4( 1.0f ), // matriz de vista
-matriz_proye = glm::mat4( 1.0f ); // matriz de proyección
-float
-ratio_vp
-= 1.0 ;
-// ratio viewport (alto/ancho)
-// actualiza matriz_vista y matriz_proye a partir de los parámetros
-// específicos de cada tipo de cámara
-virtual void actualizarMatrices() ;
-} ;
+	bool matrices_actualizadas = false; // true si las matrices están actualizadas
+	glm::mat4 matriz_vista = glm::mat4(1.0f); // Matriz de vista
+	glm::mat4 matriz_proye = glm::mat4( 1.0f ); // Matriz de proyección
+	float ratio_vp = 1.0; // Aspect-Ratio viewport (alto/ancho)
+	virtual void actualizarMatrices(); // Actualiza matriz_vista y matriz_proye
+};
 ```
 
-El ratio Y/X se almacena siempre para evitar deformaciones.
+> El ratio $Y/X$ se almacena siempre para evitar deformaciones.
 
 ### Activación y actualización de una cámara
 
-Cualquier tipo de cámara se activa fijando las matrices en el cauce a
-partir de las que se guardan en la instancia. Antes de eso se
-actualizan las matrices (recalcula matriz_vista y matriz_proye
-si no estaban actualizadas)
+Cualquier tipo de cámara se activa fijando las matrices en el cauce a partir de las que se guardan en la instancia. Antes de eso se actualizan las matrices (recalcula `matriz_vista` y `matriz_proye` si no estaban actualizadas)
 
 ```c++
-void Camara::activar( Cauce & cauce )
+void Camara::activar(Cauce & cauce)
 {
-actualizarMatrices(); // recalcula si no están actualizadas
-cauce.fijarMatrizVista( matriz_vista );
-cauce.fijarMatrizProyeccion( matriz_proye );
+	actualizarMatrices(); // Recalcula si no están actualizadas
+	cauce.fijarMatrizVista(matriz_vista);
+	cauce.fijarMatrizProyeccion(matriz_proye);
 }
 ```
 
-El método fijarRatioViewport permite cambiar ratio_vp para
-adaptarlo a las proporciones del viewport en uso:
+El método `fijarRatioViewport` permite cambiar `ratio_vp` para adaptarlo a las proporciones del viewport en uso:
 
 ```c++
-void Camara::fijarRatioViewport( const float nuevo_ratio )
+void Camara::fijarRatioViewport(const float nuevo_ratio)
 {
-ratio_vp = nuevo_ratio ;
-// registrar nuevo ratio
-matrices_actualizadas = false; // matrices deben actualizarse antes de activar
+	ratio_vp = nuevo_ratio; // Registrar nuevo ratio
+	matrices_actualizadas = false; // Matrices deben actualizarse antes de activar
 }
 ```
 
 ### Matrices de la clase base Camara
 
-La cámara básica define un view-frustum de lado 2 en X y en Z, y de
-lado 2r en Y (donde r es el ratio del viewport, ratio_vp). Está
-centrado en el origen de W .
-Por tanto, el método actualizarMatrices queda así:
+La cámara básica define un view-frustum de lado $2$ en $X$ y en $Z$, y de lado $2r$ en $Y$ (donde $r$ es el ratio del viewport, $ratio_vp$). Está centrado en el origen de $W$ . Por tanto, el método `actualizarMatrices` queda así:
+
+```c++
+virtual void Camara::actualizarMatrices()
+{
+	if (matrices_actualizadas)
+		return;
+	matriz_vista = mat4(1.0f);
+	matriz_proye = scale(vec3( 1.0f, 1.0f/ratio_vp, 1.0f));
+	matrices_actualizadas = true;
+}
+```
 
 ### Cámara orbital simple
 
-En prácticas usamos una instancia de CamaraOrbitalSimple
-(derivada indirectamente de Camara), que define una cámara
-centrada en el origen con tres parámetros: dos ángulos (a y b) y una
-distancia al origen (d):
+En prácticas usamos una instancia de `CamaraOrbitalSimple` (derivada indirectamente de `Camara`), que define una cámara centrada en el origen con tres parámetros: dos ángulos (`a` y `b`) y una distancia al origen (`d`):
 
 ```c++
 void CamaraOrbitalSimple::actualizarMatrices()
 {
-matriz_vista = translate( vec3( 0.0, 0.0, -d) ) *
-rotate( radians(b), vec3( 1.0,0.0,0.0 )) *
-rotate( radians(-a), vec3( 0.0,1.0,0.0 )) ;
-constexpr float fovy_grad = 60.0,
-near
-= 0.05,
-far
-= near+1000.0 ;
-matriz_proye = perspective( fovy_grad, 1.0f/ratio_vp, near, far );
-matrices_actualizadas = true ;
+	matriz_vista = translate(vec3(0.0, 0.0, -d)) *
+				   rotate(radians(b), vec3(1.0,0.0,0.0)) *
+				   rotate(radians(-a), vec3( 0.0,1.0,0.0));
+	constexpr float fovy_grad = 60.0;
+	constexpr float near = 0.05;
+	constexpr float far = near + 1000.0;
+	matriz_proye = perspective(fovy_grad, 1.0f/ratio_vp, near, far);
+	matrices_actualizadas = true ;
 }
 ```
 
@@ -658,7 +562,7 @@ color de los polígonos.
 
 La luz que observamos es radiación electromagnética (variaciones periódicas del campo eléctrico y magnético) de naturaleza similar a las ondas que se usan para los móviles, wifi, radio y televisión:
 
-> El sistema visual humano ha evolucionado para percibir esa radiación solo cuando su longitud de onda λ está aprox. entre 390 y 750 nanómetros (≡ espectro visible). La emisión e interacción de las ondas en los átomos nos permite percibir el entorno.
+> El sistema visual humano ha evolucionado para percibir esa radiación solo cuando su longitud de onda λ está aprox. entre 390 y 750 nanómetros, lo equivalente al conocido como **espectro visible**. La emisión e interacción de las ondas en los átomos nos permite percibir el entorno.
 
 Físicamente, la radiación se describe como algo que tiene características de onda y de corpúsculo a la vez (modelos complementarios). En Informática Gráfica se usa más frecuentemente el modelo de partículas (óptica geométrica) en lugar del modelo de ondas (óptica física).
 
@@ -680,7 +584,7 @@ En cada neurona de la retina, y para cada longitud de onda $\lambda$, se recibe 
 positivos que forman una tupla $(s, m, l )$ que depende de $\mathcal{L}$, es decir, el ojo tiene asociada una función f tal que:
 $$f(\mathcal{L}) = (s, m, l )$$
 
-Esta simplificación es aprox. lineal, es decir si $f (\mathcal{L}) = (s, m, l )$ y $f ( \mathcal{L}' ) = (s' , m', l' )$, entonces:
+Esta simplificación es aproximadamente lineal, es decir si $f (\mathcal{L}) = (s, m, l )$ y $f ( \mathcal{L}' ) = (s' , m', l' )$, entonces:
 $$f (a\mathcal{L} + b\mathcal{L}') = a (s, m, l ) + b (s', m', l')$$
 donde $a$, $b$ son valores reales arbitrarios no negativos.
 
@@ -711,15 +615,16 @@ Al conjunto de todas las ternas RGB con componentes entre 0 y 1 se le llama **es
 ## 2.2 Emisión y reflexión de la radiación
 
 La radiación electromagnética visible se genera en las fuentes de luz, por procesos físicos diversos que convierten otras formas de energía en energía radiante. Hay de dos tipos:
+
 - **Fuentes naturales**: Sol o estrellas, fuego, objetos incandescentes, órganos de algunos animales, etc...
 - **Fuentes artificiales (luminarias)**: Filamentos incandescentes, tubos fluorescentes, LEDs, etc...
 
 Los fotones creados en las luminarias interactúan con los átomos de la materia, que absorben su energía y después pueden radiar de nuevo una parte de ella, proceso conocido como reflexión:
+
 - Parte de la energía recibida se convierte en **calor**
 - Parte de la energía recibida se convierte en **radiación reflejada**
 
 > La radiación reflejada puede reflejarse de nuevo varias veces.
-
 ### Modelo de la reflexión local en un punto
 
 La radiancia $\mathcal{L}(\lambda, p, v)$ se puede escribir como suma de:
@@ -749,59 +654,51 @@ La ecuación anterior es complicada (larga) de calcular. Por tanto, en OpenGL b�
 ### Modelo simplificado
 
 El modelo que hemos visto antes se simplifica:
-- La iluminación indirecta se reduce a un termino ambiente que no depende de v.
-- De todas las direcciones ui , solo es necesario considerar las que apuntan hacia una fuente de luz.
+- La iluminación indirecta se reduce a un termino ambiente que no depende de $v$.
+- De todas las direcciones $u_i$, solo es necesario considerar las que apuntan hacia una fuente de luz.
 - Todas las fuentes de luz son visibles desde un punto.
-- Los valores de radiancia son tuplas (r, g, b) (no acotadas)
-- Los valores de reflectividad ( f r ) son tuplas (r, g, b) (entre 0 y 1)
+- Los valores de radiancia son tuplas no acotadas $(r, g, b)$
+- Los valores de reflectividad ($f_r$) son tuplas $(r, g, b)$
 
 Por tanto:
 $$\mathcal{L}(p, v) = \sum_{i = 0}^{n-1} L_{in} (p, l_i) f_r(p, v, l_i)$$
 donde $n$ es el número de fuentes de luz, $l_i$ un vector que apunta desde $p$ en la dirección de la $i$-ésima fuente de luz.
 
-Ahora solo consideramos trayectorias desde las luminarias hacia $p$, las luminarias se cuentan aunque la trayectoria esté bloqueada (no hay sombras arrojadas)
+> Ahora solo consideramos trayectorias desde las luminarias hacia $p$, las luminarias se cuentan aunque la trayectoria esté bloqueada (no hay sombras arrojadas)
 
 ![](./resources/img46.png)
 
-### El vector normal
-
-La iluminación ($f_r$) depende la orientación de la superficie en el punto $p$. Esta orientación esta caracterizada por el
-vector normal $n_p$ asociado a dicho punto:
-- $n_p$ es un vector, de longitud unidad, que depende de $p$.
-- Idealmente es perpendicular al plano tangente a la superficie en el punto $p$
-- En modelos de fronteras, puede calcularse de varias formas (depende del método de sombreado, que veremos más adelante).
-- Constituye un parámetro de $f_r$
-
+> La iluminación ($f_r$) depende la orientación de la superficie en el punto $p$. Esta orientación esta caracterizada por el vector normal $n_p$ asociado a dicho punto.
 ### Tipos y atributos de las fuentes de luz
 
 En el modelo de escena se puede incluir un conjunto de $n$ fuentes de luz, cada una de ellas puede ser de dos tipos:
-- **Fuentes de luz posicionales**: Ocupan un punto del espacio $q_i$. Dado un punto $p$, el vector unitario que apunta hacia la fuente de luz desde p se calcula como:
+
+- **Fuentes de luz posicionales**: Ocupan un punto del espacio $q_i$. Dado un punto $p$, el vector unitario que apunta hacia la fuente de luz desde $p$ se calcula como:
 $$l_i = \frac{q_i − p}{\|q_i − p\|}$$
 
-- **Fuentes de luz direccionales**: Están en un punto a distancia infinita, por tanto hay un vector $l_i$ que apunta a la fuente y que es el mismo para cualquier punto $p$ donde se quiera evaluar el MIL. Además de esto, cada fuente de luz emite una radiancia $S_i = (r, g, b)$, en general, no acotada.
+- **Fuentes de luz direccionales**: Están en un punto a distancia infinita, por tanto hay un vector $l_i$ que apunta a la fuente y que es el mismo para cualquier punto $p$ donde se quiera evaluar el MIL (_Modelo de Iluminación Local_). Además de esto, cada fuente de luz emite una radiancia $S_i = (r, g, b)$, en general, no acotada.
 
 ![](./resources/img47.png)
 
 ### Radianza incidente y tipos de reflexión. Componentes del MIL
 
-En la ecuación 2 los términos que aparecen pueden reescribirse en términos de los atributos de las fuentes de luz y el material
+En la ecuación del modelo simplificado, los términos que aparecen pueden reescribirse en términos de los atributos de las fuentes de luz y el material:
 - El término $L_{in}(p, l_i)$ se hace igual a $S_i$ (no tenemos en cuenta la distancia a la que está la fuente de luz)
-- El término $f_r(p, v, l_i)$ se descompone en tres sumandos o componentes
-- Luz indirecta reflejada, o término ambiental: $f_{ra}(p, v, l_i)$.
-- Luz reflejada de forma difusa: $f_{rd}(p, v, l_i)$.
-- Luz reflejada de forma pseudo-especular: $f_{rs}(p, v, l_i)$.
+- El término $f_r(p, v, l_i)$ se descompone en tres sumandos o componentes:
+	- Luz indirecta reflejada, o término **ambiental**: $f_{ra}(p, v, l_i)$.
+	- Luz reflejada de forma **difusa**: $f_{rd}(p, v, l_i)$.
+	- Luz reflejada de forma **pseudo-especular**: $f_{rs}(p, v, l_i)$.
 
 $$\mathcal{L}(p, v) = \sum_{i=0}^{n-1} S_i \left[ f_{ra}(p, v, l_i) + f_{rd}(p, v, l_i) + f_{rs}(p, v, l_i) \right]$$
-
 ### Color del objeto en un punto
 
-En cada punto $p$ de la superficie de un objeto hay una terna RGB $C(p)$ con valores entre $0$ y $1$, que es el color del objeto en el punto $p$.
+En cada punto $p$ de la superficie de un objeto hay una terna RGB, $C(p)$, con valores entre $0$ y $1$, que es el color del objeto en el punto $p$.
 
 - Para cada componente RGB, expresa la fracción de luz reflejada, y por tanto determina el color con el que apreciamos el objeto.
-- Puede ser el mismo (constante) en todos los puntos p de la superficie de un objeto.
+- Puede ser el mismo (constante) en todos los puntos $p$ de la superficie de un objeto.
 - Puede variar de un punto a otro dentro del mismo objeto. En rasterización, esto puede ocurrir de dos formas:
-- Por el uso de texturas (las veremos más adelante).
-- Por el uso de una tabla de colores como atributos de vértice (en cada punto $p$, $C(p)$ sería el color RGB interpolado).
+	- Por el uso de texturas.
+	- Por el uso de una tabla de colores como atributos de vértice (en cada punto $p$, $C(p)$ sería el color RGB interpolado).
 - El color del objeto afecta únicamente a las componentes ambiental y difusa (no a la componente especular).
 
 ### Componente ambiental
@@ -816,39 +713,28 @@ $$f_{ra}(p, v, l_i) = k_a(p) \cdot C(p)$$
 
 Donde $k_a(p)$ es un valor real entre $0$ y $1$ que determina la fracción de luz reflejada de esta forma.
 
-### Reflectividad ambiental del objeto
-
-En este ejemplo, el color $C(p)$ depende la parte de la tetera donde está $p$, mientras que $k$ a es constante en toda la tetera (aunque crece en sucesivas imágenes).
-
 ![](./resources/img48.png)
 
-### Componente difusa: expresión
+> En este ejemplo, el color $C(p)$ depende la parte de la tetera donde está $p$, mientras que $k_a$ es constante en toda la tetera (aunque crece en sucesivas imágenes).
+### Componente difusa
 
 La componente difusa modela como se refleja la luz en los objetos mate o difusos:
-- La componente sí depende de la posición u orientación de la fuente de luz (es distinta según como esté orientada la fuente respecto de la superficie en $p$, es decir, depende de $n_p$ y $l_i$),
+- Depende de la posición u orientación de la fuente de luz (es distinta según como esté orientada la fuente respecto de la superficie en $p$, es decir, depende de $n_p$ y $l_i$),
 - No depende de la dirección $v$ en la que miramos $p$ (el punto $p$ se ve de un color igual desde cualquier dirección que lo veamos.
 
 La expresión concreta de $f_{rd}$ es esta:
 $$f_{rd}(p, v, l_i) = k_d (p) \cdot C(p) \cdot \max\{0, n_p \cdot l_i\}$$
 Donde $k_d (p)$ es un valor entre $0$ y $1$ que indica la fracción de luz reflejada de forma difusa.
 
-### Orientación de la superficie
-
 La orientación de la superficie respecto de la fuente de luz viene determinada por el valor $\alpha$, que es el ángulo que hay entre los vectores $n_p$ y $l_i$ (el valor $n_p \cdot l_i$ es igual al $\cos \alpha$). Se pueden distinguir dos casos:
-- Si $\alpha > 90º$ , entonces:
-	- $\cos(\alpha)<0$ 
-	- La superficie, en $p$, está orientada de espaldas a la fuente de luz.
-	- La contribución de esa fuente debe ser 0.
-- Si $0 \leq \alpha \leq 90º$, entonces:
-	- La superficie, en $p$, está orientada de cara a la fuente de luz.
-	- $0 \leq \cos(\alpha) \leq 1$
-	- Se puede demostrar que el valor $\cos(\alpha)$ es proporcional a la densidad de fotones por unidad de área que inciden en el entorno de $p$, provenientes de la $i$-ésima fuente de luz.
+- Si $\alpha > 90º$ , entonces la superficie, en $p$, está orientada de espaldas a la fuente de luz, luego la contribución de esa fuente debe ser 0.
+- Si $0 \leq \alpha \leq 90º$, entonces la superficie, en $p$, está orientada de cara a la fuente de luz.
+
+> Se puede demostrar que el valor $\cos(\alpha)$ es proporcional a la densidad de fotones por unidad de área que inciden en el entorno de $p$, provenientes de la $i$-ésima fuente de luz.
 
 ![](./resources/img49.png)
 
-### Material difuso
-
-Ejemplo con dos fuentes de luz direccionales, $k_a(p) = 0$ y $k_d(p) = 1$ (solo hay componente difusa). Además, $C(p)$ varía de unos polígonos a otros:
+A continuación, presentamos un ejemplo con dos fuentes de luz direccionales, $k_a(p) = 0$ y $k_d(p) = 1$ (solo hay componente difusa). Además, $C(p)$ varía de unos polígonos a otros:
 
 ![](./resources/img50.png)
 
@@ -856,27 +742,21 @@ Aquí $k_a$ crece de izquierda a derecha, y $k_d$ de arriba abajo:
 
 ![](./resources/img51.png)
 
-### Componente pseudo-especular: modelo de Phong
+### Componente pseudo-especular: Modelo de Phong
 
 La componente pseudo-especular modela como se refleja la luz en los objetos brillantes, en los cuales dichas zonas brillantes dependen de la posición del observador:
 
-- La componente sí depende de la posición u orientación de la fuente de luz (es distinta según como esté orientada la fuente respecto de la superficie en $p$), también depende de la dirección en la que miramos $p$ (el punto $p$ se ve de un color diferente según la dirección en la que lo veamos).
-
+- Depende de la posición u orientación de la fuente de luz (es distinta según como esté orientada la fuente respecto de la superficie en $p$).
+- Depende de la dirección en la que miramos $p$ (el punto $p$ se ve de un color diferente según la dirección en la que lo veamos).
 
 La expresión ideada por Bui Tuong Phong, y conocida como modelo de Phong es esta:
 $$f_{rs}(p, v, li ) = k_s(p) d_i [\max\{0, ri \cdot v\}]^e$$
 
-Donde $k_d(p)$ es un valor real entre $0$ y $1$, representa la fracción de luz reflejada de forma pseudo-especular. Además
-- $r_i$ : Vector reflejado, depende tanto de $l_i$ como de $n_p$ , y está en el plano formado por ambos, con $n_p$ como bisectriz de ellos, se obtiene como:
+Donde $k_d(p)$ es un valor real entre $0$ y $1$, representa la fracción de luz reflejada de forma pseudo-especular. Además $r_i$  es el vector reflejado, depende tanto de $l_i$ como de $n_p$ , y está en el plano formado por ambos, con $n_p$ como bisectriz de ellos, se obtiene como:
 $$r_i = 2(l_i \cdot n_p)n_p − l_i$$
+Además, $e$ es el exponente de brillo, es decir, un valor real positivo que permite variar el tamaño de las zonas brillantes (a mayor valor, menor tamaño y más pulida o especular) y, $d_i$ vale $1$ si $n_p \cdot l_i > 0$ (fuente de cara a la superficie), y $0$ en otro caso (de espaldas).
 
 > El vector $r_i$ indica la dirección desde $p$ en la cual la $i$-ésima fuente de luz produce el máximo brillo.
-
-
-- $e$ : Exponente de brillo, un valor real positivo que permite variar el tamaño de las zonas brillantes (a mayor valor, menor tamaño y más pulida o especular).
-- $d_i$: Vale $1$ si $n_p \cdot l_i > 0$ (fuente de cara a la superficie), y $0$ en otro caso (de espaldas)
-
-### Vectores del modelo de Phong
 
 El valor $r_i \cdot v$ es el coseno del ángulo $\beta$ que hay entre la dirección de máximo brillo $r_i$ y la dirección $v$ hacia el observador. Cuando $r_i = v$ entonces $\beta = 0$ , $\cos( \beta) = 1$, y el brillo es máximo:
 
@@ -886,10 +766,6 @@ El valor $r_i \cdot v$ es el coseno del ángulo $\beta$ que hay entre la direcci
 
 Una alternativa al modelo anterior consiste en usar el vector _halfway_ $h_i$ (bisectriz de $l_i$ y $v$, normalizado). Ahora el brillo es proporcional al coseno del ángulo $\gamma$ entre $h_i$ y $n_p$ (máximo cuando coinciden)
 
-La expresión del Modelo de Blinn-Phong es la siguiente:
-$$f_{rs}(p, v, l_i) = k_s(p)d_i n_p \cdot h_i$$
-Esta variante es más común que el modelo de Phong anterior.
-
 ![](./resources/img53.png)
 
 Aquí $k_a(p) = k_d(p) = 0$, $k_s(p) = 1$ y $e = 5.0$:
@@ -898,7 +774,7 @@ Aquí $k_a(p) = k_d(p) = 0$, $k_s(p) = 1$ y $e = 5.0$:
 
 ### Efecto del exponente de brillo
 
-Aquí el exponente $e$ crece de izquierda a derecha y de arriba abajo:
+Aquí el exponente $e$ crece de izquierda a derecha y decrece de arriba abajo:
 
 ![](./resources/img55.png)
 
@@ -967,212 +843,87 @@ $$(v_0 , u_0 ), (v_1 , u_1), \dotsc, (u_{n−1} , v_{n−1})$$
 
 > Se puede hacer manualmente en objetos sencillos, o bien de forma asistida usando software para CAD. Hace necesario realizar una interpolación de coordenadas de textura en el interior de los polígonos.
 
-- **Asignación procedural**: $f$ se implementa como un subprograma $CoordText(p)$ que calcula las coordenadas de textura (para un punto $p$ devuelve el par $(u, v) = f (p)$ con las coordenadas de textura de $p$).
-
-### Ejemplo de asignación explícita
-
-Esto es posible en objetos sencillos como este cubo construido con triángulos. En este ejemplo se busca una asignación que de cc.t. que sea continua en las aristas:
-
 ![](./resources/img62.png)
 
-### Tipos de asignación procedural
+> En este ejemplo se busca una asignación de coordenadas de texturas que sea continua en las aristas.
 
-Hay dos opciones:
-I Asignación procedural a vértices: se invoca CoordText(vi )
-para calcular las coordenadas de textura en cada vértice vi , y las
-coordenadas obtenidas se almacenan y después se interpolan
-linealmente en el interior de los polígonos de la malla.
-I Funciona de forma totalmente correcta (exacta) solo cuando
-f es lineal, en otro caso es una aproximación lineal a trozos.
-I Asignación procedural a puntos: se invoca CoordText(p) cada
-vez que sea necesario evaluar el MIL en un punto de la
-superficie p.
-I Permite exactitud incluso aunque f sea no lineal.
-I En OpenGL, esto requiere programación del cauce gráfico,
-invocando a CoordText en cada pixel desde el fragment
-shader.
+- **Asignación procedural**: La función $f$ se implementa como un subprograma $CoordText(p)$ que calcula las coordenadas de textura (para un punto $p$ devuelve el par $(u, v) = f (p)$ con las coordenadas de textura de $p$). Hay dos opciones:
 
-Los tipos de funciones f más frecuentes son:
-I Funciones lineales de la posición (proyección en un plano): el
-punto p = ( x, y, z) se proyecta sobre un plano y se expresa
-como un par ( x 0 , y0 ) de coordenadas en dicho plano, que se
-interpretan como coordenadas de textura.
-I Coordenadas paramétricas: se pueden usar si la malla aproxima
-una superficie paramétrica (p.ej. la tetera, hecha de superficies
-paramétricas tipo B-spline). Se usa asignación procedural a
-vértices. Se trata de funciones no lineales de la posición.
+	- **Asignación procedural a vértices**: Se invoca `CoordText(vi)` para calcular las coordenadas de textura en cada vértice $v_i$ , y las coordenadas obtenidas se almacenan y después se interpolan linealmente en el interior de los polígonos de la malla. Funciona de forma totalmente correcta (exacta) solo cuando $f$ es lineal, en otro caso es una aproximación lineal a trozos.
 
-Otras opciones (no lineales) son estas dos:
-I Coordenadas polares (proyección en una esfera): el punto p se
-expresa en coordenadas polares como una terna (α, β, r ), los
-valores u y v se obtienen de α y β.
-I Coordenadas cilíndricas (proyección en un cilindro): el punto p
-se expresa en coordenadas cilindricas como una terna (α, y, r ),
-los valores u y v se obtienen de α e y.
-Es muy complicado usarlas con asignación a vértices (α puede pasar
-de 360 a 0 en un triángulo, la textura se vería mal), y por tanto
-requieren usar asignación procedural a puntos (invocar CoordText
-desde los fragment shaders).
+	- **Asignación procedural a puntos**: Se invoca `CoordText(p)` cada vez que sea necesario evaluar el MIL en un punto de la superficie $p$. Permite exactitud incluso aunque $f$ sea no lineal.
+
+> En OpenGL, esto requiere programación del cauce gráfico, invocando a `CoordText` en cada pixel desde el fragment shader.
 
 ### Funciones lineales (proyección)
 
-En este caso el punto p = ( x, y, z) se proyecta en un plano, y se usan
-las coordenadas del punto proyectado (en el sistema de referencia
-del plano), como coordenadas de textura.
-El plano estará definido por un punto por el que pasa (q) y por dos
-vectores libres (eu y ev , de longitud unidad y perpendiculares entre
-sí). En estas condiciones:
-u = f u (p) = (p − q) · eu
-v = f v (p) = (p − q) · ev
-como casos particulares, y a modo de ejemplo, podemos hacer q
-igual al origen (0, 0, 0), eu = x = (1, 0, 0) y ev = y = (0, 1, 0), y en
-este caso es una proyección paralela el eje Z, sobre el plano XY
-(descarta la Z)
-u = x = p · x = ( x, y, z) · (1, 0, 0)
-v = y = p · y = ( x, y, z) · (0, 1, 0)
+En este caso el punto $p = ( x, y, z)$ se proyecta en un plano, y se usan las coordenadas del punto proyectado (en el sistema de referencia del plano), como coordenadas de textura.
+
+El plano estará definido por un punto por el que pasa ($q$) y por dos vectores libres ($e_u$ y $e_v$ , de longitud unidad y perpendiculares entre sí). En estas condiciones:
+$$u = f_u(p) = (p − q) \cdot e_u \hspace{1cm} v = f_v(p) = (p − q) \cdot e_v$$
 
 ### Ejemplo de proyección paralela a Z
 
-Las coordenadas de p que se usan en las funciones lineales pueden
-ser las coordenadas de objeto (izquierda) o bien o las coordenadas
-de mundo (derecha). Aquí vemos un ejemplo de una proyección
-paralela al eje Z:
+Las coordenadas de $p$ que se usan en las funciones lineales pueden ser las coordenadas de objeto (izquierda) o bien o las coordenadas de mundo (derecha). Aquí vemos un ejemplo de una proyección paralela al eje $Z$:
 
 ![](./resources/img63.png)
 
-este método funciona mejor (menor deformación) cuando la normal
-es aproximadamente paralela a la dirección de proyección (parte
-frontal en el ejemplo de la izquierda).
+Este método funciona mejor (menor deformación) cuando la normal es aproximadamente paralela a la dirección de proyección (parte frontal en el ejemplo de la izquierda).
 
 ### Coordenadas paramétricas
 
-Una superficie paramétrica es una variedad plana de dos
-dimensiones (que puede ser abierta o cerrada), para la cual existe
-una función g (con dominio en [0, 1] × [0, 1]) tal que, si p es un punto
-de la superficie, entonces existen (s, t) tales que p = g(s, t):
-I En este caso, al par (s, t) se le llaman coordenadas paramétricas
-del punto p, y a la función g se le llama función de
-parametrización de la superficie.
-I Usando la capacidad de evaluar g, podemos construir una malla
-que aproxima cualquier superficie paramétrica. La posición pi
-del i-ésimo vértice se obtiene como g(si , ti ), donde los (si , ti )
-forman una rejilla en [0, 1] × [0, 1].
-I En estas condiciones, podemos hacer (u, v) = f (p) = (s, t), es
-decir, podemos usar las coordenadas paramétricas como
-coordenadas de textura.
+Una **superficie paramétrica** es una variedad plana de dos dimensiones (que puede ser abierta o cerrada), para la cual existe una función $g$ (con dominio en $[0, 1] \times [0, 1]$) tal que, si $p$ es un punto de la superficie, entonces existen $(s, t)$ tales que $p = g(s, t)$:
 
-### Ejemplo de coordenadas paramétricas
+TODO: COMPLETAR ESTA DEFINICIÓN DE SUPERFICIE PARAMÉTRICA
 
-Vemos un ejemplo de textura (izq.) y su aplicación a la tetera (der.)
+Usando la capacidad de evaluar $g$, podemos construir una malla que aproxima cualquier superficie paramétrica. La posición $p_i$ del $i$-ésimo vértice se obtiene como $g(s_i , t_i)$, donde los $(s_i , t_i)$ forman una rejilla en $[0, 1] \times [0, 1]$.
+
+> En estas condiciones, podemos hacer $(u, v) = f (p) = (s, t)$, es decir, podemos usar las coordenadas paramétricas como coordenadas de textura.
 
 ![](./resources/img64.png)
-
-Esta imagen se ha generado asignando explicitamente en el
-programa a cada vértice sus coordenadas de textura, usando para
-ello sus coordenadas paramétricas.
-
 ### Coordenadas esféricas
 
-Se basa en usar las coordenadas polares (longitud, latitud y radio)
-del punto p:
-I Equivale a una proyección radial en una esfera.
-I Las coordenadas (α, β, r ) se obtienen a partir de las
-coordenadas cartesianas ( x, y, z) (normalmente coordenadas de
+Se basa en usar las coordenadas polares (longitud, latitud y radio) del punto $p$. Las coordenadas $(\alpha, \beta, r )$ se obtienen a partir de las coordenadas cartesianas $(x, y, z)$ , normalmente coordenadas de
 objeto, con el origen en un punto central de dicho objeto).
-Hacemos:
- p
-
-α = atan2(z, x )
-β = atan2 y, x2 + z2
-I Se obtiene α en el rango [−π, π ] y β en el rango [−π/2, π/2].
-Por tanto, podemos calcular u y v como sigue:
-u =
-1
-α
-+
-2
-2π
-v =
-1
-β
-+
-2
-π
-el valor de r no se usa y por tanto no es necesario calcularlo.
-
-### Ejemplo de coordenadas esféricas
-
-Vemos un esquema de la proyección (izq.) y el resultado en varios
-objetos (der.)
+$$\alpha = a \tan2(z, x) \hspace{1cm} \beta = a \tan 2(y, \sqrt{x^2 + y^2})$$
+Se obtiene $\alpha$ en el rango $[−\pi, \pi]$ y $\beta$ en el rango $[−\pi/2, \pi/2]$. Por tanto, podemos calcular $u$ y $v$ como sigue:
+$$u = \frac{1}{2} + \frac{\alpha}{2\pi} \hspace{1cm} v = \frac{1}{2} + \frac{\beta}{\pi}$$
 
 ![](./resources/img65.png)
 
 ### Coordenadas cilíndricas
 
-Se usan las coordenadas polares (ángulo y altura) del punto p:
-I Equivale a una proyección radial en un cilindro (cuyo eje es
-usualmente un eje vertical central al objeto).
-I Las coordenadas (α, h, r ) se obtienen a partir de las
-coordenadas cartesianas ( x, y, z) (también con origen en el
-centro del objeto). Hacemos:
-α = atan2(z, x )
-h = y
-I El valor de α está en el rango [−π, π ] y h en el rango [ymin , ymax ]
-(el rango en Y del objeto). Por tanto, podemos calcular u y v
-como:
-1
-α
-y − ymin
-u =
-+
-v =
-2
-2π
-ymax − ymin
-tampoco el valor de r se usa ahora y por tanto no es necesario
-calcularlo.
+Se usan las coordenadas polares (ángulo y altura) del punto $p$. Las coordenadas $(\alpha, h, r )$ se obtienen a partir de las coordenadas cartesianas $( x, y, z)$,  también con origen en el centro del objeto.
+$$\alpha = a \tan 2(z,x) \hspace{1cm} h = y$$
 
-### Ejemplo de coordenadas cilíndricas
-
-Vemos un esquema de la proyección (izq.) y el resultado en varios
-objetos (der.)
+El valor de $\alpha$ está en el rango $[−\pi, \pi]$ y $h$ en el rango $[y_{min} , y_{max}]$. Por tanto, podemos calcular $u$ y $v$ como:
+$$u = \frac{1}{2} + \frac{\alpha}{2\pi} \hspace{1cm} v = \frac{y - y_{min}}{y_{max} - y_{min}}$$
 
 ![](./resources/img66.png)
 
 ### Consulta de texels en texturas de imagen
 
-En una textura de imagen con n x columnas de texels y ny filas,
-podemos interpretar que cada texel tiene asociada un pequeño
-rectangulo contenido en [0, 1]2 . El texel en la columna i, fila j tendrá
-un área con centro en el punto (ci , d j )
-La consulta del color de la textura en un punto (u, v) puede hacerse
-de dos formas:
-I más cercano: usar el color del texel cuyo centro sea más
-cercano a la posición (u, v), es equivalente a seleccionar el texel
-cuya área contiene a (u, v).
-I interpolación realizar un interpolación (bilineal) entre los
-colores de los cuatro texels con centros más cercanos al punto
-(u, v).
-las diferencias entre ambos métodos son visibles cuando la
-proyección en la ventana de un texel ocupa muchos pixels.
+En una textura de imagen con $n_x$ columnas de texels y $n_y$ filas, podemos interpretar que cada texel tiene asociada un pequeño rectangulo contenido en $[0, 1]^2$ . El texel en la columna $i$, fila $j$ tendrá un área con centro en el punto $(c_i , d_j)$.
 
-### Interpolación bilineal
+La consulta del color de la textura en un punto $(u, v)$ puede hacerse de dos formas:
+- Usar el color del texel cuyo centro sea **más cercano** a la posición $(u, v)$, es equivalente a seleccionar el texel cuya área contiene a $(u, v)$.
+- Realizar un interpolación (bilineal) entre los colores de los cuatro texels con centros más cercanos al punto $(u, v)$.
 
-Aquí vemos una textura de baja resolución, vista de cerca, que se
-visualiza usando los dos métodos:
+> Las diferencias entre ambos métodos son visibles cuando la proyección en la ventana de un texel ocupa muchos pixels.
 
 ![](./resources/img67.png)
 
 ## 2.5 Métodos de sombreado para rasterización
 
 En el algoritmo de Z-buffer, la evaluación del MIL puede hacerse en tres puntos distintos del cauce gráfico:
-- **Sombreado plano** (_flat shading_): una vez por cada polígono que forma el modelo, asignando el resultado (una terna RGB única) a todos los pixels donde se proyecta el polígono.
-- **Sombreado de vértices** (_smooth shading_ o _Gouroud shading_): una vez por vértice, cada color RGB obtenido se usa para interpolar los colores de los pixels en cada polígono.
-- **Sombreado de pixel** (_pixel shading_ o _Phong shading_): una vez por cada pixel donde se proyecta el polígono
+
+- **Sombreado plano** (_flat shading_): Una vez por cada polígono que forma el modelo, asignando el resultado (una terna RGB única) a todos los pixels donde se proyecta el polígono.
+- **Sombreado de vértices** (_smooth shading_ o _Gouroud shading_): Una vez por vértice, cada color RGB obtenido se usa para interpolar los colores de los pixels en cada polígono.
+- **Sombreado de pixel** (_pixel shading_ o _Phong shading_): Una vez por cada pixel donde se proyecta el polígono
 
 ### Sombreado plano
 
-Este método de sombreado es muy eficiente en tiempo si el modelo es sencillo, es decir, si  el número de polígonos es pequeño en comparación con el de pixels.
+Este método de sombreado es muy eficiente en tiempo si el modelo es sencillo, es decir, si el número de polígonos es pequeño en comparación con el de pixels.
 
 Se debe seleccionar un punto cualquiera $p$ de cada polígono, típicamente se usa un vértice, pero podría ser cualquier otro. Se usa la normal al polígono $n_p$  y se calcula el vector al observador $v$ en $p$.
 
@@ -1199,15 +950,11 @@ La Bandas Mach son una ilusión visual producida por la inhibición lateral de l
 
 En esta modalidad (_vertex shading_), el MIL se evalua una vez en cada vértice del modelo.
 
-- La posición $p$ coincide con la posición del vértice.
-
 > Si la malla de polígonos aproxima un objeto curvo, la normal $n_p$ puede calcularse como el promedio de las normales de los polígonos adyacentes al vértice.
 
-- La evaluación del MIL produce un color único para cada vértice. 
-- Los valores en los vértices se usan como valores extremos para interpolar los colores de los pixels donde se proyecta el polígono. 
-- La eficiencia en tiempo es parecida al sombreado plano. 
-- Los resultados son muchas veces más realistas que con sombreado plano. 
-- Pueden persistir problemas de bandas Mach y poco realismo.
+La evaluación del MIL produce un color único para cada vértice, que se usan como valores extremos para interpolar los colores de los pixels donde se proyecta el polígono. 
+
+La eficiencia en tiempo es parecida al sombreado plano aunque los resultados son muchas veces más realistas. Aun así,  pueden persistir problemas de bandas Mach y poco realismo.
 
 ### Pérdida de zonas brillantes
 
@@ -1223,13 +970,9 @@ A veces pueden aparecer problemas parecidos a las bandas Mach, en este caso por 
 
 ### Sombreado en los píxeles
 
-En esta modalidad (_pixel shading_), el MIL se evalua en cada pixel del viewport en el que se proyecta un polígono
+En esta modalidad (_pixel shading_), el MIL se evalua en cada pixel del viewport en el que se proyecta un polígono. Requiere interpolar las normales asociadas a los vértices.
 
-- Requiere interpolar las normales asociadas a los vértices.
-- Es computacionalmente más costoso que los anteriores, pero no cuando el número de polígonos visibles es del orden del número de pixels del viewport (o superior).
-- Produce resultados de más calidad, hay muchos menos defectos por discontinuidades.
-- Los resultados son más realistas incluso con pocos polígonos.
-- La evaluación del MIL es la última etapa del cauce.
+Es computacionalmente más costoso que los anteriores, pero no cuando el número de polígonos visibles es del orden del número de pixels del viewport (o superior). Aunque produce resultados de más calidad, hay muchos menos defectos por discontinuidades.
 
 ![](./resources/img73.png)
 
@@ -1269,11 +1012,11 @@ glGenTextures(n, arr_nombres_tex); // crea n nuevos nombres
 
 OpenGL permite configurar distintas unidades de textura, y activar distintas texturas en las distintas unidades.
 
-> Para cambiar la unidade de texturas activa podemos usar:
+> Para cambiar la unidad de textura activa podemos usar:
 
 ```c++
 // Activa textura con identificador ’idTex’:
-glActiveTexture(GL_TEXTUREi);
+glActiveTexture(GL_TEXTUREi); // GL_TEXTURE0, GL_TEXTURE1, GL_TEXTURE2, ...
 ```
 
 En el estado interno de OpenGL, por cada unidad de textura, hay en cada momento un nombre o identificador de una única textura activa:
@@ -1293,9 +1036,7 @@ Antes de usar una textura en OpenGL (de tamaño $n_x \times n_y$), es necesario 
 
 - Cada texel se representa (usualmente) con tres bytes (enteros sin signo entre 0 y 255), que codifican la proporción de rojo, verde y azul, respecto al valor máximo (255).
 - Los tres bytes de cada texel se almacenan contiguos, usualmente en orden RGB.
-- Los $3 \cdot n_x$ bytes de cada fila de texels se almacenan contiguos, de izquierda a derecha.
-- Las $n_y$ filas se almacenan contiguas, desde abajo hacia arriba.
-- Se conoce la dirección de memoria del primer byte, que llamamos **texels** (es un puntero de tipo `void *`) con este esquema la imagen ocupará, lógicamente, $3 n_x n_y$ bytes consecutivos en memoria.
+- Se conoce la dirección de memoria del primer byte, que llamamos `texels` (es un puntero de tipo `void *`) con este esquema la imagen ocupará, lógicamente, $3 n_x n_y$ bytes consecutivos en memoria.
 
 ### Especificación de los texels de la imagen de textura
 
@@ -1314,7 +1055,7 @@ glTexImage2D
 	GL_UNSIGNED_BYTE, // GLenum type: tipo valores.
 	imagen // const void * data: puntero a texels en memoria apl.
 );
-// generar mipmaps (versiones a resolución reducida)
+// Generar mipmaps (versiones a resolución reducida)
 glGenerateMipmap( GL_TEXTURE_2D );
 ```
 
@@ -1364,15 +1105,15 @@ Por último, es posible seleccionar que se hace cuando se especifican coordenada
 > Para repetir la textura en ambas coordenadas, hacemos:
 
 ```c++
-glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
-glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 ```
 
 ## 3.2 Shaders para iluminación y texturas
 
 En OpenGL moderno se usa **sombreado de Phong** (sombreado en los pixels), por tanto:
 - En el vertex shader se hace:
-	- Generación de coordenadas de textura (si está activada, en otro caso se pasan las coords. de textura del vértice)
+	- Generación de coordenadas de textura (si está activada, en otro caso se pasan las coordenadas de textura del vértice)
 - En el fragment shader se hace:
 	- Lectura de parámetros del MIL:
 	- Vector normal y el vector al observador
@@ -1382,19 +1123,18 @@ En OpenGL moderno se usa **sombreado de Phong** (sombreado en los pixels), por t
 	- Evaluación del MIL.
 
 El MIL se evalua en el espacio de coordenadas de vista (ECC).
-
 ### Atributos de vértice (entradas _vertex shader_)
 
 Recordamos los atributos de vértice (distintos por cada vértice) que son parte de las entradas al vertex shader:
 
 ```c++
-// posición del vértice en coordenadas de objeto
+// Posición del vértice en coordenadas de objeto
 layout(location = 0) in vec3 in_posicion_occ;
-// color del vértice
+// Color del vértice
 layout(location = 1) in vec3 in_color;
-// normal del vértice (en coordenadas de objeto)
+// Normal del vértice (en coordenadas de objeto)
 layout(location = 2) in vec3 in_normal_occ;
-// coordenadas de textura del vértice
+// Coordenadas de textura del vértice
 layout(location = 3) in vec2 in_coords_textura;
 ```
 
@@ -1403,15 +1143,14 @@ layout(location = 3) in vec2 in_coords_textura;
 ```c++
 // Parámetros relativos al MIL y material actual
 uniform bool u_eval_mil; // evaluar el MIL sí (true) o no (false)
-uniform float u_mil_ka; // reflect. ambiental del MIL (k a )
-uniform float u_mil_kd; // reflect. difusa del MIL (k d )
-uniform float u_mil_ks; // reflect. pseudo-especular (k s )
+uniform float u_mil_ka; // reflect. ambiental del MIL (ka)
+uniform float u_mil_kd; // reflect. difusa del MIL (kd)
+uniform float u_mil_ks; // reflect. pseudo-especular (ks)
 uniform float u_mil_exp; // exponente para pseudo-especular (e)
 
 // Parámetros relativos a texturas
 uniform bool u_eval_text; // false –> no evaluar texturas, true -> sí
-uniform int
-u_tipo_gct; // tipo gen.cc.tt. (0=desact., 1=obj., 2=cam.)
+uniform int u_tipo_gct; // tipo gen.cc.tt. (0=desact., 1=obj., 2=cam.)
 uniform vec4 u_coefs_s; // coefficientes para gen.cc.t (coordenada S)
 uniform vec4 u_coefs_t; // coefficientes para gen.cc.t (coordenada T)
 
@@ -1447,21 +1186,18 @@ La función principal del vertex shader hace la transformación de coordenadas d
 ```c++
 void main()
 {
-// calcular posicion y normal en coordenadas de mundo
-vec4 posic_wc = u_mat_modelado
-*vec4(in_posicion_occ,1.0);
-vec3 normal_wc=(u_mat_modelado_nor*vec4(in_normal_occ,0.0)).xyz;
-// calcular variables varying
-v_posic_ecc
-= u_mat_vista*posic_wcc ;
-v_normal_ecc = (u_mat_vista*vec4(normal_wcc,0.0)).xyz;
-v_vec_obs_ecc = (-v_posic_ecc).xyz ;
-v_color
-= vec4( in_color, 1 ) ;
-v_coord_text = CoordsTextura();
-// calcular posición del vértice en coords. de recortado
-gl_Position
-= u_mat_proyeccion * v_posic_ecc ;
+	// Calcular posicion y normal en coordenadas de mundo
+	vec4 posic_wc = u_mat_modelado
+	*vec4(in_posicion_occ,1.0);
+	vec3 normal_wc=(u_mat_modelado_nor*vec4(in_normal_occ,0.0)).xyz;
+	// Calcular variables varying
+	v_posic_ecc = u_mat_vista*posic_wcc ;
+	v_normal_ecc = (u_mat_vista*vec4(normal_wcc,0.0)).xyz;
+	v_vec_obs_ecc = (-v_posic_ecc).xyz ;
+	v_color = vec4( in_color, 1 ) ;
+	v_coord_text = CoordsTextura();
+	// Calcular posición del vértice en coords. de recortado
+	gl_Position = u_mat_proyeccion * v_posic_ecc ;
 }
 ```
 
@@ -1472,23 +1208,19 @@ La función `CoordsTextura` se encarga de calcular las coordenadas de textura de
 ```c++
 vec2 CoordsTextura()
 {
-if ( ! u_eval_text )
-// si textura desactivada
-return vec2( 0.0, 0.0 );
-// devolver cualquier cosa
-if ( u_tipo_gct == 0 )
-// si text. activadas, gener. desact.
-return in_coords_textura.st; // devuelve coords. de tabla de cc.t.
-vec4 pos_ver ;
-// posición a usar para generación
-if ( u_tipo_gct == 1 )
-// si generación en coords. de objeto
-pos_ver = vec4( in_posicion_occ, 1.0 ); // dev. coords. obj.
-else
-// si generación en coords de cámara
-pos_ver = v_posic_ecc ;
-// dev. coords. de cámara
-return vec2( dot(pos_ver,u_coefs_s), dot(pos_ver,u_coefs_t) );
+	// Si textura desactivada
+	if (!u_eval_text) 
+		return vec2(0.0, 0.0);
+	// Si text. activadas, gener. desact.
+	if (u_tipo_gct == 0 )
+		return in_coords_textura.st;
+	vec4 pos_ver;
+	// Si generación en coords. de objeto
+	if (u_tipo_gct == 1)
+		pos_ver = vec4( in_posicion_occ, 1.0 ); // dev. coords. obj.
+	else
+		pos_ver = v_posic_ecc; // dev. coords. de cámara
+	return vec2(dot(pos_ver,u_coefs_s), dot(pos_ver,u_coefs_t));
 }
 ```
 
@@ -1512,19 +1244,18 @@ evaluando el MIL, si procede:
 ```c++
 void main()
 {
-// calcular el color base del objeto (color_obj)
-vec4 color_obj ;
-if ( u_eval_text )
-// si hay textura: consultar
-color_obj = texture( u_tex, v_coord_text );
-else
-// si no hay textura:
-color_obj = v_color ; // usar color interpolado
-// calcular el color del pixel (out_color_fragmento)
-if ( ! u_eval_mil ) // si está desactivada iluminación:
-out_color_fragmento = color_obj; // color pixel <– color objeto
-else // si está activada iluminación: evaluar MIL
-out_color_fragmento = vec4( EvalMIL( color_obj.rgb ), 1.0 );
+	// Calcular el color base del objeto (color_obj)
+	vec4 color_obj ;
+	// Consultar textura si hay o usar color interpolado
+	if ( u_eval_text )
+		color_obj = texture(u_tex, v_coord_text);
+	else
+		color_obj = v_color;
+	// Calcular el color del pixel (out_color_fragmento)
+	if (!u_eval_mil)
+		out_color_fragmento = color_obj; // color pixel <– color objeto
+	else
+		out_color_fragmento = vec4(EvalMIL(color_obj.rgb), 1.0);
 }
 ```
 
@@ -1534,21 +1265,20 @@ out_color_fragmento = vec4( EvalMIL( color_obj.rgb ), 1.0 );
 // Devuelve vector hacia observador normalizado
 vec3 VectorHaciaObsECC()
 {
-return normalize( v_vec_obs_ecc );
+	return normalize(v_vec_obs_ecc);
 }
 // Calcula la normal al triángulo (prod. vect. de las tangentes)
 vec3 NormalTrianguloECC()
 {
-vec4 tx = dFdx( v_posic_ecc ); // tangente al tri. en horizontal
-ty = dFdy( v_posic_ecc ); // tangente al tri. en vertical
-return normalize( cross( tx.xyz, ty.xyz )); // producto vectorial
+	vec4 tx = dFdx(v_posic_ecc); // tangente al tri. en horizontal
+	ty = dFdy(v_posic_ecc); // tangente al tri. en vertical
+	return normalize(cross(tx.xyz, ty.xyz)); // producto vectorial
 }
 // Calcula el vector normal apuntando al observador, normalizado
 vec3 NormalECC( vec3 vec_obs_ecc )
 {
-vec3 n = u_usar_normales_tri ? NormalTrianguloECC()
-: normalize( v_normal_ecc );
-return dot( n, vec_obs_ecc ) >= 0.0 ? n : -n ;
+	vec3 n = u_usar_normales_tri ? NormalTrianguloECC() : normalize( v_normal_ecc );
+	return dot(n, vec_obs_ecc) >= 0.0 ? n : -n;
 }
 ```
 
@@ -1559,9 +1289,9 @@ El vector hacia la i-ésima fuente de luz (normalizado), en coordenadas de cáma
 ```c++
 vec3 VectorHaciaFuenteECC( int i )
 {
-return ( u_pos_dir_luz_ecc[i].w == 1.0 ) ?
-normalize( u_pos_dir_luz_ecc[i].xyz - v_posic_ecc.xyz ) :
-normalize( u_pos_dir_luz_ecc[i].xyz ) ;
+	return (u_pos_dir_luz_ecc[i].w == 1.0) ?
+		normalize(u_pos_dir_luz_ecc[i].xyz - v_posic_ecc.xyz) :
+		normalize(u_pos_dir_luz_ecc[i].xyz) ;
 }
 ```
 
@@ -1570,26 +1300,22 @@ normalize( u_pos_dir_luz_ecc[i].xyz ) ;
 ```c++
 vec3 EvalMIL( vec3 color_obj )
 {
-vec3 v
-= VectorHaciaObsECC() ;
-vec3 n
-= NormalECC( v );
-vec3 sum = vec3( 0.0, 0.0, 0.0 );
-for( int i = 0 ; i < u_num_luces ; i++ )
-{
-sum
-= sum + u_color_luz[i]*color_obj*u_mil_ka ;
-vec3 l
-= VectorHaciaFuenteECC( i ) ;
-float nl = dot( n, l ) ;
-if ( 0.0 < nl )
-{ float hn = max( 0.0, dot( n, normalize( l+v ) ));
-vec3 col = color_obj*(u_mil_kd*nl)+pow(hn,u_mil_exp)*u_mil_ks;
-sum
-= sum + (u_color_luz[i] * col);
-}
-}
-return sum ;
+	vec3 v = VectorHaciaObsECC() ;
+	vec3 n = NormalECC(v);
+	vec3 sum = vec3(0.0, 0.0, 0.0);
+	for( int i = 0 ; i < u_num_luces ; i++ )
+	{
+		sum = sum + u_color_luz[i]*color_obj*u_mil_ka ;
+		vec3 l = VectorHaciaFuenteECC(i) ;
+		float nl = dot(n, l) ;
+		if ( 0.0 < nl )
+		{ 
+			float hn = max(0.0, dot( n, normalize(l+v)));
+			vec3 col = color_obj*(u_mil_kd*nl)+pow(hn,u_mil_exp)*u_mil_ks;
+			sum = sum + (u_color_luz[i] * col);
+		}
+	}
+	return sum ;
 }
 ```
 
@@ -1599,129 +1325,114 @@ return sum ;
 
 La clase Cauce incluye estos dos métodos:
 
-- El método fijarEvalMIL actualiza el uniform u_eval_mil:
+- El método `fijarEvalMIL` actualiza el uniform `u_eval_mil`:
 
 ```c++
-void Cauce::fijarEvalMIL( const bool nue_eval_mil )
+void Cauce::fijarEvalMIL(const bool nue_eval_mil)
 {
-eval_mil = nue_eval_mil ;
-glUseProgram( id_prog );
-glUniform1ui( loc_eval_mil, eval_mil ? 1 : 0 );
+	eval_mil = nue_eval_mil ;
+	glUseProgram(id_prog);
+	glUniform1ui(loc_eval_mil, eval_mil ? 1 : 0);
 }
 ```
 
-- El método fijarUsarNormalesTri actualiza el parámetro uniform u_usar_normales_tri:
+- El método `fijarUsarNormalesTri` actualiza el parámetro uniform `u_usar_normales_tri`:
 
 ```c++
-void Cauce::fijarUsarNormalesTri( const bool nue_usar_normales_tri )
+void Cauce::fijarUsarNormalesTri(const bool nue_usar_normales_tri)
 {
-usar_normales_tri = nue_usar_normales_tri ;
-glUseProgram( id_prog );
-glUniform1ui( loc_usar_normales_tri, usar_normales_tri );
+	usar_normales_tri = nue_usar_normales_tri ;
+	glUseProgram(id_prog);
+	glUniform1ui(loc_usar_normales_tri, usar_normales_tri);
 }
 ```
 
 ### Parámetros de las fuentes
 
-El método fijarFuentesLuz se invoca una vez por cuadro:
+El método `fijarFuentesLuz` se invoca una vez por cuadro:
 
 ```c++
-void Cauce::fijarFuentesLuz( const vector<vec3> & color,
-const vector<vec4> & pos_dir_wcc)
+void Cauce::fijarFuentesLuz(const vector<vec3> & color, const vector<vec4> & pos_dir_wcc)
 {
-const unsigned nl = color.size();
-vector<vec4> pos_dir_ecc ;
-for( unsigned i = 0 ; i < nl ; i++ )
-pos_dir_ecc.push_back( mat_vista * pos_dir_wcc[i] );
-glUseProgram( id_prog );
-glUniform1i( loc_num_luces, nl );
-glUniform3fv( loc_color_luz, nl, (const float *)color.data());
-glUniform4fv( loc_pos_dir_luz_ecc, nl,
-(const float *)pos_dir_ecc.data() );
+	const unsigned nl = color.size();
+	vector<vec4> pos_dir_ecc ;
+	for (unsigned i = 0 ; i < nl ; i++)
+		pos_dir_ecc.push_back(mat_vista * pos_dir_wcc[i]);
+	glUseProgram(id_prog);
+	glUniform1i(loc_num_luces, nl);
+	glUniform3fv(loc_color_luz, nl, (const float *)color.data());
+	glUniform4fv(loc_pos_dir_luz_ecc, nl, (const float *)pos_dir_ecc.data());
 }
 ```
 
-transforma las direcciones o posiciones por la matriz de vista actual,
-así que las interpreta en coords. de mundo y produce E.C.
+> Transforma las direcciones o posiciones por la matriz de vista actual, así que las interpreta en coords. de mundo y produce E.C.
 
 ### Parámetros del MIL (material)
 
-El método fijarParamsMIL fija los parámetros del material
-(reflectividades ambiente, difusa y especular, y el exponente)
+El método `fijarParamsMIL` fija los parámetros del material (reflectividades ambiente, difusa y especular, y el exponente)
 
 ```c++
-void Cauce::fijarParamsMIL( const float mil_ka, const float mil_kd,
-const float mil_ks, const float exp )
+void Cauce::fijarParamsMIL(const float mil_ka, const float mil_kd, const float mil_ks, const float exp)
 {
-glUseProgram( id_prog );
-glUniform1f( loc_mil_ka, mil_ka );
-glUniform1f( loc_mil_kd, mil_kd );
-glUniform1f( loc_mil_ks, mil_ks );
-glUniform1f( loc_mil_exp, exp );
+	glUseProgram(id_prog);
+	glUniform1f(loc_mil_ka, mil_ka);
+	glUniform1f(loc_mil_kd, mil_kd);
+	glUniform1f(loc_mil_ks, mil_ks);
+	glUniform1f(loc_mil_exp, exp);
 }
 ```
 
-se debe invocar cada vez que se quiera activar un nuevo material
+> Se debe invocar cada vez que se quiera activar un nuevo material
 
 ### Habilitar una textura
 
-El método fijarEvalText permite habilitar (o deshabilitar) las
-texturas, y en el primer caso requiere el identificador de la textura a
-activar:
+El método `fijarEvalText` permite habilitar (o deshabilitar) las texturas, y en el primer caso requiere el identificador de la textura a activar:
 
 ```c++
-void Cauce::fijarEvalText( const bool nue_eval_text,
-const int nue_text_id )
+void Cauce::fijarEvalText(const bool nue_eval_text, const int nue_text_id)
 {
-eval_text = nue_eval_text ;
-glUseProgram( id_prog );
-if ( eval_text ) // activar
-{ glActiveTexture( GL_TEXTURE0 );
-glBindTexture( GL_TEXTURE_2D, nue_text_id );
-glUniform1ui( loc_eval_text, true );
-}
-else // desactivar
-{ glUniform1ui( loc_eval_text, false );
-}
+	eval_text = nue_eval_text;
+	glUseProgram(id_prog);
+	if (eval_text)
+	{ 
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, nue_text_id);
+		glUniform1ui(loc_eval_text, true);
+	}
+	else
+		glUniform1ui(loc_eval_text, false);
 }
 ```
 
 ### Fijar parámetros de generación de cc.t.
 
-El método fijarTipoGCT fija los parámetros relacionados con
-generación automática de coordenadas de textura (generación
-activada sí/no, tipo de generación, coeficientes):
+El método `fijarTipoGCT` fija los parámetros relacionados con generación automática de coordenadas de textura (generación activada sí/no, tipo de generación, coeficientes):
 
 ```c++
-oid Cauce::fijarTipoGCT( const int nue_tipo_gct,
-const float * coefs_s,
-const float * coefs_t )
+void Cauce::fijarTipoGCT(const int nue_tipo_gct, const float * coefs_s, const float * coefs_t)
 {
-tipo_gct = nue_tipo_gct ;
-glUniform1i( loc_tipo_gct, tipo_gct );
-if ( tipo_gct == 1 || tipo_gct == 2 )
-{
-glUniform4fv( loc_coefs_s, 1, coefs_s );
-glUniform4fv( loc_coefs_t, 1, coefs_t );
-}
+	tipo_gct = nue_tipo_gct ;
+	glUniform1i(loc_tipo_gct, tipo_gct);
+	if (tipo_gct == 1 || tipo_gct == 2)
+	{
+		glUniform4fv(loc_coefs_s, 1, coefs_s);
+		glUniform4fv(loc_coefs_t, 1, coefs_t);
+	}
 }
 ```
 
 # 4. Representación de materiales, texturas y fuentes
 
-En esta sección veremos como representar en una aplicación los
-diversos parámetros relacionados con la iluminación y texturas:
-- Clase Textura: incluye un puntero a los texels en RAM, y los parámetros de generación de coords. de text.
-- Clase Material: incluye los parámetros del MIL (reflectividades ambiente, difusa y especular, exponente de brillo), y opcionalmente un puntero a una instancia de una textura.
-- Clase FuenteLuz y ColFuentesLuz: parámetros que definen cada fuente de luz (posición o dirección, color), y conjunto de fuentes de luz a usar en una escena.
-- Clase NodoGrafoEscena: en esta clase se podrán incluir entradas de tipo material.
-- Clase Escena: contendrá una colección de fuentes, y un material inicial.
+En esta sección veremos como representar en una aplicación los diversos parámetros relacionados con la iluminación y texturas:
+- Clase `Textura`: Incluye un puntero a los texels en RAM, y los parámetros de generación de coordenadas de textura.
+- Clase `Material`: Incluye los parámetros del MIL (reflectividades ambiente, difusa y especular, exponente de brillo), y opcionalmente un puntero a una instancia de una textura.
+- Clase `FuenteLuz` y `ColFuentesLuz`: Parámetros que definen cada fuente de luz (posición o dirección, color), y conjunto de fuentes de luz a usar en una escena.
+- Clase `NodoGrafoEscena`: En esta clase se podrán incluir entradas de tipo material.
+- Clase `Escena`: Contendrá una colección de fuentes, y un material inicial.
 
-Las instancias de estas las clases Textura, Material y ColFuentesLuz incorporan un método para activarlas:
+Las instancias de estas las clases `Textura`, `Material` y `ColFuentesLuz` incorporan un método para activarlas.
 
-- La activación es el proceso por el cual el cauce se configura para que en la siguientes operaciones de visualización se use una textura, un material, o una colección de fuentes.
-- En todos los casos se usa un método llamado activar, que tiene como único parámetro una referencia al cauce actual.
-- Veremos como se implementa la activación usando el interfaz de la clase Cauce.
+> La activación es el proceso por el cual el cauce se configura para que en la siguientes operaciones de visualización se use una textura, un material, o una colección de fuentes.
 
 Para las texturas, materiales y colecciones de fuentes, se definen clases derivadas con constructores que implementan distintas variantes.
 
@@ -1735,34 +1446,20 @@ La clase textura se declara así:
 class Textura
 {
 public:
-Textura( const std::string & nombreArchivoJPG ) ; // constructor
-~Textura() ;
-// libera memoria ocupada por texels
-void activar( ) ; // activación en el cauce actual (apl->cauce)
+	Textura(const std::string & nombreArchivoJPG);
+	~Textura();
+	void activar(); // Activación en el cauce actual (apl->cauce)
 protected:
-void enviar() ;
-// envia la imagen a la GPU (gluBuild2DMipmaps)
-unsigned char * imagen = nullptr;// texels en mem. dinámica
-bool
-enviada
-= false; // true sii enviada
-GLuint
-ident_textura = -1 ;
-// ’nombre’ o identif. de text.
-unsigned ancho
-= 0,
-// número de columnas
-alto
-= 0 ;
-// número de filas de la imagen
-ModoGenCT modo_gen_ct
-= mgct_desactivada ; // modo gen. cc.t.
-float
-coefs_s[4]
-= {1.0,0.0,0.0,0.0}, // coeficientes (S)
-coefs_t[4]
-= {0.0,1.0,0.0,0.0}; // coeficientes (T)
-} ;
+	void enviar(); // Envia la imagen a la GPU (gluBuild2DMipmaps)
+	unsigned char * imagen = nullptr; // Texels en memoria dinamica
+	bool enviada = false;
+	GLuint ident_textura = -1 ; // Identificador de textura
+	unsigned ancho = 0; // Número de columnas de la imagen
+	unsigned alto = 0; // Número de filas de la imagen
+	ModoGenCT modo_gen_ct = mgct_desactivada ; // modo gen. cc.t.
+	float coefs_s[4] = {1.0,0.0,0.0,0.0}; // Coeficientes (S)
+	float coefs_t[4] = {0.0,1.0,0.0,0.0}; // Coeficientes (T)
+};
 ```
 
 ### Clase `Material`
@@ -1773,25 +1470,19 @@ Encapsula una textura y los cuatro parámetros del MIL (reales):
 class Material
 {
 public:
-Material() {} ; // usa valores por defecto (en las declaraciones)
-// constructores (sin textura y con textura)
-Material( const float p_k_amb, const float p_k_dif,
-const float p_k_pse, const float p_exp_pse );
-Material( Textura * p_textura,
-const float p_k_amb, const float p_k_dif,
-const float p_k_pse, const float p_exp_pse );
-void activar(); // activación en el cauce actual (apl->cauce)
-~Material() ;
-// libera la textura, si hay alguna
+	Material(){};
+	// Constructor sin textura
+	Material(const float p_k_amb, const float p_k_dif, const float p_k_pse, const float p_exp_pse);
+	// Constructor con textura
+	Material(Textura * p_textura, const float p_k_amb, const float p_k_dif, const float p_k_pse, const float p_exp_pse);
+	void activar(); // Activación en el cauce actual (apl->cauce)
+	~Material() ;
 protected:
-Textura * textura = nullptr; // textura, si != nullptr
-float k_amb
-= 0.2f, // coeficiente de reflexión ambiente
-k_dif
-= 0.8f, // coeficiente de reflexión difusa
-k_pse
-= 0.0f, // coeficiente de reflexión pseudo-especular
-exp_pse = 0.0f; // exponente de brillo para reflexion pseudo-especular
+	Textura * textura = nullptr;
+	float k_amb = 0.2f; // Coeficiente de reflexión ambiente
+	float k_dif = 0.8f; // Coeficiente de reflexión difusa
+	float k_pse = 0.0f; // Coeficiente de reflexión pseudo-especular
+	float exp_pse = 0.0f; // Exponente de brillo para reflexion pseudo-especular
 } ;
 ```
 
@@ -1806,21 +1497,16 @@ Ejemplo de fuente de luz direccional y manipulable interactivamente:
 class FuenteLuz
 {
 public:
-FuenteLuz( GLfloat p_longi_ini, GLfloat p_lati_ini,
-const glm::vec3 & p_color ) ;
-void actualizarLongi( const float incre );
-void actualizarLati( const float incre );
-float longi, // longitud actual (en grados, entre 0 y 360)
-lati ; // latitud actual (en grados, entre -90 y 90)
+	FuenteLuz(GLfloat p_longi_ini, GLfloat p_lati_ini, const glm::vec3 & p_color);
+	void actualizarLongi(const float incre);
+	void actualizarLati(const float incre);
+	float longi; // Longitud actual (en grados, entre 0 y 360)
+	float lati; // Latitud actual (en grados, entre -90 y 90)
 protected:
-glm::vec3 color ;
-float
-longi_ini,
-lati_ini ;
-// color de la fuente
-// valor inicial de ’longi’
-// valor inicial de ’lati’
-} ;
+	glm::vec3 color; // Color de la fuente
+	float longi_ini; // Valor inicial de longitud
+	float lati_ini ; // Valor inicial de latitud
+};
 ```
 
 ### Clase `ColFuentesLuz`
@@ -1831,20 +1517,17 @@ Colección de fuentes manipulable (con una fuente actual):
 class ColFuentesLuz
 {
 public:
-ColFuentesLuz() ; // crea la colección vacía
-~ColFuentesLuz() ; // libera memoria ocu
-void insertar( FuenteLuz * pf ); // inserta nueva fuente (copia ptr.)
-void activar();
-// activa iluminación y las fuentes
-void sigAntFuente( int d ) ;
-// cambiar fuente act.(d=+1/-1)
-FuenteLuz * fuenteLuzActual() ; // devuelve (puntero a) fuente act.
+	ColFuentesLuz();
+	~ColFuentesLuz();
+	void insertar(FuenteLuz * pf); // Inserta nueva fuente
+	void activar();
+	void sigAntFuente( int d ); // Cambiar fuente actual (d=+1/-1)
+	FuenteLuz * fuenteLuzActual(); // Devuelve puntero a fuente actual
 private:
-std::vector<FuenteLuz *> vpf ; // vector de punteros a fuentes
-GLint
-max_num_fuentes = 0 ; // máximo número de fuentes
-unsigned i_fuente_actual = 0 ; // índice de fuente actual
-} ;
+	std::vector<FuenteLuz*> vpf; // Vector de punteros a fuentes
+	GLint max_num_fuentes = 0; // Máximo número de fuentes
+	unsigned i_fuente_actual = 0; // Índice de fuente actual
+};
 ```
 
 ### Visualización con materiales y luces
@@ -1870,24 +1553,22 @@ Para gestionar eso en las prácticas se define una clase que encapsula una pila 
 class PilaMateriales
 {
 public:
-PilaMateriales() { }
-// guarda material actual en la pila (no puede ser nulo)
-void push();
-// cambia el material actual y lo activa
-void activar( Material * nuevo_actual );
-// invoca activar para el material en el tope y lo elimina del tope
-void pop();
+	PilaMateriales(){};
+	// Guarda material actual en la pila (no puede ser nulo)
+	void push();
+	// Cambia el material actual y lo activa
+	void activar(Material * nuevo_actual);
+	// Invoca activar para el material en el tope y lo elimina del tope
+	void pop();
 private:
-// pila de materiales guardados
-std::vector<Material *> vector_materiales ;
-// material actual
-Material * actual = nullptr ;
+	// Pila de materiales guardados
+	std::vector<Material*> vector_materiales;
+	// Material actual
+	Material * actual = nullptr ;
 } ;
 ```
 
-Si queremos visualizar un objeto (objeto) con algún material
-específico (material), podemos usar un objeto con la pila de
-materiales (pila_materiales):
+Si queremos visualizar un objeto (`objeto`) con algún material específico (`material`), podemos usar un objeto con la pila de materiales (`pila_materiales`):
 
 ```c++
 Material * material = ....... ; // crear e inicializar el material
@@ -1903,21 +1584,12 @@ Antes de visualizar una escena, debemos de activar algún material por defecto e
 
 ## 4.3 Materiales en el grafo de escena
 
-En los grafo de escena vamos a incorporar la posibilidad de asignar
-distintos materiales a distintas partes o nodos del grafo:
-I Hay un nuevo tipo de entrada en los nodos: las entradas de tipo
-material: es un puntero a una instancia de Material.
-I Un material en una entrada de un nodo afecta a todas las
-entradas posteriores de dicho nodo, hasta el final del nodo o
-bien hasta otra entrada posterior del nodo también de tipo
-material.
-I Por tanto, toda entrada está afectada del primer material
-encontrado en el camino desde esa entrada hasta la primera
-entrada del nodo raíz (si no hay ninguno, se usaría uno por
-defecto).
+En los grafo de escena vamos a incorporar la posibilidad de asignar distintos materiales a distintas partes o nodos del grafo:
+- Hay un nuevo tipo de entrada en los nodos, las entradas de tipo **material**, siendo estas un puntero a una instancia de `Material`.
+- Un material en una entrada de un nodo afecta a todas las entradas posteriores de dicho nodo, hasta el final del nodo o bien hasta otra entrada posterior del nodo también de tipo material.
+- Por tanto, toda entrada está afectada del primer material encontrado en el camino desde esa entrada hasta la primera entrada del nodo raíz (si no hay ninguno, se usaría uno por defecto).
 
-Disponemos de las primitivas Cubo, Esfera y Ejes, y cuatro materiales
-posibles (se muestran en azul):
+> Disponemos de las primitivas Cubo, Esfera y Ejes, y cuatro materiales posibles (se muestran en azul):
 
 ![](./resources/img76.png)
 
@@ -1928,20 +1600,16 @@ Ahora las entradas de los nodos del tipo grafo de escena pueden contener un punt
 ```c++
 struct EntradaNGE
 {
-unsigned char tipoE ; // 0 => objeto, 1 => transformacion, 2 => material
-union
-{ Objeto3D * objeto
-; // ptr. a un objeto
-Matriz4f * matriz
-; // ptr. a matriz 4x4 transf. (propiet.)
-Material * material ; // ptr. a material
-} ;
-// constructores (uno por tipo)
-EntradaNGE( Objeto3D * pObjeto ) ;
-// (copia únicamente el puntero)
-EntradaNGE( const Matriz4f & pMatriz ); // (crea copia de la matriz)
-EntradaNGE( Material * pMaterial );
-// (copia únicamente el puntero)
+	unsigned char tipoE ; // 0 => objeto, 1 => transformacion, 2 => material
+	union
+	{ 
+		Objeto3D * objeto; // Ptr. a un objeto
+		Matriz4f * matriz; // Ptr. a matriz de transf.
+		Material * material; // Ptr. a material
+	};
+	EntradaNGE(Objeto3D * pObjeto) ; // (copia únicamente el puntero)
+	EntradaNGE(const Matriz4f & pMatriz); // (crea copia de la matriz)
+	EntradaNGE(Material * pMaterial); // (copia únicamente el puntero)
 } ;
 ```
 
@@ -1950,16 +1618,16 @@ Habrá una nueva versión del método agregar de los nodos:
 ```c++
 class NodoGrafoEscena : public Objeto3D
 {
-...........
-void agregar( Material * pMaterial ); // añadir material al final
-} ;
+. . .
+	void agregar(Material * pMaterial); // Añadir material al final
+};
 ```
 
 ### Procesamiento de nodos con materiales
 
-En ell método visualizarGL de la clase NodoGrafoEscena:
+En ell método `visualizarGL` de la clase `NodoGrafoEscena`:
 
-- Al inicio, hacer push en la pila
+- Al inicio, hacer `push` en la pila
 
 ```c++
 pila_materiales->push();
@@ -1968,9 +1636,9 @@ pila_materiales->push();
 - En el bucle, al encontrar una entrada de tipo material, se activa:
 
 ```c++
-case TipoEntNGE::material : // si la entrada es de tipo ’material’
-if ( iluminación activada ) // y si está activada la iluminación
-pila_materiales->activar( entradas[i].material );
+case TipoEntNGE::material : // Si la entrada es de tipo ’material’
+	if (iluminación activada ) // y si está activada la iluminación
+		pila_materiales->activar(entradas[i].material);
 break ;
 ```
 
