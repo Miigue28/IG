@@ -38,14 +38,10 @@
 #include <vector>
 #include "ig-aux.h"
 
-// --------------------------------------------------------------------------------------------
-// Guarda los datos y metadatos de un VBO con una tabla de atributos de vértice
-//
+// Guarda los datos y metadatos de un VBO con una tabla de atributos de vértices
 class DescrVBOAtribs
 {
 private:
-   // Metadatos y datos del buffer
-
    GLuint buffer = 0;       // Nombre o id del buffer en la GPU (0 antes de crearlo, >0 después)
    GLuint index = 0;        // Índice de atributo (<num_attrs)
    GLenum type = 0;         // Tipo de los valores (GL_FLOAT o GL_DOUBLE)
@@ -58,7 +54,6 @@ private:
 
    // Hace una copia de los datos de la tabla en una zona de memoria propiedad de esta
    // instancia (copia los datos originales en 'data' en 'own_data', solo una vez).
-   
    void copiarDatos();
 
    friend class DescrVAO;
@@ -78,8 +73,7 @@ public:
    // @param p_count (unsigned) número de tuplas (>0)
    // @param p_data  (void *)   puntero al array de tuplas (no nulo)
    //
-   DescrVBOAtribs(const unsigned p_index, const GLenum p_type, const unsigned p_size,
-                  const unsigned long p_count, const void *p_data);
+   DescrVBOAtribs(const unsigned p_index, const GLenum p_type, const unsigned p_size, const unsigned long p_count, const void *p_data);
 
    // Crea un descriptor de VBO de atributos, a partir de una tabla de coordenadas,
    // almacenada como un vector (std::vector) de 'vec3'.

@@ -40,15 +40,16 @@
 #include <vector>
 #include <string>
 
-#include "malla-ind.h" // declaración de 'Objeto3D'
+#include "malla-ind.h"
 
-// ---------------------------------------------------------------------
 // Clase para mallas indexadas obtenidas a partir de la revolución de un perfil
 class MallaRevol : public MallaInd
 {
 private:
-   glm::vec3 rotateVertexYAxis(const double angle, const glm::vec3 & vertex);
-   glm::vec3 rotateVertexXAxis(const double angle, const glm::vec3 & vertex);
+   // Rotate a three dimensional vector around the X, Y, Z axis.
+   glm::vec3 rotateX(const double angle, const glm::vec3 & vertex);
+   glm::vec3 rotateY(const double angle, const glm::vec3 & vertex);
+   glm::vec3 rotateZ(const double angle, const glm::vec3 & vertex);
 protected:
    MallaRevol(){} // solo usable desde clases derivadas con constructores especificos
 

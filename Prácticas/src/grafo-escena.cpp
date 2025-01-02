@@ -107,37 +107,54 @@ void NodoGrafoEscena::visualizarGL()
       // Fijar el color en el cauce usando el color del objeto
       cauce->fijarColor(leerColor());
    }
+
+   // Si la iluminación está activada, gestionamos los materiales
+   if (aplicacionIG->iluminacion)
+   {
+      // Guardamos el material actual en la pila
+      pila_materiales->push();
+   }
+
    // Guardar copia de la matriz de modelado
    cauce->pushMM();
+   
    // Para cada entrada del vector de entradas
    for  (EntradaNGE entrada : entradas)
    {
       switch (entrada.tipo)
       {
          // Si la entrada es de tipo objeto: llamar recursivamente a 'visualizarGL'
-         case TipoEntNGE::objeto: entrada.objeto->visualizarGL(); break;
+         case TipoEntNGE::objeto: 
+            entrada.objeto->visualizarGL(); 
+         break;
          // Si la entrada es de tipo transformación: componer la matriz
-         case TipoEntNGE::transformacion: cauce->compMM(*(entrada.matriz)); break;
+         case TipoEntNGE::transformacion: 
+            cauce->compMM(*(entrada.matriz)); 
+         break;
+         // Si la entrada es de tipo material: activar el material
+         case TipoEntNGE::material: 
+            if (aplicacionIG->iluminacion)
+               pila_materiales->activar(entrada.material); 
+         break;
+         case TipoEntNGE::noInicializado:
+            std::cout << "Entrada no inicializada" << std::endl;
+         break;
       }
    }
    // Restaurar la copia guardada de la matriz de modelado
    cauce->popMM();
-   // Si el objeto tiene color asignado
+
+   // Restaurar el color original a la entrada
    if (tieneColor())
    {
-      // Restaurar el color original a la entrada
       cauce->popColor();
    }
-
-   // COMPLETAR: práctica 4: añadir gestión de los materiales cuando la iluminación está activada
-   //
-   // Si 'apl->iluminacion' es 'true', se deben de gestionar los materiales:
-   //
-   //   1. al inicio, hacer 'push' de la pila de materiales (guarda material actual en la pila)
-   //   2. si una entrada es de tipo material, activarlo usando a pila de materiales
-   //   3. al finalizar, hacer 'pop' de la pila de materiales (restaura el material activo al inicio)
-
-   // ......
+      
+   // Restaurar el material activo al inicio
+   if (aplicacionIG->iluminacion)
+   {
+      pila_materiales->pop();
+   }
 }
 
 // Visualizar pura y simplemente la geometría, sin colores, normales, coord. text. etc...
@@ -162,6 +179,9 @@ void NodoGrafoEscena::visualizarGeomGL()
          case TipoEntNGE::objeto: (entrada.objeto)->visualizarGeomGL(); break;
          // Si la entrada es de tipo transformación: componer la matriz
          case TipoEntNGE::transformacion: cauce->compMM(*(entrada.matriz)); break;
+         // Ignoramos el resto
+         case TipoEntNGE::material: break;
+         case TipoEntNGE::noInicializado: break;
       }
    }
    // Restaurar la copia guardada de la matriz de modelado
@@ -173,22 +193,25 @@ void NodoGrafoEscena::visualizarNormalesGL()
 {
    using namespace std;
    assert(aplicacionIG != nullptr);
-
-   // Comprobar que hay un cauce
    Cauce *cauce = aplicacionIG->cauce;
    assert(cauce != nullptr);
 
-   // COMPLETAR: práctica 4: visualizar las normales del nodo del grafo de escena
-   //
-   // Este método hace un recorrido de las entradas del nodo, parecido a 'visualizarGL', teniendo
-   // en cuenta estos puntos:
-   //
-   // - usar push/pop de la matriz de modelado al inicio/fin (al igual que en visualizatGL)
-   // - recorrer las entradas, llamando recursivamente a 'visualizarNormalesGL' en los nodos u objetos hijos
-   // - ignorar el color o identificador del nodo (se supone que el color ya está prefijado antes de la llamada)
-   // - ignorar las entradas de tipo material, y la gestión de materiales (se usa sin iluminación)
+   cauce->pushMM();
 
-   // .......
+   // Recorrer las entradas, llamando recursivamente a 'visualizarNormalesGL' en los objetos
+   for (EntradaNGE entrada : entradas)
+   {
+      switch (entrada.tipo)
+      {
+         case TipoEntNGE::objeto: (entrada.objeto)->visualizarNormalesGL(); break;
+         case TipoEntNGE::transformacion: cauce->compMM(*(entrada.matriz)); break;
+         // Ignoramos el resto
+         case TipoEntNGE::material: break;
+         case TipoEntNGE::noInicializado: break;
+      }
+   }
+
+   cauce->popMM();
 }
 
 // -----------------------------------------------------------------------------
@@ -453,4 +476,10 @@ void CubePair::actualizarEstadoParametro(const unsigned iParam, const float t_se
       *scalingmovement = scale(vec3(1.0, 1.0*abs(cos(t_sec)), 1.0));
    break;
    }
+}
+
+NodoCubo24::NodoCubo24()
+{
+   agregar(new Material(new Textura("window-icon.jpg"), 0.5, 0.4, 0.3, 40.0));
+   agregar(new Cubo24());
 }

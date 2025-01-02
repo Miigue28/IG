@@ -165,4 +165,10 @@ public:
    virtual void actualizarEstadoParametro(const unsigned iParam, const float t_sec);
 };
 
+class NodoCubo24 : public NodoGrafoEscena
+{
+public:
+   NodoCubo24();
+};
+
 #endif // GRAFO_ESCENA_HPP

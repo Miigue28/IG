@@ -36,14 +36,12 @@
 #define IG_MALLAIND_HPP
 
 #include <vector>
-#include <ig-aux.h>
-#include <vaos-vbos.h>
 
-#include "objeto3d.h" // Declaración de 'Objeto3D'
+#include "ig-aux.h"
+#include "vaos-vbos.h"
+#include "objeto3d.h"
 
-// ---------------------------------------------------------------------
 // Clase para objetos gráficos genéricos
-
 class MallaInd : public Objeto3D
 {
 protected:
@@ -59,17 +57,15 @@ protected:
    std::vector<glm::vec3> nor_tri;   // Normales de triángulos
    std::vector<glm::vec2> cc_tt_ver; // Coordenadas de textura de los vértices
 
-   // Descriptor del VAO con los vértices, triángulos y atributos de esta malla indexada
-   // (se crea bajo demanda en 'visualizarGL')
+   // Descriptor del VAO con los vértices, triángulos y atributos de esta malla indexada (se crea bajo demanda en 'visualizarGL')
    DescrVAO *dvao = nullptr;
 
-   // VAO con los segmentos de las normales (vis. con GL_LINES)
-   // (se crea bajo demanda en 'visualizarNormales')
+   // Descriptor del VAO con los segmentos de las normales (se crea bajo demanda en 'visualizarNormales')
    DescrVAO *dvao_normales = nullptr;
 
-   std::vector<glm::vec3> segmentos_normales; // Guarda los segmentos de normales
+   std::vector<glm::vec3> segmentos_normales;
 
-   // Normales de triángulos y vértices
+   // Normales de vértices a partir de los tríangulos adyacentes
    void calcularNormales();
 
    // Cálculo de las normales de triángulos (solo si no están creadas ya)
@@ -118,6 +114,12 @@ class Cubo : public MallaInd
 {
 public:
    Cubo();
+};
+
+class Cubo24 : public MallaInd
+{
+public:
+   Cubo24();
 };
 
 class Tetraedro : public MallaInd

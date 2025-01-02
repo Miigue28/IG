@@ -3,7 +3,7 @@
  * Titulación: DGIIM
  * Email: miguelangelmc@correo.ugr.es
  * DNI: 20070272
-**/
+ **/
 
 // *********************************************************************
 // **
@@ -40,15 +40,11 @@
 #include "ig-aux.h"
 #include "lector-jpg.h"
 
-// *********************************************************************
-// algunes declaraciones auxiliares importantes
-
+// Algunes declaraciones auxiliares importantes
 class Material;
 class Textura;
 
-//**********************************************************************
-// posibles modos de generacion de coords. de textura
-
+// Posibles modos de generacion de coords. de textura
 typedef enum
 {
    mgct_desactivada,
@@ -56,52 +52,50 @@ typedef enum
    mgct_coords_ojo
 } ModoGenCT;
 
-// *********************************************************************
-// Clase Textura:
-// ---------------
-// clase que encapsula una imagen de textura de OpenGL, así como los
-// parámetros relativos a como se aplica  a las primitivas que se dibujen
-// mientras está activa
-
+// Clase Textura: Encapsula una imagen de textura de OpenGL, así como los parámetros relativos 
+// a como se aplica  a las primitivas que se dibujen mientras está activa
 class Textura
 {
 public:
-   // carga una imagen de textura en la memoria de vídeo, e
+   // Carga una imagen de textura en la memoria de vídeo, e
    // inicializa los atributos de la textura a valores por defecto.
    // El nombre del archivo debe ir sin el 'path', se busca en 'materiales/imgs' y si
    // no está se busca en 'archivos-alumno'
    Textura(const std::string &nombreArchivoJPG);
 
-   // libera la memoria dinámica usada por la textura, si hay alguna
+   // Libera la memoria dinámica usada por la textura, si hay alguna
    ~Textura();
 
-   // activar una textura en un cauce
+   // Activar una textura en un cauce
    void activar();
 
-protected:        //--------------------------------------------------------
-   void enviar(); // envia la imagen a la GPU (gluBuild2DMipmaps)
+protected:
+   // Envia la imagen a la GPU (gluBuild2DMipmaps)
+   void enviar();
 
-   bool
-       enviada = false; // true si ha sido enviada, false en otro caso
-   GLuint
-       ident_textura = -1; // 'nombre' o identif. de textura para OpenGL
-   unsigned
-       ancho = 0, // número de columnas de la imagen
-       alto = 0;  // número de filas de la imagen
-   unsigned char *
-       imagen = nullptr; // pixels de la imagen, por filas.
-   ModoGenCT
-       modo_gen_ct = mgct_desactivada; // modo de generacion de coordenadas de textura
-   float
-       coefs_s[4] = {1.0, 0.0, 0.0, 0.0}, // si 'modo_gen_ct != desactivadas', coeficientes para la coord. S
-       coefs_t[4] = {0.0, 1.0, 0.0, 0.0}; // idem para coordenada T
+   bool enviada = false;
+
+   // Identificador de textura para OpenGL
+   GLuint ident_textura = -1;
+
+   // Número de columnas de la imagen
+   unsigned ancho = 0;
+
+   // Número de filas de la imagen
+   unsigned alto = 0;
+
+   // Pixels de la imagen, por filas.
+   unsigned char * imagen = nullptr;
+
+   // Modo de generacion de coordenadas de textura
+   ModoGenCT modo_gen_ct = mgct_desactivada;
+
+   // Coeficientes de generación de coordenadas de textura
+   float coefs_s[4] = {1.0, 0.0, 0.0, 0.0}; 
+   float coefs_t[4] = {0.0, 1.0, 0.0, 0.0};
 };
 
-// *********************************************************************
-// clase: TexturaXY
-// ---------------------------------------------------------------------
-// textura con generación automática de coords de textura (s=x,t=y)
-
+// Clase TexturaXY: Textura con generación automática de coords. de textura (s = x, t = y)
 class TexturaXY : public Textura
 {
 public:
@@ -112,159 +106,137 @@ class TexturaXZ : public Textura
 public:
    TexturaXZ(const std::string &nom);
 };
-// *********************************************************************
-// Clase Material
-// ---------------------------------------------------------------------
-// clase que encapsula los atributos de un material, incluyendo la
-// textura del mismo.
 
+// Clase Material: Encapsula los atributos de un material, incluyendo la
+// textura del mismo.
 class Material
 {
 public:
-   // material por defecto (ver valores iniciales en las declaraciones)
-   Material() {};
+   Material(){};
 
-   // crea un material usando el color plano del objeto
+   // Crea un material usando el color plano del objeto
    Material(/** const Tupla3f & p_color_ad,**/ const float p_k_amb, const float p_k_dif,
             const float p_k_pse, const float p_exp_pse);
 
-   // crea un material usando una textura
+   // Crea un material usando una textura
    Material(Textura *p_textura, const float p_k_amb, const float p_k_dif,
             const float p_k_pse, const float p_exp_pse);
 
-   // libera la memoria dinámica ocupada por el material (básicamente la textura)
+   // Libera la memoria dinámica ocupada por el material (básicamente la textura)
    ~Material();
 
-   // activa un material en el cauce actual.
+   // Activa un material en el cauce actual.
    void activar();
 
-   // poner y leer el nombre del material
+   // Poner y leer el nombre del material
    void ponerNombre(const std::string &nuevo_nombre);
    std::string nombre() const;
-
-   //--------------------------------------------------------
 protected:
    // void coloresCero();// pone todos los colores y reflectividades a cero
 
-   std::string
-       nombre_mat = "material anónimo"; // nombre del material
+   // Nombre del material
+   std::string nombre_mat = "Material anónimo";
 
-   // Tupla3f
-   //    color_ad = { 0.6f, 0.6f, 0.6f }; // color para componentes difusa y ambiental
-   Textura *
-       textura = nullptr; // si != nullptr, se usa color de la textura en lugar de 'color_ad'
-   float
-       k_amb = 0.2f,   // coeficiente de reflexión ambiente
-       k_dif = 0.8f,   // coeficiente de reflexión difusa
-       k_pse = 0.0f,   // coeficiente de reflexión pseudo-especular
-       exp_pse = 0.0f; // exponente de brillo para reflexion pseudo-especular
+   // Color para componentes difusa y ambiental
+   //Tupla3f color_ad = { 0.6f, 0.6f, 0.6f };
+
+   // Si textura != nullptr, se usa color de la textura en lugar de 'color_ad'
+   Textura * textura = nullptr;
+
+   float k_amb = 0.2f;   // Coeficiente de reflexión ambiente
+   float k_dif = 0.8f;   // Coeficiente de reflexión difusa
+   float k_pse = 0.0f;   // Coeficiente de reflexión pseudo-especular
+   float exp_pse = 0.0f; // Exponente de brillo para reflexion pseudo-especular
 };
 
-//**********************************************************************
-// Clase FuenteLuz
-// ---------------
-// clase que contiene los atributo de una fuente de luz OpenGL
-
+// Clase FuenteLuz: Contiene los atributos de una fuente de luz OpenGL
 class FuenteLuz
 {
 public:
-   // inicializa la fuente de luz
+   // Inicializa la fuente de luz
    //
-   // p_longi_ini == valor inicial del ángulo horizontal en grados
-   // p_lati_ini  == idem del ángulo vértical
-   // p_color     == color de la fuente de luz (amb, dif y spec )
-   FuenteLuz(GLfloat p_longi_ini, GLfloat p_lati_ini, const glm::vec3 &p_color);
+   // p_longi_ini == Valor inicial del ángulo horizontal en grados
+   // p_lati_ini  == Valor inicial del ángulo vértical en grados
+   // p_color     == Color de la fuente de luz (amb, dif y spec)
+   FuenteLuz(GLfloat p_longi_ini, GLfloat p_lati_ini, const glm::vec3 & p_color);
 
    // cambia los atributos de la instancia en respuesta a una pulsación
    // de una tecla 'especial' (según la terminología de 'glut')
    // bool gestionarEventoTeclaEspecial( int key ) ;
 
-   // para fuentes diraccionales, incrementar o decrementar la longitud
+   // Para fuentes diraccionales, incrementar o decrementar la longitud
    // (en las puntuales no hace nada)
    void actualizarLongi(const float incre);
-   // para fuentes diraccionales, incrementar o decrementar la longitud
+   // Para fuentes diraccionales, incrementar o decrementar la longitud
    // (en las puntuales no hace nada)
    void actualizarLati(const float incre);
 
-   //-------------------------------------------------------------------
-   // variables de instancia:
-
 public:
-   float
-       longi, // longitud actual de la fuente direccional (en grados, entre 0 y 360)
-       lati;  // latitud actual de la fuente direccional (en grados, entre -90 y 90)
+   float longi; // Longitud actual de la fuente direccional (en grados, entre 0 y 360)
+   float lati;  // Latitud actual de la fuente direccional (en grados, entre -90 y 90)
 
 protected:
-   glm::vec3
-       color; // color de la fuente de luz (sirve para todas las componentes del MIL)
+   glm::vec3 color; // Color de la fuente de luz (sirve para todas las componentes del MIL)
 
-   float
-       longi_ini, // valor inicial de 'longi'
-       lati_ini;  // valor inicial de 'lati'
+   float longi_ini; // Valor inicial de 'longi'
+   float lati_ini;  // Valor inicial de 'lati'
 
    friend class ColFuentesLuz;
 };
 
-//**********************************************************************
-// Clase ConjuntoFuentes
-// ---------------
-// clase que contiene los atributos de una coleccion de fuentes de luz OpenGL
-
+// Clase ConjuntoFuentes: Contiene los atributos de una coleccion de fuentes de luz OpenGL
 class ColFuentesLuz
 {
 public:
-   ColFuentesLuz(); // crea la colección vacía
+   ColFuentesLuz();
    ~ColFuentesLuz();
 
-   // inserta una nueva
+   // Inserta una nueva fuente de luz
    void insertar(FuenteLuz *pf);
 
-   // activa esta colección de fuentes en el cauce actual
+   // Activa esta colección de fuentes en el cauce actual
    void activar();
 
-   // pasa a la siguiente fuente de luz (si d==+1), o a la anterior (si d==-1)
-   // aborta si 'd' no es -1 o +1, inicialmente es la fuente 0
+   // Pasa a la siguiente fuente de luz (si d == +1), o a la anterior (si d == -1)
+   // Aborta si 'd' no es -1 o +1, inicialmente es la fuente 0
    void sigAntFuente(int d);
 
-   // devuelve un puntero a la fuente de luz actual
+   // Devuelve un puntero a la fuente de luz actual
    FuenteLuz *fuenteLuzActual();
-
 private:
-   std::vector<FuenteLuz *> vpf; // vector de punteros a fuentes
+   // Vector de punteros a fuentes
+   std::vector<FuenteLuz*> vpf; 
 
-   GLint max_num_fuentes = 0;    // máximo número de fuentes
-   unsigned i_fuente_actual = 0; // fuente que se modifica al llamar a 'actualizar' (rota con pg.arriba y pg.abajo)
+   // Máximo número de fuentes
+   GLint max_num_fuentes = 0;
+
+   // Indice de la fuente actual 
+   unsigned i_fuente_actual = 0;
 };
 
-// --------------------------------------------------------------------------
-// PilaMateriales:clase para un vector (usado como pila FIFO) con punteros a
-// materiales, y además un puntero al material actual.
-//
+// PilaMateriales: Clase para un vector (usado como pila FIFO) con punteros a materiales
 class PilaMateriales
 {
 public:
-   PilaMateriales() {}
-   void push();                          // guarda el material actual en la pila (NO puede ser nulo)
-   void activar(Material *nuevo_actual); // cambia el material actual y lo activa
-   void pop();                           // invoca 'activar' para el material en el tope y lo elimina del tope
+   PilaMateriales(){}
+   // Guarda el material actual en la pila (NO puede ser nulo)
+   void push();
+   // Cambia el material actual y lo activa
+   void activar(Material *nuevo_actual);
+   // Invoca 'activar' para el material en el tope y lo elimina del tope
+   void pop();
 
 private:
-   std::vector<Material *> vector_materiales; // pila de materiales guardados
-   Material *actual = nullptr;                // material actual
+   std::vector<Material *> vector_materiales;
+   Material *actual = nullptr;
 };
 
 // --------------------------------------------------------------------------
-// Actualizar una colección de fuentes en función de una tecla GLFW pulsada
-// (se usa el código glfw de la tecla, se llama desde 'main.cpp' con L pulsada)
-// devuelve 'true' sii se ha actualizado algo
-
+// Actualizar una colección de fuentes en función de una tecla GLFW pulsada (se usa el código glfw de la tecla, se llama desde 'main.cpp' con L pulsada)
+// Devuelve 'true' sii se ha actualizado algo
 bool ProcesaTeclaFuenteLuz(ColFuentesLuz *col_fuentes, int glfw_key);
 
-// *********************************************************************
-// Clase Col2Fuentes
-// ---------------
-// derivada de 'ColFuentes' incluye dos fuentes de luz.
-
+// Clase Col2Fuentes: Incluye dos fuentes de luz predefinidas
 class Col2Fuentes : public ColFuentesLuz
 {
 public:

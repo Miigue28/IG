@@ -45,28 +45,30 @@ void FGE_PulsarLevantarTecla(GLFWwindow *window, int key, int scancode, int acti
    assert(aplicacionIG != nullptr);
    using namespace std;
 
-   if (action == GLFW_PRESS) // solo estamos interesados en el evento de levantar una tecla
-      return;                // (ignoramos el evento generado al pulsar)
+   // Solo estamos interesados en el evento de levantar una tecla
+   if (action == GLFW_PRESS) return;
 
    bool redib = true; // true sii al final de esta función es necesario redibujar
 
    // Recuperar y comprobar camara y objeto actual
    Escena *escena = aplicacionIG->escenas[aplicacionIG->ind_escena_act];
    assert(escena != nullptr);
+
    CamaraInteractiva *camara = escena->camaraActual();
    assert(camara != nullptr);
+
    Objeto3D *objeto = escena->objetoActual();
    assert(objeto != nullptr);
 
-   // si está pulsada la tecla 'L', actualizar la colección de fuentes de luz y terminar
+   // Si está pulsada la tecla 'L', actualizar la colección de fuentes de luz y terminar
    if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS)
    {
-      // COMPLETAR: Práctica 4: procesar la tecla 'key' para actualizar la colección de fuentes
-      // de luz actual (usar método 'colFuentes' de la escena activa para obtener un puntero), llamar a
-      // 'ProcesaTeclaFuenteLuz', si devuelve 'true', forzar revisualizar escena (asignar 'true' a 'apl->revisualizar_escena')
-      // .....
+      // Procesar pulsación de una tecla en la configuración de las fuentes de luz
+      if (ProcesaTeclaFuenteLuz(escena->colFuentes(), key))
+         aplicacionIG->revisualizar_escena = true;
 
-      return; // finalizar la f.g.e, ya que si está la tecla L pulsada no se mira ninguna otra tecla.
+      // Finalizar la FGE, ya que si está la tecla L pulsada no se mira ninguna otra tecla.
+      return; 
    }
 
    // Si está pulsada la tecla 'A', la tecla se procesa en 'animacion.cpp', actuando sobre el objeto que se está visualizando
@@ -90,23 +92,23 @@ void FGE_PulsarLevantarTecla(GLFWwindow *window, int key, int scancode, int acti
    // Teclas de camara
    case GLFW_KEY_LEFT:
       camara->desplRotarXY(+cam_ab_incre_tecla, 0.0);
-      break;
+   break;
 
    case GLFW_KEY_RIGHT:
       camara->desplRotarXY(-cam_ab_incre_tecla, 0.0);
-      break;
+   break;
 
    case GLFW_KEY_UP:
       camara->desplRotarXY(0.0, +cam_ab_incre_tecla);
-      break;
+   break;
 
    case GLFW_KEY_DOWN:
       camara->desplRotarXY(0.0, -cam_ab_incre_tecla);
-      break;
+   break;
 
    case GLFW_KEY_KP_SUBTRACT: // tecla '-' en el teclado numérico
       camara->moverZ(+cam_d_incre_tecla);
-      break;
+   break;
 
    case GLFW_KEY_KP_ADD: // tecla '+' en el teclado numérico ¿?
       camara->moverZ(-cam_d_incre_tecla);

@@ -34,22 +34,14 @@
 
 #include "ig-aux.h"
 #include "aplicacion-ig.h"
-#include "malla-ind.h" // declaración de 'ContextoVis'
+#include "malla-ind.h"
 #include "lector-ply.h"
-#include "seleccion.h" // para 'ColorDesdeIdent'
-
-// *****************************************************************************
-// funciones auxiliares
-
-// *****************************************************************************
-// métodos de la clase MallaInd.
+#include "seleccion.h" // 'ColorDesdeIdent'
 
 MallaInd::MallaInd()
 {
-   // nombre por defecto
-   ponerNombre("malla indexada, anónima");
+   ponerNombre("Malla indexada anónima");
 }
-// -----------------------------------------------------------------------------
 
 MallaInd::MallaInd(const std::string &nombreIni)
 {
@@ -57,37 +49,55 @@ MallaInd::MallaInd(const std::string &nombreIni)
    ponerNombre(nombreIni);
 }
 
-//-----------------------------------------------------------------------------
-// calcula la tabla de normales de triángulos una sola vez, si no estaba calculada
-
+// Calcula la tabla de normales de triángulos una sola vez, si no estaba calculada
 void MallaInd::calcularNormalesTriangulos()
 {
-
-   // si ya está creada la tabla de normales de triángulos, no es necesario volver a crearla
-   const unsigned nt = triangulos.size();
-   assert(1 <= nt);
+   // Si ya está creada la tabla de normales de triángulos, no es necesario volver a crearla
+   const unsigned num_tri = triangulos.size();
+   assert(1 <= num_tri);
    if (0 < nor_tri.size())
    {
-      assert(nt == nor_tri.size());
+      assert(num_tri == nor_tri.size());
       return;
    }
 
-   // COMPLETAR: Práctica 4: creación de la tabla de normales de triángulos
-   // ....
+   // Creación de la tabla de normales de triángulos
+   for (const auto & triangulo : triangulos)
+   {
+      // Calcular el vector normal al triángulo
+      glm::vec3 a = vertices[triangulo[1]] - vertices[triangulo[0]];
+      glm::vec3 b = vertices[triangulo[2]] - vertices[triangulo[0]];
+      glm::vec3 normal = glm::cross(a, b);
+
+      // Verificamos la longitud del producto vectorial por si el triángulo es degenerado
+      if (glm::l2Norm(normal) == 0)
+         nor_tri.push_back(glm::vec3(0.0f, 0.0f, 0.0f));
+      else
+         nor_tri.push_back(glm::normalize(normal));
+   }
 }
 
-// -----------------------------------------------------------------------------
-// calcula las dos tablas de normales
-
+// Calcula la tabla de normales de vértices
 void MallaInd::calcularNormales()
 {
-   using namespace glm;
-   // COMPLETAR: en la práctica 4: calculo de las normales de la malla
-   // se debe invocar en primer lugar 'calcularNormalesTriangulos'
-   // .......
-}
+   // Calculamos las normales de las caras
+   this->calcularNormalesTriangulos();
 
-// --------------------------------------------------------------------------------------------
+   nor_ver.resize(vertices.size());
+
+   // Calculamos la normal del vértice como suma ponderada de las normales de las caras adyacentes
+   for (size_t i = 0; i < triangulos.size(); ++i)
+   {
+      nor_ver[triangulos[i][0]] += nor_tri[i];
+      nor_ver[triangulos[i][1]] += nor_tri[i];
+      nor_ver[triangulos[i][2]] += nor_tri[i];
+   }
+
+   // Normalizamos las normales obtenidas
+   for (auto & normal : nor_ver)
+      if (glm::l2Norm(normal) != 0)
+         normal = glm::normalize(normal);
+}
 
 void MallaInd::visualizarGL()
 {
@@ -171,10 +181,7 @@ void MallaInd::visualizarGeomGL()
       dvao->habilitarAtrib(ind_atrib_coord_text, GL_TRUE);
 }
 
-// -----------------------------------------------------------------------------
-// Visualizar las normales del objeto, si no tiene tabla de normales imprime
-// advertencia y no hace nada.
-
+// Visualizar las normales del objeto, si no tiene tabla de normales imprime advertencia y no hace nada.
 void MallaInd::visualizarNormalesGL()
 {
    using namespace std;
@@ -184,7 +191,7 @@ void MallaInd::visualizarNormalesGL()
 
    if (nor_ver.size() == 0)
    {
-      cout << "Advertencia: intentando dibujar normales de una malla que no tiene tabla (" << leerNombre() << ")." << endl;
+      cout << "Advertencia: Intentando dibujar normales de una malla que no tiene tabla (" << leerNombre() << ")." << endl;
       return;
    }
 
@@ -198,25 +205,21 @@ void MallaInd::visualizarNormalesGL()
    }
    CError();
 
-   // COMPLETAR: práctica 4: visualizar las normales del objeto MallaInd
-   //
-   // *1* Si el puntero al descriptor de VAO de normales ('dvao_normales') es nulo,
-   //    debemos de crear dicho descriptor, con estos pasos:
-   //
-   //       * Para cada posición 'v_i' de un vértice en el vector 'vertices':
-   //             - Leer la correspondiente normal 'n_i' del vector de normales ('nor_ver').
-   //             - Añadir 'v_i' al vector 'segmentos_normales'.
-   //             - Añadir 'v_i+a*n_i' al vector 'segmentos_normales'.
-   //
-   //       * Crear el objeto descriptor del VAO de normales, para ello se usa el vector
-   //          'segmentos_normales' y se tiene en cuenta que esa descriptor únicamente gestiona
-   //          una tabla de atributos de vértices (la de posiciones, ya que las otras no se
-   //          necesitan).
-   //
-   // *2* Visualizar el VAO de normales, usando el método 'draw' del descriptor, con el
-   //       tipo de primitiva 'GL_LINES'.
-
-   //  ..........
+   // Visualizar las normales del objeto
+   if (dvao_normales == nullptr)
+   {
+      for (unsigned i = 0; i < vertices.size(); ++i)
+      {
+         // Añadir el vértice i-ésimo al vector segmentos_normales
+         segmentos_normales.push_back(nor_ver[i]);
+         // Añadir v_i + a*n_i, donde a es una constante ajustable que puede depender de la escala de los objetos que se visualizan (prueba incialmente con a=1 y luego ajústalo)
+         segmentos_normales.push_back(vertices[i] + 1.0f*nor_ver[i]);
+      }
+      // Crear el objeto descriptor del VAO de normales
+      dvao_normales = new DescrVAO(1, new DescrVBOAtribs(0, segmentos_normales));
+   }
+   // Visualizar el VAO de normales
+   dvao_normales->draw(GL_LINES);
 }
 
 // -----------------------------------------------------------------------------
@@ -245,21 +248,17 @@ void MallaInd::visualizarModoSeleccionGL()
    //
 }
 
-// -----------------------------------------------------------------------------
 // Clase MallaPLY
-
 MallaPLY::MallaPLY(const std::string &nombre_arch)
 {
    ponerNombre(std::string("Malla leída del archivo '") + nombre_arch + "'");
+   // Leer archivo PLY e inicializar la malla
    LeerPLY(nombre_arch, vertices, triangulos);
-
-   // COMPLETAR: práctica 4: invocar  a 'calcularNormales' para el cálculo de normales
-   // .................
+   // Calcular las normales de los vértices
+   calcularNormales();
 }
 
-// -----------------------------------------------------------------------------
 // Clase Cubo
-
 Cubo::Cubo() : MallaInd("Cubo 8 vértices")
 {
    vertices =
@@ -288,6 +287,99 @@ Cubo::Cubo() : MallaInd("Cubo 8 vértices")
      {1, 5, 7},
      {1, 7, 3} // Z+ (+1)
    };
+
+   this->calcularNormales();
+}
+
+Cubo24::Cubo24() : MallaInd("Cubo 24 vértices")
+{
+   vertices =
+   {
+      {+1.0, -1.0, +1.0}, // 0
+      {+1.0, +1.0, +1.0}, // 1
+      {+1.0, +1.0, -1.0}, // 2
+      {+1.0, -1.0, -1.0}, // 3
+
+      {-1.0, -1.0, +1.0}, // 4
+      {-1.0, +1.0, +1.0}, // 5
+      {+1.0, +1.0, +1.0}, // 6
+      {+1.0, -1.0, +1.0}, // 7
+
+      {-1.0, -1.0, -1.0}, // 8
+      {-1.0, +1.0, -1.0}, // 9
+      {-1.0, +1.0, +1.0}, // 10
+      {-1.0, -1.0, +1.0}, // 11
+
+      {+1.0, -1.0, -1.0}, // 12
+      {+1.0, +1.0, -1.0}, // 13
+      {-1.0, +1.0, -1.0}, // 14
+      {-1.0, -1.0, -1.0}, // 15
+
+      {+1.0, +1.0, +1.0}, // 16
+      {-1.0, +1.0, +1.0}, // 17
+      {-1.0, +1.0, -1.0}, // 18
+      {+1.0, +1.0, -1.0}, // 19
+
+      {+1.0, -1.0, +1.0}, // 20
+      {-1.0, -1.0, +1.0}, // 21
+      {-1.0, -1.0, -1.0}, // 22
+      {+1.0, -1.0, -1.0}  // 23
+   };
+
+   triangulos =
+   {
+      {0, 3, 2},
+      {0, 2, 1},
+
+      {4, 7, 6},
+      {4, 6, 5},
+
+      {8, 11, 10},
+      {8, 10, 9},
+
+      {12, 15, 14},
+      {12, 14, 13},
+
+      {16, 19, 18},
+      {16, 18, 17},
+
+      {20, 22, 23},
+      {20, 21, 22}
+   };
+   
+   cc_tt_ver = 
+   {
+      {0.0, 1.0-0.0},
+      {0.0, 1.0-1.0},
+      {1.0, 1.0-1.0},
+      {1.0, 1.0-0.0},
+
+      {0.0, 1.0-0.0},
+      {0.0, 1.0-1.0},
+      {1.0, 1.0-1.0},
+      {1.0, 1.0-0.0},
+
+      {0.0, 1.0-0.0},
+      {0.0, 1.0-1.0},
+      {1.0, 1.0-1.0},
+      {1.0, 1.0-0.0},
+
+      {0.0, 1.0-0.0},
+      {0.0, 1.0-1.0},
+      {1.0, 1.0-1.0},
+      {1.0, 1.0-0.0},
+
+      {0.0, 1.0-0.0},
+      {0.0, 1.0-1.0},
+      {1.0, 1.0-1.0},
+      {1.0, 1.0-0.0},
+
+      {0.0, 1.0-0.0},
+      {0.0, 1.0-1.0},
+      {1.0, 1.0-1.0},
+      {1.0, 1.0-0.0}
+   };
+   this->calcularNormales();
 }
 
 Tetraedro::Tetraedro() : MallaInd("Tetraedro 4 vértices")
@@ -307,6 +399,7 @@ Tetraedro::Tetraedro() : MallaInd("Tetraedro 4 vértices")
       {1, 2, 3},
       {0, 2, 3}
    };
+   this->calcularNormales();
 }
 
 CuboColores::CuboColores() : MallaInd("Cubo 8 vértices colorido")

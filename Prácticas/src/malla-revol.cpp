@@ -41,27 +41,72 @@
 using namespace std;
 
 // Método que crea las tablas de vértices, triángulos, normales y cc.de.tt.
-// a partir de un perfil y el número de copias que queremos de dicho perfil.
 void MallaRevol::inicializar(const std::vector<glm::vec3> &perfil, const unsigned num_copias)
 {
-   using namespace glm;
-
-   const double angle = (2*M_PI)/(num_copias-1);
    const size_t num_vertices = perfil.size();
 
-   // Creación de la tabla de vértices por revolución del perfil
+   // Creación de la tabla de normales de aristas del perfil
+   std::vector<glm::vec3> nor_aris_perfil;
+   glm::vec3 edge, normal;
+   for (size_t i = 0; i < num_vertices - 1; ++i)
+   {
+      // Calculamos la arista que forman dos vértices consecutivos
+      edge = perfil[i+1] - perfil[i];
+      // Calculamos la normal de la arista
+      normal = rotateZ(-glm::radians(90.0f), edge);
+      // Normalizamos la normal
+      if (glm::l2Norm(normal) != 0)
+         nor_aris_perfil.push_back(glm::normalize(normal));
+      else
+         nor_aris_perfil.push_back({0.0f, 0.0f, 0.0f});
+   }
+
+   // Creación de la tabla de normales de vértices del perfil
+   std::vector<glm::vec3> nor_ver_perfil;
+   nor_ver_perfil.push_back(nor_aris_perfil[0]);
+   for (size_t i = 1; i < num_vertices; ++i)
+   {
+      // Calculamos la normal del vértice como promedio de las aristas adyacentes
+      nor_ver_perfil.push_back(glm::normalize(nor_aris_perfil[i-1] + nor_aris_perfil[i]));
+   }
+   nor_ver_perfil.push_back(nor_aris_perfil.back());
+
+   // Creación de la tabla de distancias de aristas para cálculo de coordenadas de textura
+   std::vector<unsigned> dist;
+   double dist_sum = 0.0f;
+   for (size_t i = 0; i < num_vertices - 1; ++i)
+   {
+      // Distancia euclídea entre vértices adyacentes
+      dist.push_back(glm::l2Norm(perfil[i+1] - perfil[i]));
+      dist_sum += dist.back();
+   }
+
+   // Creación de la tabla de distancias de vértices a lo largo del perfil para cálculo de coordenadas de textura
+   std::vector<double> dist_perfil;
+   double idist_sum = 0.0f;
+   for (size_t i = 0; i < num_vertices; ++i)
+   {
+      dist_perfil.push_back(idist_sum / dist_sum);
+      idist_sum += dist[i];
+   }
+
+   // Creación de la tabla de vértices, normales y coordenadas de texturas por revolución del perfil
+   const double angle = (2*M_PI)/(num_copias - 1);
    for (size_t i = 0; i < num_copias; i++)
    {
       for (size_t j = 0; j < num_vertices; j++)
       {
-         vec3 vertex = rotateVertexYAxis(angle*i, perfil[j]);
+         glm::vec3 vertex = rotateY(angle*i, perfil[j]);
          vertices.push_back(vertex);
+         glm::vec3 normal = rotateY(angle*i, nor_ver_perfil[j]);
+         nor_ver.push_back(normal);
+         glm::vec2 texture = {static_cast<float>(i)/static_cast<float>(num_copias - 1.0), 1.0 - dist_perfil[j]};
+         cc_tt_ver.push_back(texture);
       }
    }
 
-   size_t index;
-
    // Creación de la tabla de triángulos
+   size_t index;
    for (size_t i = 0; i < num_copias - 1; i++)
    {
       for (size_t j = 0; j < num_vertices - 1; j++)
@@ -74,7 +119,6 @@ void MallaRevol::inicializar(const std::vector<glm::vec3> &perfil, const unsigne
 }
 
 // Método que crea las tablas de vértices, triángulos, normales y cc.de.tt.
-// a partir de un perfil y el número de copias que queremos de dicho perfil.
 void MallaRevol::inicializarX(const std::vector<glm::vec3> &perfil, const unsigned num_copias)
 {
    using namespace glm;
@@ -87,7 +131,7 @@ void MallaRevol::inicializarX(const std::vector<glm::vec3> &perfil, const unsign
    {
       for (size_t j = 0; j < num_vertices; j++)
       {
-         vec3 vertex = rotateVertexXAxis(angle*i, perfil[j]);
+         vec3 vertex = rotateX(angle*i, perfil[j]);
          vertices.push_back(vertex);
       }
    }
@@ -107,7 +151,6 @@ void MallaRevol::inicializarX(const std::vector<glm::vec3> &perfil, const unsign
 }
 
 // Método que crea las tablas de vértices, triángulos, normales y cc.de.tt.
-// a partir de un perfil y el número de copias que queremos de dicho perfil.
 void MallaRevol::inicializar(const std::vector<glm::vec3> &perfil, const unsigned num_copias, const double angle)
 {
    using namespace glm;
@@ -120,7 +163,7 @@ void MallaRevol::inicializar(const std::vector<glm::vec3> &perfil, const unsigne
    {
       for (size_t j = 0; j < num_vertices; j++)
       {
-         vec3 vertex = rotateVertexYAxis(subangles*i, perfil[j]);
+         vec3 vertex = rotateY(subangles*i, perfil[j]);
          vertices.push_back(vertex);
       }
    }
@@ -139,16 +182,7 @@ void MallaRevol::inicializar(const std::vector<glm::vec3> &perfil, const unsigne
    }
 }
 
-glm::vec3 MallaRevol::rotateVertexYAxis(const double angle, const glm::vec3 & vertex)
-{
-   glm::vec3 out;
-   out.x = cos(angle)*vertex.x + sin(angle)*vertex.z;
-   out.y = vertex.y;
-   out.z = - sin(angle)*vertex.x + cos(angle)*vertex.z;
-   return out;
-}
-
-glm::vec3 MallaRevol::rotateVertexXAxis(const double angle, const glm::vec3 & vertex)
+glm::vec3 MallaRevol::rotateX(const double angle, const glm::vec3 & vertex)
 {
    glm::vec3 out;
    out.x = vertex.x;
@@ -157,9 +191,25 @@ glm::vec3 MallaRevol::rotateVertexXAxis(const double angle, const glm::vec3 & ve
    return out;
 }
 
-// -----------------------------------------------------------------------------
-// Constructor, a partir de un archivo PLY
+glm::vec3 MallaRevol::rotateY(const double angle, const glm::vec3 & vertex)
+{
+   glm::vec3 out;
+   out.x = cos(angle)*vertex.x + sin(angle)*vertex.z;
+   out.y = vertex.y;
+   out.z = - sin(angle)*vertex.x + cos(angle)*vertex.z;
+   return out;
+}
 
+glm::vec3 MallaRevol::rotateZ(const double angle, const glm::vec3 & vertex)
+{
+   glm::vec3 out;
+   out.z = vertex.z;
+   out.x = cos(angle)*vertex.x + sin(angle)*vertex.y;
+   out.y = - sin(angle)*vertex.x + cos(angle)*vertex.y;
+   return out;
+}
+
+// Constructor, a partir de un archivo PLY
 MallaRevolPLY::MallaRevolPLY(const std::string &nombre_arch, const unsigned nperfiles)
 {
    std::vector<glm::vec3> perfil;
@@ -168,9 +218,6 @@ MallaRevolPLY::MallaRevolPLY(const std::string &nombre_arch, const unsigned nper
    LeerVerticesPLY(nombre_arch, perfil);
    inicializar(perfil, nperfiles);
 }
-
-// -----------------------------------------------------------------------------
-// Clase Cilindro
 
 Cilinder::Cilinder(const int num_verts_per, const unsigned nperfiles)
 {
@@ -186,14 +233,12 @@ Cilinder::Cilinder(const int num_verts_per, const unsigned nperfiles)
    inicializar(perfil, nperfiles);
 }
 
-// -----------------------------------------------------------------------------
-// Clase Cono
-
 Cone::Cone(const int num_verts_per, const unsigned nperfiles)
 {
    std::vector<glm::vec3> perfil;
 
    ponerNombre(std::string("Cono de Revolución"));
+
    // La base tiene centro en el origen, el radio y la altura son 1
    for (int i = 0; i <= num_verts_per; i++)
    {
@@ -203,9 +248,6 @@ Cone::Cone(const int num_verts_per, const unsigned nperfiles)
    inicializar(perfil, nperfiles);
 }
 
-// -----------------------------------------------------------------------------
-// Clase Esfera
-
 Sphere::Sphere(const int num_verts_per, const unsigned nperfiles)
 {
    std::vector<glm::vec3> perfil;
@@ -213,6 +255,7 @@ Sphere::Sphere(const int num_verts_per, const unsigned nperfiles)
    const float lowerbound = 1.5*M_PI;
 
    ponerNombre(std::string("Esfera de Revolución"));
+
    // La esfera tiene el centro en el origen, el radio es 1
    for (int i = 0; i <= num_verts_per; i++)
    {

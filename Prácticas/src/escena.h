@@ -123,4 +123,10 @@ public:
    Escena3();
 };
 
+class Escena4 : public Escena
+{
+public:
+   Escena4();
+};
+
 #endif // ESCENA_H

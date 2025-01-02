@@ -49,19 +49,14 @@
 #include "materiales-luces.h"
 #include "escena.h"
 #include "modelo-jer.h"
-
-// -----------------------------------------------------------------------------------------------
+#include "examen-ec-p123.h"
+#include "latapeones.h"
 
 Escena::Escena()
 {
-   // COMPLETAR: práctica 4: inicializar la colección de fuentes y el material inicial
-   //
-   // Se debe dar un valor inicial adecuado a las variables de instancia 'col_fuentes' y 'material_ini'
-   //
-   // - Para 'col_fuentes', se usará una instancia de 'Col2Fuentes'
-   // - Se deben de elegir los parámetros del material.
-   //
-   // ...
+   // Iniciar la colección de fuentes y el material inicial
+   col_fuentes = new Col2Fuentes();
+   material_ini = new Material();
 
    // COMPLETAR: práctica 5: añadir varias cámaras perspectiva y ortogonales al vector de cámaras de la escena
    //
@@ -69,10 +64,8 @@ Escena::Escena()
    // Eliminar este 'push_back' de la cámara orbital simple ('CamaraOrbitalSimple') por varias cámaras de 3 modos ('Camara3Modos')
    camaras.push_back(new CamaraOrbitalSimple());
 }
-// -----------------------------------------------------------------------------------------------
-// Visualiza la escena en la ventana actual, usando la configuración especificada en 'cv'
-// (pone 'apl->modo_selecion' a 'false' y queda así)
 
+// Visualiza la escena en la ventana actual, usando la configuración especificada en el cauce gráfico
 void Escena::visualizarGL()
 {
    assert(aplicacionIG != nullptr);
@@ -130,15 +123,16 @@ void Escena::visualizarGL()
 
    if (aplicacionIG->iluminacion)
    {
-      // COMPLETAR: práctica 4: activar evaluación del MIL (y desactivar texturas)
-      //
-      // * habilitar evaluación del MIL en el cauce (fijarEvalMIL)
-      // * activar la colección de fuentes de la escena
-      // * activar el material inicial (usando 'pila_materiales')
-      // ....
+      // Habilitar evaluación del MIL en el cauce
+      cauce->fijarEvalMIL(true);
+      // Activar la colección de fuentes de la escena
+      col_fuentes->activar();
+      // Activar el material inicial (usando pila_materiales)
+      (aplicacionIG->pila_materiales)->activar(material_ini);
    }
-   else // si la iluminación no está activada, deshabilitar MIL y texturas
+   else
    {
+      // Deshabilitamos el MIL y las texturas
       cauce->fijarEvalMIL(false);
       cauce->fijarEvalText(false);
    }
@@ -208,27 +202,22 @@ void Escena::visualizarGL_Seleccion()
    // ........
 }
 
-// -----------------------------------------------------------------------------------------------
-// visualiza las normales del objeto actual de la escena
-
+// Visualiza las normales del objeto actual de la escena
 void Escena::visualizarNormales()
 {
-   // comprobar precondiciones
    assert(aplicacionIG != nullptr);
    Cauce *cauce = aplicacionIG->cauce;
    assert(cauce != nullptr);
 
-   // COMPLETAR: práctica 4: visualizar normales del objeto actual de la escena
-   //
-   // Este código debe dar estos pasos:
-   //
-   // 1. Configurar el cauce de la forma adecuada, es decir:
-   //      * Desactivar la iluminación (con 'fijarEvalMIL')
-   //      * Desactivar el uso de texturas (con 'fijarEvalText')
-   //      * fijar el color (con 'fijarColor')
-   // 2. Visualizar las normales del objeto actual de la escena (con el método 'visualizarNormalesGL')
+   // Desactivar la iluminación
+   cauce->fijarEvalMIL(false);
+   // Desactivar el uso de texturas
+   cauce->fijarEvalText(false);
+   // Fijar el color
+   cauce->fijarColor(1.0, 1.0, 1.0);
+   // Visualizar las normales del objeto actual de la escena
+   objetoActual()->visualizarNormalesGL();
 
-   // ......
 }
 
 // -----------------------------------------------------------------------------------------------
@@ -299,7 +288,7 @@ Escena1::Escena1()
    //objetos.push_back(new Cuadrado());
    //objetos.push_back(new PiramideL());
    //objetos.push_back(new EstrellaZ(8));
-   objetos.push_back(new Leaflet(3));
+   objetos.push_back(new Ejercicio01());
 }
 
 // -------------------------------------------------------------------------
@@ -315,9 +304,10 @@ Escena2::Escena2()
    //objetos.push_back(new Cilinder(50, 50));
    //objetos.push_back(new Cone(50, 50));
    //objetos.push_back(new Sphere(50, 50));
-   objetos.push_back(new PiramideEstrellaZ(8));
+   //objetos.push_back(new PiramideEstrellaZ(8));
    //objetos.push_back(new RejillaY(3, 3));
    //objetos.push_back(new MallaTorre(3));
+   objetos.push_back(new Ejercicio02(1));
 }
 
 // -------------------------------------------------------------------------
@@ -329,16 +319,18 @@ Escena3::Escena3()
 
    //objetos.push_back(new GrafoEstrellaX(6));
    //objetos.push_back(new GrafoCubos());
-   objetos.push_back(new CubePair(0.5f, 0.25f));
-   objetos.push_back(new Trombone());
+   //objetos.push_back(new CubePair(0.5f, 0.25f));
+   //objetos.push_back(new Trombone());
+   objetos.push_back(new Ejercicio03(2, 0.2));
 }
 
-// ----------------------------------------------------------------------------
-// COMPLETAR: práctica 4: escribir implementación del constructor de 'Escena4'.
-//
-// Añadir la implementación del constructor de la clase Escena4 para construir
-// los objetos que se indican en el guion de la práctica 4
-// .......
+Escena4::Escena4()
+{
+   using namespace std;
+   cout << "Creando objetos de la Práctica 4" << endl;
+
+   objetos.push_back(new LataPeones());
+}
 
 // ----------------------------------------------------------------------
 // COMPLETAR: práctica 5: escribir implementación del constructor de 'Escena5'.
