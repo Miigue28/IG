@@ -56,7 +56,8 @@ Escena::Escena()
 {
    // Iniciar la colección de fuentes y el material inicial
    col_fuentes = new Col2Fuentes();
-   material_ini = new Material();
+   //material_ini = new Material();
+   material_ini = new Material(0.4f, 0.8f, 0.0f, 2.0f);
 
    // COMPLETAR: práctica 5: añadir varias cámaras perspectiva y ortogonales al vector de cámaras de la escena
    //
@@ -329,6 +330,7 @@ Escena4::Escena4()
    using namespace std;
    cout << "Creando objetos de la Práctica 4" << endl;
 
+   objetos.push_back(new NodoCubo24());
    objetos.push_back(new LataPeones());
 }
 

@@ -70,10 +70,10 @@ void MallaInd::calcularNormalesTriangulos()
       glm::vec3 normal = glm::cross(a, b);
 
       // Verificamos la longitud del producto vectorial por si el triángulo es degenerado
-      if (glm::l2Norm(normal) == 0)
-         nor_tri.push_back(glm::vec3(0.0f, 0.0f, 0.0f));
-      else
+      if (glm::length(normal) != 0.0)
          nor_tri.push_back(glm::normalize(normal));
+      else
+         nor_tri.push_back(glm::vec3(0.0f, 0.0f, 0.0f));
    }
 }
 
@@ -83,7 +83,7 @@ void MallaInd::calcularNormales()
    // Calculamos las normales de las caras
    this->calcularNormalesTriangulos();
 
-   nor_ver.resize(vertices.size());
+   nor_ver = std::vector<glm::vec3>(vertices.size(), glm::vec3(0.0f, 0.0f, 0.0f));
 
    // Calculamos la normal del vértice como suma ponderada de las normales de las caras adyacentes
    for (size_t i = 0; i < triangulos.size(); ++i)
@@ -95,7 +95,7 @@ void MallaInd::calcularNormales()
 
    // Normalizamos las normales obtenidas
    for (auto & normal : nor_ver)
-      if (glm::l2Norm(normal) != 0)
+      if (glm::length(normal) != 0.0)
          normal = glm::normalize(normal);
 }
 
@@ -211,12 +211,13 @@ void MallaInd::visualizarNormalesGL()
       for (unsigned i = 0; i < vertices.size(); ++i)
       {
          // Añadir el vértice i-ésimo al vector segmentos_normales
-         segmentos_normales.push_back(nor_ver[i]);
+         //segmentos_normales.push_back(nor_ver[i]);
+         segmentos_normales.push_back(vertices[i]);
          // Añadir v_i + a*n_i, donde a es una constante ajustable que puede depender de la escala de los objetos que se visualizan (prueba incialmente con a=1 y luego ajústalo)
-         segmentos_normales.push_back(vertices[i] + 1.0f*nor_ver[i]);
+         segmentos_normales.push_back(vertices[i] + (0.35f*nor_ver[i]));
       }
       // Crear el objeto descriptor del VAO de normales
-      dvao_normales = new DescrVAO(1, new DescrVBOAtribs(0, segmentos_normales));
+      dvao_normales = new DescrVAO(numero_atributos_cauce, new DescrVBOAtribs(ind_atrib_posiciones, segmentos_normales));
    }
    // Visualizar el VAO de normales
    dvao_normales->draw(GL_LINES);
@@ -346,7 +347,7 @@ Cubo24::Cubo24() : MallaInd("Cubo 24 vértices")
       {20, 22, 23},
       {20, 21, 22}
    };
-   
+
    cc_tt_ver = 
    {
       {0.0, 1.0-0.0},

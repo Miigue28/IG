@@ -133,8 +133,8 @@ void NodoGrafoEscena::visualizarGL()
          break;
          // Si la entrada es de tipo material: activar el material
          case TipoEntNGE::material: 
-            if (aplicacionIG->iluminacion)
-               pila_materiales->activar(entrada.material); 
+            //if (aplicacionIG->iluminacion)
+            pila_materiales->activar(entrada.material); 
          break;
          case TipoEntNGE::noInicializado:
             std::cout << "Entrada no inicializada" << std::endl;
@@ -203,8 +203,12 @@ void NodoGrafoEscena::visualizarNormalesGL()
    {
       switch (entrada.tipo)
       {
-         case TipoEntNGE::objeto: (entrada.objeto)->visualizarNormalesGL(); break;
-         case TipoEntNGE::transformacion: cauce->compMM(*(entrada.matriz)); break;
+         case TipoEntNGE::objeto: 
+            (entrada.objeto)->visualizarNormalesGL(); 
+         break;
+         case TipoEntNGE::transformacion: 
+            cauce->compMM(*(entrada.matriz)); 
+         break;
          // Ignoramos el resto
          case TipoEntNGE::material: break;
          case TipoEntNGE::noInicializado: break;

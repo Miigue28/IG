@@ -9,4 +9,16 @@ public:
     LataPeones();
 };
 
+class Lata : public NodoGrafoEscena
+{
+public:
+    Lata(const std::string & filename);
+};
+
+class Peon : public NodoGrafoEscena
+{
+public:
+    Peon(int profiles);
+};
+
 #endif

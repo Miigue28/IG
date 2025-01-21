@@ -43,11 +43,12 @@ const bool trazam = false;
 Textura::Textura(const std::string &nombreArchivoJPG)
 {
    // Eliminamos el path del nombre del archivo
-   size_t index = nombreArchivoJPG.find_last_of('/');
-   std::string parsed_filename = nombreArchivoJPG.substr(index + 1);
+   //size_t index = nombreArchivoJPG.find_last_of('/');
+   //std::string parsed_filename = nombreArchivoJPG.substr(index + 1);
 
    // Cargamos la imagen
-   imagen = LeerArchivoJPEG(parsed_filename.c_str(), ancho, alto);
+   //imagen = LeerArchivoJPEG(parsed_filename.c_str(), ancho, alto);
+   imagen = LeerArchivoJPEG(nombreArchivoJPG.c_str(), ancho, alto);
 }
 
 // Por ahora, se asume la unidad de texturas #0
@@ -70,6 +71,8 @@ void Textura::enviar()
    // Selección de texels para texturas fuera de rango
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+   enviada = true;
 }
 
 Textura::~Textura()
@@ -94,7 +97,6 @@ void Textura::activar()
    if (!enviada)
    {
       enviar();
-      enviada = true;
    }
 
    cauce->fijarEvalText(true, ident_textura);
@@ -104,27 +106,29 @@ void Textura::activar()
 TexturaXY::TexturaXY(const std::string &nom) : Textura(nom)
 {
    modo_gen_ct = mgct_coords_objeto;
-   coefs_s[0] = 1.0f / 2.0f;
-   coefs_s[1] = 0.0f;
-   coefs_s[2] = 0.0f;
-   coefs_s[3] = 0.5f;
-   coefs_t[0] = 0.0f;
-   coefs_t[1] = 1.0f / 2.0f;
-   coefs_t[2] = 0.0f;
-   coefs_t[3] = 0.5f;
+   //coefs_s[0] = 1.0f / 2.0f;
+   //coefs_s[1] = 0.0f;
+   //coefs_s[2] = 0.0f;
+   //coefs_s[3] = 0.5f;
+   //coefs_t[0] = 0.0f;
+   //coefs_t[1] = 1.0f / 2.0f;
+   //coefs_t[2] = 0.0f;
+   //coefs_t[3] = 0.5f;
 }
 
 TexturaXZ::TexturaXZ(const std::string &nom) : Textura(nom)
 {
    modo_gen_ct = mgct_coords_objeto;
-   coefs_s[0] = 1.0f / 2.0f;
-   coefs_s[1] = 0.0f;
-   coefs_s[2] = 0.0f;
-   coefs_s[3] = 0.5f;
-   coefs_t[0] = 0.0f;
-   coefs_t[1] = 0.0f;
-   coefs_t[2] = 1.0f / 2.0f;
-   coefs_t[3] = 0.5f;
+   //coefs_s[0] = 1.0f / 2.0f;
+   //coefs_s[1] = 0.0f;
+   //coefs_s[2] = 0.0f;
+   //coefs_s[3] = 0.5f;
+   //coefs_t[0] = 0.0f;
+   //coefs_t[1] = 0.0f;
+   //coefs_t[2] = 1.0f / 2.0f;
+   //coefs_t[3] = 0.5f;
+   coefs_t[1] = 0.0;
+   coefs_t[2] = 1.0;
 }
 
 // Crea un material usando un color plano y los coeficientes de las componentes
@@ -179,6 +183,10 @@ void Material::activar()
    if (textura != nullptr)
    {
       textura->activar();
+   }
+   else
+   {
+      cauce->fijarEvalText(false);
    }
 
    // Fijar los parámetros del material
@@ -261,7 +269,7 @@ void ColFuentesLuz::activar()
       y = cos(theta);
       z = sin(theta) * cos(phi);
 
-      direcciones.push_back({x, y, z, 0.0});
+      direcciones.push_back({x, y, z, 0.0f});
    }
 
    // Activar una colección de fuentes de luz

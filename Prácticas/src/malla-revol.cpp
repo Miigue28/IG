@@ -43,19 +43,20 @@ using namespace std;
 // Método que crea las tablas de vértices, triángulos, normales y cc.de.tt.
 void MallaRevol::inicializar(const std::vector<glm::vec3> &perfil, const unsigned num_copias)
 {
-   const size_t num_vertices = perfil.size();
+   const size_t num_vert_perfil = perfil.size();
 
    // Creación de la tabla de normales de aristas del perfil
    std::vector<glm::vec3> nor_aris_perfil;
    glm::vec3 edge, normal;
-   for (size_t i = 0; i < num_vertices - 1; ++i)
+   for (size_t i = 0; i < num_vert_perfil - 1; ++i)
    {
       // Calculamos la arista que forman dos vértices consecutivos
       edge = perfil[i+1] - perfil[i];
       // Calculamos la normal de la arista
-      normal = rotateZ(-glm::radians(90.0f), edge);
+      normal = rotateZ(glm::radians(90.0f), edge);
+
       // Normalizamos la normal
-      if (glm::l2Norm(normal) != 0)
+      if (glm::length(normal) != 0.0)
          nor_aris_perfil.push_back(glm::normalize(normal));
       else
          nor_aris_perfil.push_back({0.0f, 0.0f, 0.0f});
@@ -64,7 +65,7 @@ void MallaRevol::inicializar(const std::vector<glm::vec3> &perfil, const unsigne
    // Creación de la tabla de normales de vértices del perfil
    std::vector<glm::vec3> nor_ver_perfil;
    nor_ver_perfil.push_back(nor_aris_perfil[0]);
-   for (size_t i = 1; i < num_vertices; ++i)
+   for (size_t i = 1; i < num_vert_perfil - 1; ++i)
    {
       // Calculamos la normal del vértice como promedio de las aristas adyacentes
       nor_ver_perfil.push_back(glm::normalize(nor_aris_perfil[i-1] + nor_aris_perfil[i]));
@@ -72,35 +73,40 @@ void MallaRevol::inicializar(const std::vector<glm::vec3> &perfil, const unsigne
    nor_ver_perfil.push_back(nor_aris_perfil.back());
 
    // Creación de la tabla de distancias de aristas para cálculo de coordenadas de textura
-   std::vector<unsigned> dist;
-   double dist_sum = 0.0f;
-   for (size_t i = 0; i < num_vertices - 1; ++i)
+   std::vector<float> d;
+   for (size_t i = 0; i < num_vert_perfil - 1; ++i)
    {
       // Distancia euclídea entre vértices adyacentes
-      dist.push_back(glm::l2Norm(perfil[i+1] - perfil[i]));
-      dist_sum += dist.back();
+      d.push_back(glm::length(perfil[i+1] - perfil[i]));
    }
+
+   std::vector<float> partial_sums;
+   partial_sums.push_back(0.0f);
+   for (size_t i = 1; i < num_vert_perfil; ++i)
+   {
+      partial_sums.push_back(partial_sums[i-1] + d[i-1]);
+   }
+   float sum = partial_sums[num_vert_perfil - 1];
 
    // Creación de la tabla de distancias de vértices a lo largo del perfil para cálculo de coordenadas de textura
-   std::vector<double> dist_perfil;
-   double idist_sum = 0.0f;
-   for (size_t i = 0; i < num_vertices; ++i)
+   std::vector<float> t;
+   t.push_back(0.0f);
+   for (size_t i = 1; i < num_vert_perfil; ++i)
    {
-      dist_perfil.push_back(idist_sum / dist_sum);
-      idist_sum += dist[i];
+      t.push_back(partial_sums[i] / sum);
    }
-
+   
    // Creación de la tabla de vértices, normales y coordenadas de texturas por revolución del perfil
    const double angle = (2*M_PI)/(num_copias - 1);
    for (size_t i = 0; i < num_copias; i++)
    {
-      for (size_t j = 0; j < num_vertices; j++)
+      for (size_t j = 0; j < num_vert_perfil; j++)
       {
          glm::vec3 vertex = rotateY(angle*i, perfil[j]);
          vertices.push_back(vertex);
          glm::vec3 normal = rotateY(angle*i, nor_ver_perfil[j]);
          nor_ver.push_back(normal);
-         glm::vec2 texture = {static_cast<float>(i)/static_cast<float>(num_copias - 1.0), 1.0 - dist_perfil[j]};
+         glm::vec2 texture = {static_cast<float>(i)/static_cast<float>(num_copias - 1.0), 1.0 - t[j]};
          cc_tt_ver.push_back(texture);
       }
    }
@@ -109,11 +115,11 @@ void MallaRevol::inicializar(const std::vector<glm::vec3> &perfil, const unsigne
    size_t index;
    for (size_t i = 0; i < num_copias - 1; i++)
    {
-      for (size_t j = 0; j < num_vertices - 1; j++)
+      for (size_t j = 0; j < num_vert_perfil - 1; j++)
       {
-         index = i*num_vertices+j;
-         triangulos.push_back({index, index+num_vertices, index+num_vertices+1});
-         triangulos.push_back({index, index+num_vertices+1, index+1});
+         index = i*num_vert_perfil+j;
+         triangulos.push_back({index, index+num_vert_perfil, index+num_vert_perfil+1});
+         triangulos.push_back({index, index+num_vert_perfil+1, index+1});
       }
    }
 }
