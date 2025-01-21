@@ -885,7 +885,7 @@ Usando la capacidad de evaluar $g$, podemos construir una malla que aproxima cua
 
 Se basa en usar las coordenadas polares (longitud, latitud y radio) del punto $p$. Las coordenadas $(\alpha, \beta, r )$ se obtienen a partir de las coordenadas cartesianas $(x, y, z)$ , normalmente coordenadas de
 objeto, con el origen en un punto central de dicho objeto).
-$$\alpha = a \tan2(z, x) \hspace{1cm} \beta = a \tan 2(y, \sqrt{x^2 + y^2})$$
+$$\alpha = a\tan2(z, x) \hspace{1cm} \beta = a\tan2(y, \sqrt{x^2 + y^2})$$
 Se obtiene $\alpha$ en el rango $[−\pi, \pi]$ y $\beta$ en el rango $[−\pi/2, \pi/2]$. Por tanto, podemos calcular $u$ y $v$ como sigue:
 $$u = \frac{1}{2} + \frac{\alpha}{2\pi} \hspace{1cm} v = \frac{1}{2} + \frac{\beta}{\pi}$$
 
@@ -1287,7 +1287,7 @@ vec3 NormalECC( vec3 vec_obs_ecc )
 El vector hacia la i-ésima fuente de luz (normalizado), en coordenadas de cámara, se calcula en función de la componente W de la posición o dirección a dicha fuente.
 
 ```c++
-vec3 VectorHaciaFuenteECC( int i )
+vec3 VectorHaciaFuenteECC(int i)
 {
 	return (u_pos_dir_luz_ecc[i].w == 1.0) ?
 		normalize(u_pos_dir_luz_ecc[i].xyz - v_posic_ecc.xyz) :
@@ -1355,7 +1355,7 @@ El método `fijarFuentesLuz` se invoca una vez por cuadro:
 void Cauce::fijarFuentesLuz(const vector<vec3> & color, const vector<vec4> & pos_dir_wcc)
 {
 	const unsigned nl = color.size();
-	vector<vec4> pos_dir_ecc ;
+	vector<vec4> pos_dir_ecc;
 	for (unsigned i = 0 ; i < nl ; i++)
 		pos_dir_ecc.push_back(mat_vista * pos_dir_wcc[i]);
 	glUseProgram(id_prog);
