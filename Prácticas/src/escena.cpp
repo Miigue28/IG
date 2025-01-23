@@ -59,11 +59,10 @@ Escena::Escena()
    //material_ini = new Material();
    material_ini = new Material(0.4f, 0.8f, 0.0f, 2.0f);
 
-   // COMPLETAR: práctica 5: añadir varias cámaras perspectiva y ortogonales al vector de cámaras de la escena
-   //
-   // Añadir sentencias 'push_back' para añadir varias cámaras al vector 'camaras'.
-   // Eliminar este 'push_back' de la cámara orbital simple ('CamaraOrbitalSimple') por varias cámaras de 3 modos ('Camara3Modos')
    camaras.push_back(new CamaraOrbitalSimple());
+   //camaras.push_back(new Camara3Modos(true, {5.0, 0.0, 0.0}, 1.0, {0.0, 0.0, 0.0}, 70.0));
+   //camaras.push_back(new Camara3Modos(false, {-5.0, 5.0, 5.0}, 1.0, {0.0, 0.0, 0.0}, 50.0));
+   //camaras.push_back(new Camara3Modos(true, {2.0, 2.0, 2.0}, 1.0, {0.0, 0.0, 0.0}, 70.0));
 }
 
 // Visualiza la escena en la ventana actual, usando la configuración especificada en el cauce gráfico
@@ -165,42 +164,39 @@ void Escena::visualizarGL()
       objeto->visualizarGeomGL();
    }
 }
-// -----------------------------------------------------------------------------------------------
-// Visualiza el objeto actual de la cámara, pero en modo selección
 
+// Visualiza el objeto actual de la cámara, pero en modo selección
 void Escena::visualizarGL_Seleccion()
 {
-   // Comprobar algunas precondiciones y recuperar el cauce (para acortar la anotación)
    assert(aplicacionIG != nullptr);
-   assert(aplicacionIG->cauce != nullptr);
    Cauce *cauce = aplicacionIG->cauce;
+   assert(cauce != nullptr);
    CError();
 
-   // COMPLETAR: práctica 5: visualizar el objeto raiz de esta escena en modo selección
-   //
-   // Se deben dar los siguientes pasos:
+   // Fijar el viewport usando el tamaño de la ventana
+   glViewport(0, 0, aplicacionIG->ventana_tam_x, aplicacionIG->ventana_tam_y);
 
-   // (1) Configurar estado de OpenGL:
-   //       + fijar el viewport (con 'glViewport') usando el tamaño de la ventana (guardado en 'apl'),
-   //       + fijar el modo de polígonos a 'relleno', con 'glPolygonMode'
-   //
-   // ........
+   // Fijar el modo de polígonos a relleno
+   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-   // (2) Activar  y configurar el cauce:
-   //      + Activar el cauce (con el método 'activar')
-   //      + Desactivar iluminación y texturas en el cauce
-   //      + Poner el color actual del cauce a '0' (por defecto los objetos no son seleccionables)
-   // ........
+   // Activar y configurar el cauce desactivando la iluminación y las texturas
+   cauce->activar();
+   cauce->fijarEvalMIL(false);
+   cauce->fijarEvalText(false);
 
-   // (3) Limpiar el framebuffer (color y profundidad) con color (0,0,0) (para indicar que en ningún pixel hay nada seleccionable)
-   // ........
+   // Poner el color actual del cauce a 0 (por defecto los objetos no son seleccionables)
+   cauce->fijarColor({0.0, 0.0, 0.0, 1.0});
 
-   // (4) Recuperar la cámara actual (con 'camaraActual') y activarla en el cauce,
-   // ........
+   // Limpiar el framebuffer con color (0,0,0) para indicar que en ningún pixel hay nada seleccionable
+   glClearColor(0, 0, 0, 1);
+   glClear(GL_DEPTH_BUFFER_BIT);
 
-   // (5) Recuperar (con 'objetoActual') el objeto raíz actual de esta escena y
-   //     visualizarlo con 'visualizarModoSeleccionGL'.
-   // ........
+
+   // Recuperar la cámara actual y activarla en el cauce
+   camaraActual()->activar(*cauce);
+
+   // Recuperar el objeto raiz actual de la escena y visualizarlo en modo seleccion
+   objetoActual()->visualizarModoSeleccionGL();
 }
 
 // Visualiza las normales del objeto actual de la escena
@@ -315,8 +311,7 @@ Escena2::Escena2()
 
 Escena3::Escena3()
 {
-   using namespace std;
-   cout << "Creando objetos de la Práctica 3" << endl;
+   std::cout << "Creando objetos de la Práctica 3" << std::endl;
 
    //objetos.push_back(new GrafoEstrellaX(6));
    //objetos.push_back(new GrafoCubos());
@@ -327,16 +322,15 @@ Escena3::Escena3()
 
 Escena4::Escena4()
 {
-   using namespace std;
-   cout << "Creando objetos de la Práctica 4" << endl;
+   std::cout << "Creando objetos de la Práctica 4" << std::endl;
 
    objetos.push_back(new NodoCubo24());
    objetos.push_back(new LataPeones());
 }
 
-// ----------------------------------------------------------------------
-// COMPLETAR: práctica 5: escribir implementación del constructor de 'Escena5'.
-//
-// Añadir la implementación del constructor de la clase Escena5 para construir
-// los objetos que se indican en el guion de la práctica 5
-// .......
+Escena5::Escena5()
+{
+   std::cout << "Creando objetos de la Práctica 5" << std::endl;
+
+   objetos.push_back(new VariasLatasPeones());
+}

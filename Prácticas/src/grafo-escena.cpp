@@ -218,9 +218,7 @@ void NodoGrafoEscena::visualizarNormalesGL()
    cauce->popMM();
 }
 
-// -----------------------------------------------------------------------------
-// visualizar el objeto en 'modo seleccion', es decir, sin iluminación y con los colores
-// basados en los identificadores de los objetos
+// Visualizar el objeto sin iluminación y con los colores basados en los identificadores de los objetos
 void NodoGrafoEscena::visualizarModoSeleccionGL()
 {
    using namespace std;
@@ -228,21 +226,45 @@ void NodoGrafoEscena::visualizarModoSeleccionGL()
    Cauce *cauce = aplicacionIG->cauce;
    assert(cauce != nullptr);
 
-   // COMPLETAR: práctica 5: visualizar este nodo en modo selección.
-   //
-   // Se debe escribir código para dar estos pasos:
-   //
-   // 2. Leer identificador (con 'leerIdentificador'), si el identificador no es -1
-   //      + Guardar una copia del color actual del cauce (con 'pushColor')
-   //      + Fijar el color del cauce de acuerdo al identificador, (usar 'ColorDesdeIdent').
-   // 3. Guardar una copia de la matriz de modelado (con 'pushMM')
-   // 4. Recorrer la lista de nodos y procesar las entradas transformación o subobjeto:
-   //      + Para las entradas subobjeto, invocar recursivamente a 'visualizarModoSeleccionGL'
-   //      + Para las entradas transformación, componer la matriz (con 'compMM')
-   // 5. Restaurar la matriz de modelado original (con 'popMM')
-   // 6. Si el identificador no es -1, restaurar el color previo del cauce (con 'popColor')
-   //
-   // ........
+   int id = leerIdentificador();
+
+   // Si el nodo tiene identificador
+   if (id != -1)
+   {
+      // Guardar una copia del color actual del cauce
+      cauce->pushColor();
+
+      // Fijar el color del cauce de acuerdo al identificador
+      cauce->fijarColor(ColorDesdeIdent(id));
+   }
+
+   // Guardar una copia de la matriz de modelado
+   cauce->pushMM();
+
+   // Recorrer la lista de nodos y procesar las entradas
+   for (auto & entrada : entradas)
+   {
+      switch (entrada.tipo)
+      {
+      case TipoEntNGE::objeto:
+         entrada.objeto->visualizarModoSeleccionGL();
+      break;
+      case TipoEntNGE::transformacion:
+         cauce->compMM(*(entrada.matriz));
+      break;
+      default:
+      break;
+      }
+   }
+
+   // Restaurar la matriz de modelado original
+   cauce->popMM();
+
+   if (id != -1)
+   {
+      // Restaurar el color previo del cauce
+      cauce->popColor();
+   }
 }
 
 // Añadir una entrada genérica (de cualquier tipo de entrada) al final
@@ -282,28 +304,54 @@ glm::mat4 *NodoGrafoEscena::leerPtrMatriz(unsigned indice)
 
    return entradas[indice].matriz;
 }
-// -----------------------------------------------------------------------------
-// si 'centro_calculado' es 'false', recalcula el centro usando los centros
-// de los hijos (el punto medio de la caja englobante de los centros de hijos)
 
+// Calcula (solo una vez) el centro promediando los centros de los hijos
 void NodoGrafoEscena::calcularCentroOC()
 {
    using namespace std;
    using namespace glm;
 
-   // COMPLETAR: práctica 5: calcular y guardar el centro del nodo
-   //    en coordenadas de objeto (hay que hacerlo recursivamente)
-   //   (si el centro ya ha sido calculado, no volver a hacerlo)
-   // ........
-}
-// -----------------------------------------------------------------------------
-// método para buscar un objeto con un identificador y devolver un puntero al mismo
+   // Si el centro ya ha sido calculado, no volver a hacerlo
+   if (centro_calculado)
+      return;
 
+   int contador_centros = 0;
+   mat4 matriz_modelado = mat4(1.0f);
+   vec3 centro_acumulado = {0.0, 0.0, 0.0};
+
+   // Recorremos recursivamente todas las entradas
+   for (auto & entrada : entradas)
+   {
+      switch (entrada.tipo)
+      {
+      case TipoEntNGE::objeto:
+         // Calculamos el centro de cada subobjeto
+         entrada.objeto->calcularCentroOC();
+         centro_acumulado += vec3(matriz_modelado * vec4(entrada.objeto->leerCentroOC(), 1.0f));
+         contador_centros++;
+      break;
+      case TipoEntNGE::transformacion:
+         matriz_modelado *= *(entrada.matriz);
+      break;
+      default:
+      break;
+      }
+   }
+
+   // Hacemos el promedio de los centros
+   centro_acumulado /= static_cast<float>(contador_centros);
+
+   // Poner centro y apuntar que ya se ha calculado
+   ponerCentroOC(centro_acumulado);
+   centro_calculado = true;
+}
+
+// Método para buscar un objeto con un identificador y devolver un puntero al mismo
 bool NodoGrafoEscena::buscarObjeto(
-    const int ident_busc,       // identificador a buscar
-    const glm::mat4 &mmodelado, // matriz de modelado
-    Objeto3D **objeto,          // (salida) puntero al puntero al objeto
-    glm::vec3 &centro_wc        // (salida) centro del objeto en coordenadas del mundo
+   const int ident_busc,       // identificador a buscar
+   const glm::mat4 &mmodelado, // matriz de modelado
+   Objeto3D **objeto,          // (salida) puntero al puntero al objeto
+   glm::vec3 &centro_wc        // (salida) centro del objeto en coordenadas del mundo
 )
 {
    using namespace std;
@@ -311,20 +359,37 @@ bool NodoGrafoEscena::buscarObjeto(
 
    assert(0 < ident_busc);
 
-   // COMPLETAR: práctica 5: buscar un sub-objeto con un identificador
-   // Se deben de dar estos pasos:
+   // Calcula el centro del objeto
+   calcularCentroOC();
 
-   // 1. calcula el centro del objeto, (solo la primera vez)
-   // ........
+   // Si el identificador del nodo es el que se busca, terminar
+   if (ident_busc == leerIdentificador())
+   {
+      *objeto = this;
+      centro_wc = leerCentroOC();
+      return true;
+   }
 
-   // 2. si el identificador del nodo es el que se busca, ya está (terminar)
-   // ........
+   mat4 matriz_modelado = mmodelado;
 
-   // 3. El nodo no es el buscado: buscar recursivamente en los hijos
-   //    (si alguna llamada para un sub-árbol lo encuentra, terminar y devolver 'true')
-   // ........
+   // Si el nodo no es el buscado, buscar recursivamente en los hijos
+   for (auto & entrada : entradas)
+   {
+      switch (entrada.tipo)
+      {
+      case TipoEntNGE::objeto:
+         if (entrada.objeto->buscarObjeto(ident_busc, matriz_modelado, objeto, centro_wc))
+            return true;
+      break;
+      case TipoEntNGE::transformacion:
+         matriz_modelado *= *(entrada.matriz);
+      break;
+      default:
+      break;
+      }
+   }
 
-   // ni este nodo ni ningún hijo es el buscado: terminar
+   // Si ni este nodo ni ningún hijo es el buscado, terminar
    return false;
 }
 

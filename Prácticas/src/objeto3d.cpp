@@ -42,10 +42,7 @@
 using namespace std;
 
 // Constructor
-Objeto3D::Objeto3D()
-{
-   
-}
+Objeto3D::Objeto3D(){}
 
 // Devuelve el nombre del objeto
 std::string Objeto3D::leerNombre() const
@@ -108,12 +105,8 @@ bool Objeto3D::cuandoClick(const glm::vec3 &centro_wc)
    cout << "Ejecutando método 'cuandoClick' por defecto." << endl;
    cout << "Click realizado sobre el objeto: '" << leerNombre() << "'" << endl;
 
-   // COMPLETAR: práctica 5: apuntar la cámara actual a este objeto
-   //
-   // Recuperar la camara actual de la escena (puntero 'escena') con el método 'camaraActual',
-   // y hacer que apunte al punto central de este objeto (parámetro 'centro_wc'), usando
-   // el método 'mirarHacia' de esa cámara.
-   // ...
+   // Recuperar la camara actual de la escena y hacer que apunte al punto central de este objeto
+   escena->camaraActual()->mirarHacia(centro_wc);
 
    return true;
 }
@@ -134,7 +127,7 @@ void Objeto3D::calcularCentroOC()
 }
 
 // Método para buscar un objeto con un identificador y devolver un puntero al objeto y el punto central
-bool Objeto3D::buscarObjeto(const int ident_busc,const glm::mat4 &mmodelado, Objeto3D **objeto, glm::vec3 &centro_wc)
+bool Objeto3D::buscarObjeto(const int ident_busc, const glm::mat4 &mmodelado, Objeto3D **objeto, glm::vec3 &centro_wc)
 {
    using namespace glm;
    assert(0 < ident_busc);

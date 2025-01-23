@@ -81,11 +81,7 @@ AplicacionIG::AplicacionIG()
    //escenas.push_back(new Escena2());
    //escenas.push_back(new Escena3());
    escenas.push_back(new Escena4());
-   
-   // COMPLETAR: práctica 5: añadir escena de la práctica 5
-   //
-   // hacer 'push_back' en el vector de escenas de una instancia de 'Escena5'
-   // ......
+   escenas.push_back(new Escena5());
 
    cout << "Objetos creados." << endl;
 }

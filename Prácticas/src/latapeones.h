@@ -3,6 +3,12 @@
 
 #include "grafo-escena.h"
 
+class VariasLatasPeones : public NodoGrafoEscena
+{
+public:
+    VariasLatasPeones();
+};
+
 class LataPeones : public NodoGrafoEscena
 {
 public:
@@ -17,8 +23,12 @@ public:
 
 class Peon : public NodoGrafoEscena
 {
+protected:
+    glm::mat4 * traslation_movement = nullptr;
 public:
     Peon(int profiles);
+
+    virtual bool cuandoClick(const glm::vec3 &centro_wc);
 };
 
 #endif

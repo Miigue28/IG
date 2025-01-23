@@ -223,30 +223,34 @@ void MallaInd::visualizarNormalesGL()
    dvao_normales->draw(GL_LINES);
 }
 
-// -----------------------------------------------------------------------------
-// visualizar el objeto en 'modo seleccion', es decir, sin iluminación y con los colores
-// basados en los identificadores de los objetos
+// Visualiza el objeto sin iluminación y con los colores basados en los identificadores de los objetos
 void MallaInd::visualizarModoSeleccionGL()
 {
-
    using namespace std;
    assert(aplicacionIG != nullptr);
    Cauce *cauce = aplicacionIG->cauce;
    assert(cauce != nullptr);
 
-   // COMPLETAR: práctica 5: visualizar la malla en modo selección
-   //
-   // Se debe escribir código para visualizar únicamente la geometría, pero usando el color
-   // obtenido a partir del identificador. El código da estos pasos:
-   //
-   // 1. Leer el identificador del objeto (con 'leerIdentificador'). Si el objeto tiene
-   //    identificador (es decir, si su identificador no es -1)
-   //       + Hacer push del color del cauce, con 'pushColor'.
-   //       + Fijar el color del cauce (con 'fijarColor') usando un color obtenido a
-   //         partir del identificador (con 'ColorDesdeIdent').
-   // 2. Invocar 'visualizarGeomGL' para visualizar la geometría.
-   // 3. Si tiene identificador: hacer pop del color, con 'popColor'.
-   //
+   int id = leerIdentificador();
+
+   // Si el objeto tiene identificador
+   if (id != -1)
+   {
+      // Hacer push del color del cauce
+      cauce->pushColor();
+      // Fijar el color del cauce usando un color obtenido a partir del identificador
+      cauce->fijarColor(ColorDesdeIdent(id));
+   }
+
+   // Visualizar la geometria
+   visualizarGeomGL();
+
+   // Si el objeto tiene identificador
+   if (id != -1)
+   {
+      // Hacer pop del color
+      cauce->popColor();
+   }
 }
 
 // Clase MallaPLY

@@ -106,11 +106,13 @@ void FGE_PulsarLevantarTecla(GLFWwindow *window, int key, int scancode, int acti
       camara->desplRotarXY(0.0, -cam_ab_incre_tecla);
    break;
 
-   case GLFW_KEY_KP_SUBTRACT: // tecla '-' en el teclado numérico
+   case GLFW_KEY_SLASH: // Tecla con '-' y '_' en el teclado normal
+   case GLFW_KEY_KP_SUBTRACT: // Tecla '-' en el teclado numérico
       camara->moverZ(+cam_d_incre_tecla);
    break;
 
-   case GLFW_KEY_KP_ADD: // tecla '+' en el teclado numérico ¿?
+   case GLFW_KEY_RIGHT_BRACKET: // Tecla '+' en el teclado normal
+   case GLFW_KEY_KP_ADD: // Tecla '+' en el teclado numérico ¿?
       camara->moverZ(-cam_d_incre_tecla);
       break;
 

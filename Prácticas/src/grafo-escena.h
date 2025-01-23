@@ -79,6 +79,8 @@ class NodoGrafoEscena : public Objeto3D
 protected:
    // Vector de entradas
    std::vector<EntradaNGE> entradas;
+
+   bool centro_calculado = false;
 public:
    NodoGrafoEscena();
 
