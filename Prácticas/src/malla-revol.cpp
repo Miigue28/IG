@@ -161,29 +161,83 @@ void MallaRevol::inicializar(const std::vector<glm::vec3> &perfil, const unsigne
 {
    using namespace glm;
 
-   const double subangles = angle/(num_copias-1);
-   const size_t num_vertices = perfil.size();
+   const size_t num_vert_perfil = perfil.size();
+
+   // Creación de la tabla de normales de aristas del perfil
+   std::vector<glm::vec3> nor_aris_perfil;
+   glm::vec3 edge, normal;
+   for (size_t i = 0; i < num_vert_perfil - 1; ++i)
+   {
+      // Calculamos la arista que forman dos vértices consecutivos
+      edge = perfil[i+1] - perfil[i];
+      // Calculamos la normal de la arista
+      normal = rotateZ(glm::radians(90.0f), edge);
+
+      // Normalizamos la normal
+      if (glm::length(normal) != 0.0)
+         nor_aris_perfil.push_back(glm::normalize(normal));
+      else
+         nor_aris_perfil.push_back({0.0f, 0.0f, 0.0f});
+   }
+
+   // Creación de la tabla de normales de vértices del perfil
+   std::vector<glm::vec3> nor_ver_perfil;
+   nor_ver_perfil.push_back(nor_aris_perfil[0]);
+   for (size_t i = 1; i < num_vert_perfil - 1; ++i)
+   {
+      // Calculamos la normal del vértice como promedio de las aristas adyacentes
+      nor_ver_perfil.push_back(glm::normalize(nor_aris_perfil[i-1] + nor_aris_perfil[i]));
+   }
+   nor_ver_perfil.push_back(nor_aris_perfil.back());
+
+   // Creación de la tabla de distancias de aristas para cálculo de coordenadas de textura
+   std::vector<float> d;
+   for (size_t i = 0; i < num_vert_perfil - 1; ++i)
+   {
+      // Distancia euclídea entre vértices adyacentes
+      d.push_back(glm::length(perfil[i+1] - perfil[i]));
+   }
+
+   std::vector<float> partial_sums;
+   partial_sums.push_back(0.0f);
+   for (size_t i = 1; i < num_vert_perfil; ++i)
+   {
+      partial_sums.push_back(partial_sums[i-1] + d[i-1]);
+   }
+   float sum = partial_sums[num_vert_perfil - 1];
+
+   // Creación de la tabla de distancias de vértices a lo largo del perfil para cálculo de coordenadas de textura
+   std::vector<float> t;
+   t.push_back(0.0f);
+   for (size_t i = 1; i < num_vert_perfil; ++i)
+   {
+      t.push_back(partial_sums[i] / sum);
+   }
 
    // Creación de la tabla de vértices por revolución del perfil
+   const double subangles = angle/(num_copias-1);
    for (size_t i = 0; i < num_copias; i++)
    {
-      for (size_t j = 0; j < num_vertices; j++)
+      for (size_t j = 0; j < num_vert_perfil; j++)
       {
-         vec3 vertex = rotateY(subangles*i, perfil[j]);
+         glm::vec3 vertex = rotateY(subangles*i, perfil[j]);
          vertices.push_back(vertex);
+         glm::vec3 normal = rotateY(subangles*i, nor_ver_perfil[j]);
+         nor_ver.push_back(normal);
+         glm::vec2 texture = {static_cast<float>(i)/static_cast<float>(num_copias - 1.0), 1.0 - t[j]};
+         cc_tt_ver.push_back(texture);
       }
    }
 
-   size_t index;
-
    // Creación de la tabla de triángulos
+   size_t index;
    for (size_t i = 0; i < num_copias - 1; i++)
    {
-      for (size_t j = 0; j < num_vertices - 2; j++)
+      for (size_t j = 0; j < num_vert_perfil - 2; j++)
       {
-         index = i*num_vertices+j;
-         triangulos.push_back({index, index+num_vertices, index+num_vertices+1});
-         triangulos.push_back({index, index+num_vertices+1, index+1});
+         index = i*num_vert_perfil+j;
+         triangulos.push_back({index, index+num_vert_perfil, index+num_vert_perfil+1});
+         triangulos.push_back({index, index+num_vert_perfil+1, index+1});
       }
    }
 }

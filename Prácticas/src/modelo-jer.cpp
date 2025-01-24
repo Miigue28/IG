@@ -55,6 +55,7 @@ OuterBell::OuterBell(const int num_verts_per, const unsigned nperfiles)
     }
     inicializarX(perfil, nperfiles);
     ponerColor(vec3(218.0f / 255.0f, 165.0f / 255.0f, 32.0f / 255.0f));
+    calcularNormales();
 }
 
 TunningSlide::TunningSlide()
@@ -68,17 +69,23 @@ TunningSlide::TunningSlide()
 
 Bell::Bell()
 {
+    Material * brass = new Material(0.5, 0.75, 0.85, 5.0);
+    Material * nickel = new Material(0.75, 0.35, 0.85, 10.0);
+    Material * dark_nickel = new Material(0.65, 0.5, 0.85, 40.0);
+
     NodoGrafoEscena * joint = new NodoGrafoEscena();
     joint->agregar(translate(vec3(-10.0, -8.0, 0.0)));
     joint->agregar(scale(vec3(3.0, 1.0, 1.0)));
     joint->agregar(rotate(float(M_PI/2.0), vec3(0.0, 0.0, 1.0)));
     joint->agregar(new Cilinder(50, 50));
+    joint->agregar(brass);
     joint->ponerColor(vec3(218.0f / 255.0f, 165.0f / 255.0f, 32.0f / 255.0f));
 
     NodoGrafoEscena * upperdecorator = new NodoGrafoEscena();
     upperdecorator->agregar(translate(vec3(-15.0, 0.0, 0.0)));
     upperdecorator->agregar(scale(vec3(3.0, 1.1, 1.0)));
     upperdecorator->agregar(rotate(float(M_PI/2.0), vec3(0.0, 0.0, 1.0)));
+    upperdecorator->agregar(nickel);
     upperdecorator->agregar(new Cilinder(50, 50));
     upperdecorator->ponerColor(vec3(181.0f / 255.0f, 182.0f / 255.0f, 181.0f / 255.0f));
 
@@ -86,6 +93,7 @@ Bell::Bell()
     lowerdecorator1->agregar(translate(vec3(-13.0, -8.0, 0.0)));
     lowerdecorator1->agregar(scale(vec3(5.0, 1.1, 1.0)));
     lowerdecorator1->agregar(rotate(float(M_PI/2.0), vec3(0.0, 0.0, 1.0)));
+    lowerdecorator1->agregar(nickel);
     lowerdecorator1->agregar(new Cilinder(50, 50));
     lowerdecorator1->ponerColor(vec3(181.0f / 255.0f, 182.0f / 255.0f, 181.0f / 255.0f));
 
@@ -93,18 +101,21 @@ Bell::Bell()
     lowerdecorator2->agregar(translate(vec3(-7.0, -8.0, 0.0)));
     lowerdecorator2->agregar(scale(vec3(3.0, 1.1, 1.0)));
     lowerdecorator2->agregar(rotate(float(M_PI/2.0), vec3(0.0, 0.0, 1.0)));
+    lowerdecorator2->agregar(nickel);
     lowerdecorator2->agregar(new Cilinder(50, 50));
     lowerdecorator2->ponerColor(vec3(181.0f / 255.0f, 182.0f / 255.0f, 181.0f / 255.0f));
 
     NodoGrafoEscena * beam1 = new NodoGrafoEscena();
     beam1->agregar(translate(vec3(-17.0, -7.0, 0.0)));
     beam1->agregar(scale(vec3(0.5, 6, 0.5)));
+    beam1->agregar(nickel);
     beam1->agregar(new Cilinder(50, 50));
     beam1->ponerColor(vec3(181.0f / 255.0f, 182.0f / 255.0f, 181.0f / 255.0f));
 
     NodoGrafoEscena * beam2 = new NodoGrafoEscena();
     beam2->agregar(translate(vec3(-9.0, -7.0, 0.0)));
     beam2->agregar(scale(vec3(0.5, 6, 0.5)));
+    beam2->agregar(nickel);
     beam2->agregar(new Cilinder(50, 50));
     beam2->ponerColor(vec3(181.0f / 255.0f, 182.0f / 255.0f, 181.0f / 255.0f));
 
@@ -112,8 +123,17 @@ Bell::Bell()
     screw->agregar(translate(vec3(-6.0, -8.0, 0.0)));
     screw->agregar(scale(vec3(1.0, 1.3, 1.3)));
     screw->agregar(rotate(float(M_PI/2.0), vec3(0.0, 0.0, 1.0)));
+    screw->agregar(dark_nickel);
     screw->agregar(new Cilinder(50, 50));
     screw->ponerColor(vec3(114.0f / 255.0f, 116.0f / 255.0f, 114.0f / 255.0f));
+
+    NodoGrafoEscena * tunning_slide = new NodoGrafoEscena();
+    tunning_slide->agregar(brass);
+    tunning_slide->agregar(new TunningSlide());
+
+    NodoGrafoEscena * outer_bell = new NodoGrafoEscena();
+    outer_bell->agregar(brass);
+    outer_bell->agregar(new OuterBell(50, 50));
 
     agregar(screw);
     agregar(beam2);
@@ -122,33 +142,41 @@ Bell::Bell()
     agregar(lowerdecorator1);
     agregar(upperdecorator);
     agregar(joint);
-    agregar(new TunningSlide());
-    agregar(new OuterBell(50, 50));
+    agregar(tunning_slide);
+    agregar(outer_bell);
 }
 
 InnerSlide::InnerSlide()
 {
+    Material * silver = new Material(0.35, 0.85, 0.65, 10.0);
+    Material * brass = new Material(0.5, 0.75, 0.85, 5.0);
+    Material * nickel = new Material(0.75, 0.35, 0.85, 10.0);
+
     NodoGrafoEscena * tube1 = new NodoGrafoEscena();
     tube1->agregar(translate(glm::vec3(+0.5, 0.0, 0.0)));
     tube1->agregar(scale(glm::vec3(0.1, 3.0, 0.1)));
+    tube1->agregar(silver);
     tube1->agregar(new Cilinder(50, 50));
     tube1->ponerColor(vec3(227.0f / 255.0f, 228.0f / 255.0f, 229.0f / 255.0f));
 
     NodoGrafoEscena * tube2 = new NodoGrafoEscena();
     tube2->agregar(translate(vec3(-0.5, 0.0, 0.0)));
     tube2->agregar(scale(vec3(0.1, 3.0, 0.1)));
+    tube2->agregar(silver);
     tube2->agregar(new Cilinder(50, 50));
     tube1->ponerColor(vec3(227.0f / 255.0f, 228.0f / 255.0f, 229.0f / 255.0f));
 
     NodoGrafoEscena * clip1 = new NodoGrafoEscena();
     clip1->agregar(translate(vec3(+0.5, 3.0, 0.0)));
     clip1->agregar(scale(vec3(0.15, 0.5, 0.15)));
+    clip1->agregar(nickel);
     clip1->agregar(new Cilinder(50, 50));
     clip1->ponerColor(vec3(181.0f / 255.0f, 182.0f / 255.0f, 181.0f / 255.0f));
 
     NodoGrafoEscena * clip2 = new NodoGrafoEscena();
     clip2->agregar(translate(vec3(-0.5, 3.0, 0.0)));
     clip2->agregar(scale(vec3(0.15, 0.5, 0.15)));
+    clip2->agregar(nickel);
     clip2->agregar(new Cilinder(50, 50));
     clip2->ponerColor(vec3(181.0f / 255.0f, 182.0f / 255.0f, 181.0f / 255.0f));
 
@@ -156,6 +184,7 @@ InnerSlide::InnerSlide()
     beamdecorator1->agregar(translate(vec3(+0.4, 3.65, 0.0)));
     beamdecorator1->agregar(rotate(float(M_PI/2.0), vec3(0.0, 0.0, 1.0)));
     beamdecorator1->agregar(scale(vec3(0.13, 0.15, 0.13)));
+    beamdecorator1->agregar(nickel);
     beamdecorator1->agregar(new Cilinder(50, 50));
     beamdecorator1->ponerColor(vec3(181.0f / 255.0f, 182.0f / 255.0f, 181.0f / 255.0f));
 
@@ -163,6 +192,7 @@ InnerSlide::InnerSlide()
     beamdecorator2->agregar(translate(vec3(-0.25, 3.65, 0.0)));
     beamdecorator2->agregar(rotate(float(M_PI/2.0), vec3(0.0, 0.0, 1.0)));
     beamdecorator2->agregar(scale(vec3(0.13, 0.15, 0.13)));
+    beamdecorator2->agregar(nickel);
     beamdecorator2->agregar(new Cilinder(50, 50));
     beamdecorator2->ponerColor(vec3(181.0f / 255.0f, 182.0f / 255.0f, 181.0f / 255.0f));
 
@@ -170,18 +200,21 @@ InnerSlide::InnerSlide()
     gripbeam->agregar(translate(vec3(+0.375, 3.65, 0.0)));
     gripbeam->agregar(rotate(float(M_PI/2.0), vec3(0.0, 0.0, 1.0)));
     gripbeam->agregar(scale(vec3(0.125, 0.75, 0.125)));
+    gripbeam->agregar(nickel);
     gripbeam->agregar(new Cilinder(50, 50));
     gripbeam->ponerColor(vec3(218.0f / 255.0f, 165.0f / 255.0f, 32.0f / 255.0f));
 
     NodoGrafoEscena * mouthpieceattach = new NodoGrafoEscena();
     mouthpieceattach->agregar(translate(vec3(+0.5, 3.5, 0.0)));
     mouthpieceattach->agregar(scale(vec3(0.125, 0.5, 0.125)));
+    mouthpieceattach->agregar(nickel);
     mouthpieceattach->agregar(new Cilinder(50, 50));
     mouthpieceattach->ponerColor(vec3(181.0f / 255.0f, 182.0f / 255.0f, 181.0f / 255.0f));
 
     NodoGrafoEscena * bellattach = new NodoGrafoEscena();
     bellattach->agregar(translate(vec3(-0.5, 3.5, 0.0)));
     bellattach->agregar(scale(vec3(0.125, 0.5, 0.125)));
+    bellattach->agregar(nickel);
     bellattach->agregar(new Cilinder(50, 50));
     bellattach->ponerColor(vec3(181.0f / 255.0f, 182.0f / 255.0f, 181.0f / 255.0f));
 
@@ -198,15 +231,21 @@ InnerSlide::InnerSlide()
 
 OuterSlide::OuterSlide()
 {
+    Material * silver = new Material(0.35, 0.85, 0.65, 10.0);
+    Material * brass = new Material(0.5, 0.75, 0.85, 5.0);
+    Material * nickel = new Material(0.75, 0.35, 0.85, 10.0);
+
     NodoGrafoEscena * tube1 = new NodoGrafoEscena();
     tube1->agregar(translate(vec3(+0.5, 0.0, 0.0)));
     tube1->agregar(scale(vec3(0.125, 3.0, 0.125)));
+    tube1->agregar(brass);
     tube1->agregar(new Cilinder(50, 50));
     tube1->ponerColor(vec3(218.0f / 255.0f, 165.0f / 255.0f, 32.0f / 255.0f));
 
     NodoGrafoEscena * tube2 = new NodoGrafoEscena();
     tube2->agregar(translate(vec3(-0.5, 0.0, 0.0)));
     tube2->agregar(scale(vec3(0.125, 3.0, 0.125)));
+    tube2->agregar(brass);
     tube2->agregar(new Cilinder(50, 50));
     tube2->ponerColor(vec3(218.0f / 255.0f, 165.0f / 255.0f, 32.0f / 255.0f));
 
@@ -214,6 +253,7 @@ OuterSlide::OuterSlide()
     beamdecorator1->agregar(translate(vec3(+0.4, 2.75, 0.0)));
     beamdecorator1->agregar(rotate(float(M_PI/2.0), vec3(0.0, 0.0, 1.0)));
     beamdecorator1->agregar(scale(vec3(0.13, 0.15, 0.13)));
+    beamdecorator1->agregar(brass);
     beamdecorator1->agregar(new Cilinder(50, 50));
     beamdecorator1->ponerColor(vec3(181.0f / 255.0f, 182.0f / 255.0f, 181.0f / 255.0f));
 
@@ -221,6 +261,7 @@ OuterSlide::OuterSlide()
     beamdecorator2->agregar(translate(vec3(-0.25, 2.75, 0.0)));
     beamdecorator2->agregar(rotate(float(M_PI/2.0), vec3(0.0, 0.0, 1.0)));
     beamdecorator2->agregar(scale(vec3(0.13, 0.15, 0.13)));
+    beamdecorator2->agregar(brass);
     beamdecorator2->agregar(new Cilinder(50, 50));
     beamdecorator2->ponerColor(vec3(181.0f / 255.0f, 182.0f / 255.0f, 181.0f / 255.0f));
 
@@ -228,12 +269,14 @@ OuterSlide::OuterSlide()
     gripbeam->agregar(translate(vec3(+0.375, 2.75, 0.0)));
     gripbeam->agregar(rotate(float(M_PI/2.0), vec3(0.0, 0.0, 1.0)));
     gripbeam->agregar(scale(vec3(0.125, 0.75, 0.125)));
+    gripbeam->agregar(nickel);
     gripbeam->agregar(new Cilinder(50, 50));
     gripbeam->ponerColor(vec3(218.0f / 255.0f, 165.0f / 255.0f, 32.0f / 255.0f));
 
     NodoGrafoEscena * elbow = new NodoGrafoEscena();
     elbow->agregar(rotate(float(-M_PI/2.0), vec3(1.0, 0.0, 0.0)));
     elbow->agregar(scale(vec3(0.125, 0.125, 0.125)));
+    elbow->agregar(nickel);
     elbow->agregar(new Torus(50, 50, float(M_PI), 4));
     elbow->ponerColor(vec3(181.0f / 255.0f, 182.0f / 255.0f, 181.0f / 255.0f));
 
@@ -296,6 +339,8 @@ void Slide::actualizarEstadoParametro(const unsigned iParam, const float t_sec)
 
 Mouthpiece::Mouthpiece()
 {
+    Material * silver = new Material(0.35, 0.85, 0.65, 10.0);
+
     NodoGrafoEscena * basecilinder = new NodoGrafoEscena();
     basecilinder->agregar(scale(vec3(0.5, 2.0, 0.5)));
     basecilinder->agregar(new Cilinder(50, 50));
@@ -320,6 +365,7 @@ Mouthpiece::Mouthpiece()
     mouthtorus->agregar(scale(vec3(0.45, 0.45, 0.45)));
     mouthtorus->agregar(new Torus(50, 50, float(2*M_PI), 2.0));
 
+    agregar(silver);
     agregar(mouthtorus);
     agregar(trunkcilinder);
     agregar(trunksemisphere);
