@@ -73,7 +73,7 @@ Las mallas aproximan una superficie la cual encierra completamente una región d
 
 ### Vértices
 
-Un **vértice** (_vertex_) es un par formado por un **punto** del espacio afín, al que llamaremos **posición del vértice**, y un **valor entero único** (entre $0$ y $n-1$, donde $n$ es el número de vértices de la malla). al que llamaremos **índice del vértice**.
+Un **vértice** (_vertex_) es un par formado por un **punto** del espacio afín, al que llamaremos **posición del vértice**, y un **valor entero único** (entre $0$ y $n-1$, donde $n$ es el número de vértices de la malla), al que llamaremos **índice del vértice**.
 
 > Dos vértices distintos (con distinto índice) pueden tener la misma posición.
 
@@ -185,8 +185,7 @@ Para un polígono (con dos aristas $\vec{a}$, $\vec{b}$, vectores distintos, no 
 $$\vec{n} = \frac{\vec{m}}{\|\vec{m}\|} \hspace{0.5cm} \text{ donde } \hspace{0.5cm} \vec{m} = \vec{a} \times \vec{b}$$
 En estos casos la normal se puede precalcular y almacenar en la malla para lograr eficiencia en tiempo de visualización.
 
-![](./resources/img17.png)
-
+<img src="./resources/img17.png" alt="Alt text" width="50%" align="center"/>
 ### Normales de vértices
 
 Tienen sentido cuando la malla aproxima una superficie curvada:
@@ -226,7 +225,7 @@ En esta sección veremos distintas formas de representar las mallas en la memori
 OpenGL está diseñado para visualizar directamente los triángulos aislados, las tiras de triángulos y las mallas indexadas.
 ## 3.1 Triangulos Asilados
 
-La más simple es usar una lista o tabla de triángulos aislados. La malla se representa como un vector o lista con tres entradas (tres variables de tipo `vec3`) para cada triángulo:
+Lo más simple es usar una lista o tabla de triángulos aislados. La malla se representa como un vector o lista con tres entradas (tres variables de tipo `vec3`) para cada triángulo:
 
 ![](./resources/img21.png)
 
@@ -251,13 +250,16 @@ protected:
 	DescrVAO * vao = nullptr; // Puntero al VAO (creado en la visualización)
 . . .
 public:
-	virtual void visualizarGL() ;
-	virtual void visualizarGeomGL() ;
+	virtual void visualizarGL();
+	virtual void visualizarGeomGL();
+	virtual void visualizarNormalesGL();
+	virtual void visualizarModoSeleccionGL();
 . . .
 } ;
 ```
 
 > Se trata de una secuencia no indexada (no hay índices), se puede visualizar usando el método `draw` de `DescrVAO` con el tipo de primitiva `GL_TRIANGLES`.
+
 ## 3.2 Tiras de Triángulos
 
 Las representanción en memoria usando tiras de triángulos pretende reducir la memoria y el tiempo que necesitan la
@@ -359,7 +361,7 @@ Se pueden visualizar usando `glDrawElements` con `GL_TRIANGLE_STRIP` como tipo d
 El formato PLY fue diseñado por Greg Turk y otros en la Universidad de Stanford a mediados de los 90. Codifica una malla indexada en un archivo ASCII o binario. Tiene tres partes:
 
 - **Cabecera**: Describe los atributos presentes y su formato, se indica el número de vértices y caras, ocupa varias líneas.
-- **Tabla de vértices**: Un vértice por línea, se indican sus coordenadas X, Y y Z (flotantes) en ASCII, separadas por espacios.
+- **Tabla de vértices**: Un vértice por línea, se indican sus coordenadas $X$, $Y$ y $Z$ (flotantes) en ASCII, separadas por espacios.
 - **Tabla de caras**: Una cara por línea, se indica el número de vértices de la cara, y después los índices de los vértices de la cara (comenzando en cero para el primer vértice de la tabla de vértices).
 
 > El formato es extensible de forma que un archivo puede incluir otros atributos, por ejemplo, colores de vértices.
@@ -436,7 +438,7 @@ Tambien tiene (cada arista es adyacente a dos triángulos):
 
 > Izquierda y derecha entendidos según se recorre la arista en el sentido que va desde vértice inicial al final
 
-Esto permite consultas en O(1) sobre adyacencia arista-vértice y arista-triángulo.
+Esto permite consultas en $O(1)$ sobre adyacencia arista-vértice y arista-triángulo.
 ### Aristas siguiente y anterior
 
 Además de los datos anteriores, se guarda, para cada arista, los índices de otras cuatro adyacentes a ella. Si se recorren las aristas del triángulo de la izquierda aparecerá la arista en cuestión entre otras dos, cuyos índices se guardan en la tabla:
@@ -487,8 +489,7 @@ de referencia común.
 
 Dicho sistema es el llamado **marco de coordenadas de la escena**, o **marco de coordenadas del mundo**, (_world coordinate system_), y es un marco cartesiano.
 
-> Las coordenadas de los vértices, respecto de dicho sistema de referencia, se llaman **coordenadas del mundo** (_world
-coordinates_)
+> Las coordenadas de los vértices, respecto de dicho sistema de referencia, se llaman **coordenadas del mundo** (_world coordinates_)
 
 Esto permite separar la definción de los objetos (en coordenadas maestra), de su uso en una escena concreta, lo
 cual es usual en la industria de la infografía 3D actualmente.
@@ -513,7 +514,7 @@ $$T(\dot{p}) = \begin{pmatrix} 1 & 0 & 0 & t_x \\ 0 & 1 & 0 & t_y \\ 0 & 0 & 1 &
 - **Escalado**: Estrechar o alargar las figuras en una o varias direcciones.
 $$S(\dot{p}) = \begin{pmatrix} s_x & 0 & 0 & 0 \\ 0 & s_y & 0 & 0 \\ 0 & 0 & s_z & 0 \\ 0 & 0 & 0 & 1\end{pmatrix} \begin{pmatrix} \dot{p}_x \\ \dot{p}_y \\ \dot{p}_z \\ 1 \end{pmatrix}$$
 - **Reflexión**: Imagen especular de un punto al otro lado de un plano.
-$$M(\dot{p}) = \begin{pmatrix} 1 - 2n_x n_x & n_x n_y & n_x n_z & 0 \\ n_y n_x & 1 - 2n_y n_y & n_y n_z & 0 \\ n_z n_x & n_z n_y & 1 - 2n_z n_z & 0 \\ 0 & 0 & 0 & 1\end{pmatrix} \begin{pmatrix} \dot{p}_x \\ \dot{p}_y \\ \dot{p}_z \\ 1 \end{pmatrix}$$
+$$M(\dot{p}) = I - 2\begin{pmatrix} n_x n_x & n_x n_y & n_x n_z & 0 \\ n_y n_x & n_y n_y & n_y n_z & 0 \\ n_z n_x & n_z n_y & n_z n_z & 0 \\ 0 & 0 & 0 & 1\end{pmatrix} \begin{pmatrix} \dot{p}_x \\ \dot{p}_y \\ \dot{p}_z \\ 1 \end{pmatrix}$$
 - **Cizallas**: Se puede ver como un desplazamiento de todos los puntos en la misma dirección, pero con distancias distintas.
 $$C(\dot{p}) = \begin{pmatrix} 1 & \lambda & 0 & 0 \\ 0 & 1 & 0 & 0 \\ 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 1\end{pmatrix} \begin{pmatrix} \dot{p}_x \\ \dot{p}_y \\ \dot{p}_z \\ 1 \end{pmatrix}$$
 
@@ -521,7 +522,7 @@ $$C(\dot{p}) = \begin{pmatrix} 1 & \lambda & 0 & 0 \\ 0 & 1 & 0 & 0 \\ 0 & 0 & 1
 
 ## 4.3 Transformación de normales
 
-Sea una superficie (2-variedad), donde a cada punto $\dot{p}$ le podemos asociar una normal $\vec{n}( \dot{p})$. Supongamos que transformamos todos sus puntos según una transformación afín $T$, con matriz $A$ en un marco cartesiano $C$:
+Sea una superficie (_2-manifold_), donde a cada punto $\dot{p}$ le podemos asociar una normal $\vec{n}( \dot{p})$. Supongamos que transformamos todos sus puntos según una transformación afín $T$, con matriz $A$ en un marco cartesiano $C$:
 
 - Si $T$ conserva los ángulos (aunque sea en valor absoluto), entonces conserva la dirección de las normales. Este es el caso de las traslaciones, reflexiones, rotaciones y escalados uniformes.
 - Si $T$ no conserva los ángulos, entonces tampoco conserva las normales. Es el caso de los escalados no uniformes y las cizallas.
@@ -543,18 +544,213 @@ $$ \vec{t} \cdot \vec{n} = 0 \iff \begin{pmatrix} t_1 & t_2 & t_3 \end{pmatrix} 
 - El vector normal se transforma la matriz $U$ (desconocida en principio). Si queremos que la transformación preserve la perpendicularidad, se debe cumplir esto:
 $$A \vec{t} \cdot U \vec{n} = 0 \iff (A \vec{t})^T (U \vec{n}) = (\vec{t}^T A^T) (U \vec{n}) = 0$$
 
-De (5) deducimos que $\vec{t}^T(A^TU)\vec{n} = 0$, luego deducimos que $A^T U = I$, y así sabemos que $U$ es la inversa de la traspuesta de $A$:
+De donde deducimos que $\vec{t}^T(A^TU)\vec{n} = 0$, luego $A^T U = I$, y así sabemos que $U$ es la inversa de la traspuesta de $A$:
 $$U = (A^T)^{-1} = (A^{-1})^T$$
 ## 4.5 Gestión de _modelview_ en un Cauce Básico
 
+Uno de los parámetros _uniform_ de los shaders es una matriz $M \in M_{4 \times 4}(\mathbb{R})$ que codifica una transformación geométrica, y que se llama **modelview matrix** (matriz de modelado y vista). Dicha matriz se puede ver como la composición de otras dos, $V$ y $N$:
+
+- Matriz de modelado (**modeling matrix**) $N$: Transforma las coordenadas locales en coordenadas del mundo.
+- Matriz de vista (**view matrix**) V: Transforma las coordenadas del mundo en coordenadas relativas a la cámara.
+
+La matriz modelview M se aplica a todos los vértices enviados al dibujar:
+
+![](./resources/img96.png)
+
+### Construcción de la matrix modelview en el caso general
+
+En general, en cualquier aplicación OpenGL, debemos de usar funciones para generar la matriz de vista y la matriz de modelado, y usar esas matrices para configurar el cauce gráfico. Los pasos a dar para visualizar un frame son:
+1. Usamos una variable $M$ (matriz), incialmente igual a la matriz identidad.
+2. Componemos una matriz de vista $V$ en $M$ , para ello hacemos $M := M \cdot V$ usando la función `lookAt` de GLM.
+3. Componemos varias matrices de transformacion $T_1, T_2, \dotsc, T_n$, para ello hacemos $M := M \cdot T_i$ , en orden.
+
+Al final, queda $M$ como $V \cdot T_1 \cdot T_2 \cdot \dotsb \cdot T_n$ , y usamos esa matriz $M$ para darle valor a la matriz _uniform_ de los shaders.
+
+En el repositorio opengl3-minimo hay una variable uniform (`u_mat_modelview`) en el vertex shader, que se usa para transformar todos los vértices:
+
+```c++
+// Matriz modelview
+uniform mat4 u_mat_modelview;
+// Atributo 0: Posición del vértice en coordenadas de mundo (entrada)
+layout(location = 0) in vec3 atrib_posicion ;
+....
+void main()
+{
+	. . .
+	// Calcular las posiciones del vértice en coordenadas de mundo y escribimos ’gl_Position’
+	gl_Position = u_mat_proyeccion * u_mat_modelview * vec4(atrib_posicion, 1.0);
+}
+```
+
+### Asignaciones directas a modelview
+
+En el código de la aplicación debemos darle valores a la matriz modelview:
+- Usamos la función `glUniformMatrix4fv`.
+- Se necesita la variable entera con el localizador del parámetro (`loc_mat_modelview`).
+
+A modo de ejemplo, El siguiente trozo de código manipula, desde la aplicación, la matriz modelview de forma que dicho objeto se viese:
+
+- Rotado alrededor del eje $X$ un ángulo igual a $45$ grados, y
+- Desplazado según el vector (5, 6, 7)
+
+```c++
+// Definir M
+mat4 m = translate( vec3(5.0,6.0,7.0) );
+// M :=Tra[5, 6, 7]
+m = m * rotate( 45.0, vec3(1.0,0.0,0.0) ); // M := M · Rot[45o , x]
+// Dar valor al uniform del shader
+glUniformMatrix4fv( loc_mat_modelview, 1, GL_FALSE, value_ptr(m) );
+// Visualizar con M ≡ V · Tra[5, 6, 7] · Rot[45 , x]
+DibujarObjeto();
+```
+
+### Métodos para model view en la clase Cauce
+
+La clase `Cauce` incluye una variable de instancia (`mat_modelview`) con la modelview, y estos métodos:
+
+- `resetMM`: Fija la matriz modelview como la identidad
+
+```c++
+void Cauce::resetMM()
+{
+	mat_modelview = glm::mat4(1.0);
+	glUniformMatrix4fv(loc_mat_modelview, 1, GL_FALSE, value_ptr(mat_modelview));
+}
+```
+
+- `compMM`: Compone la matriz $m$ con modelview por la derecha:
+
+```c++
+void Cauce::compMM(const glm::mat4 & m)
+{
+	mat_modelview = mat_modelview * m;
+	glUniformMatrix4fv(loc_mat_modelview, 1, GL_FALSE, value_ptr(mat_modelview));
+}
+```
+
+El ejemplo anterior puede escribirse más fácilmente usando estos métodos:
+
+```c++
+// Hacer modelview igual a la identidad (al inicio del frame)
+cauce->resetMM();
+// Dibujar otros objetos (modelview puede cambiar)
+. . .
+// Componer las matrices en la modelview
+cauce->resetMM(); // M := Ide
+cauce->compMM(translate(vec3{5.0,6.0,7.0})); // M :=Tra[5, 6, 7]
+cauce->compMM(rotate(45.0, vec3{1.0,0.0,0.0})); // M := M · Rot[45, x]
+// Visualizar con M ≡ V · Tra[5, 6, 7] · Rot[45o , x]
+DibujarObjeto();
+```
+
+>La función `resetMM` debe llamarse al inicio del frame, de forma que siempre comenzamos la visualización de los objetos con la modelview fijada a un valor conocido.
+
 ## 4.6 Gestión de _modelview_ en Cauces 3D
+
+Para visualización 3D, la clase `Cauce` incluye como variables de instancia las matrices de modelado ($N$,
+`mat_modelado`) y vista ($V$, `mat_vista`) por separado. Para manipular estas matrices, se usan estos métodos
+
+- `fijarMatrizVista(const glm::mat4 & U)`: Fija $V$ como matriz de vista (se asume que $U$ tiene una matriz de vista), y reinicializa la matriz de modelado ($N$) a la identidad. Es decir, hace $V := U$ y $N := Id$. Se debe usar al inicio de cada frame para establecer la vista.
+- `compMM(const glm::mat4 & T)`: Compone en la matriz de modelado actual $N$ una matriz $T$ por la derecha, es decir, hace $N := N \cdot T$ Este método debe invocarse después de `fijarMatrizVista`.
+
+A modo de ejemplo, este código visualiza el objeto `obj` usando una matriz de modelado obtenida como una composición de una rotación (primero), seguida de una traslación después:
+
+```c++
+// Definir matriz ’modelview’ en el Estado de OpenGL (usando clase Cauce)
+cauce->fijarMatrizVista(lookAt(o, a, u)); // M := V
+cauce->compMM(translation({5.0,6.0,7.0})); // M := M · Tra[5, 6, 7]
+cauce->compMM(rotation( 45.0, {1.0,0.0,0.0}));// M := M · Rot[45o , x]
+// Visualizar con M ≡ V · Tra[5, 6, 7] · Rot[45o , x]
+obj->visualizarGL( cv );
+```
+
+### Variables y uniforms para matrices del cauce
+
+La clase `Cauce`  incluye varias variables de instancia con las matrices del cauce. Cada una de ellas se corresponde con una parámetro uniform de los shaders:
+- **Matriz de vista:**
+	- Variable de instancia: `mat_vista`.
+	- Parámetro uniform: `u_mat_vista`.
+- **Matriz de modelado:**
+	- Variable de instancia: `mat_modelado`.
+	- Parámetro uniform: `u_mat_modelado`.
+- **Matriz de modelado para normales:**
+	- Variable de instancia: `mat_modelado_nor`.
+	- Parámetro uniform: `u_mat_modelado_nor`.
+
+### Transformación de vértices en el vertex shader
+
+La transformación de vértices en el vertex shader produce la normal en coordenadas de ojo (`v_normal_ec`) para iluminación, así como la posición del vértice en coordenadas de ojo (`v_posic_ec`) y de dispositivo (`gl_Position`):
+
+```c++
+void main()
+{
+	// Calcular la posición y normal en coordenadas de mundo (WC)
+	vec4 posic_wc = u_mat_modelado * vec4(in_posicion_occ, 1.0);
+	vec3 normal_wc = (u_mat_modelado_nor * vec4(in_normal, 0.0)).xyz;
+	// Calcular las variables de salida en coordenadas de vista (EC)
+	v_posic_ec = u_mat_vista * posic_wc;
+	v_normal_ec = (u_mat_vista * vec4(normal_wc,0.0)).xyz;
+	// Calcular la posición del vértice en coordenadas de dispositivo (DC)
+	gl_Position = u_mat_proyeccion * v_posic_ec;
+}
+```
+
+### Implementación de la clase Cauce
+
+La clase `Cauce` contiene también (como variables de instancia) las _locations_ de las citadas matrices. La
+implementación del método `fijarMatrizVista` puede ser así:
+
+```c++
+void Cauce::fijarMatrizVista(const glm::mat4 & nue_mat_vista)
+{
+	// Actualizar las variables de instancia
+	mat_vista = nue_mat_vista;
+	mat_modelado = mat4(1.0f);
+	mat_modelado_nor = mat4(1.0f);
+	// Actualizar los parámetros uniform a partir de las variables de instancia
+	actualizarUniformsMatricesMN();
+}
+```
+
+### Componer una matriz de modelado en el cauce programable
+
+En este caso se deben actualizar la matriz de modelado y la matriz de modelado de normales (usando la transpuesta de la inversa de la matriz a componer), y después actualizar los uniforms a su nuevo valor:
+
+```c++
+void Cauce::compMM(const glm::mat4 & mat_comp)
+{
+	// Calcular la matriz a componer para las normales
+	const mat4 mat_comp_nor = inverseTranspose(mat_comp);
+	// Componer las matrices
+	mat_modelado = mat_modelado * mat_comp;
+	mat_modelado_nor = mat_modelado_nor * mat_comp_nor;
+	// Actualizar los parámetros uniform a partir de las variables de instancia
+	actualizarUniformsMatricesMN();
+}
+```
+
+### Actualización de los parámetros uniform de matrices
+
+El método `actualizarUniformsMatricesMN` se encarga de asignar valor a los parámetros _uniform_ de estas matrices, a partir de las correspondientes variables de instancia:
+
+```c++
+void Cauce::actualizarUniformsMatricesMN()
+{
+	// Activa el objeto programa (debe estarlo)
+	glUseProgram(id_prog);
+	// Fijar uniforms u_mat_vista, u_mat_modelado y u_mat_modelado_nor
+	glUniformMatrix4fv(loc_mat_vista, 1, GL_FALSE, value_ptr(mat_vista));
+	glUniformMatrix4fv(loc_mat_modelado, 1, GL_FALSE, value_ptr(mat_modelado));
+	glUniformMatrix4fv(loc_mat_modelado_nor, 1, GL_FALSE, value_ptr(mat_modelado_nor));
+}
+```
 
 ## 5. Modelos Jerárquicos. Representación y Visualización
 
 ## 5.1 Modelos Jerárquicos y Grafo de Escena
 
-En una escena típica se incluyen muchas instancias distintas de malas u objetos geométricos 
-$$S = \{0_1, O_2, \dotsc, O_n\}$$
+En una escena típica se incluyen muchas instancias distintas de mallas u objetos geométricos 
+$$S = \{O_1, O_2, \dotsc, O_n\}$$
 Cada objeto $O_i$ se incluye con una transformación $T_i$, pudiendo ser un objeto instanciado más de una vez pero condistintas transformaciones. Cada transformación sirve para situar al objeto (definido en su propio marco de referencia $\mathcal{R}_i$) en su lugar en relación al marco de referencia de la escena, llamado **marco de referencia del mundo**, $\mathcal{W}$.
 
 > Intuitivamente cada transformación $T_i$ la podemos ver como la conversión desde coordenadas relativas a $\mathcal{R}_i$ hacia coordenadas relativas a $\mathcal{W}$.
@@ -603,7 +799,7 @@ Cada nodo del grafo de escena es un tipo especial de `Objeto3D` con una lista o 
 // Tipo enumerado con los tipos de entradas de los nodos del grafo:
 enum class TipoEntNGE { objeto, transformacion, .... } ;
 
-// Entrada del nodo del Grafo de Escena
+// Entrada del Nodo del Grafo de Escena
 struct EntradaNGE
 {
 	TipoEntNGE tipoE; // Tipo de entrada
@@ -700,3 +896,323 @@ Marcos::Marcos()
 
 La visualización de grafos en OpenGL se basa en operaciones que permiten guardar y recuperar la matriz **modelview**.
 
+![](./resources/img98.png)
+
+### Visualización con OpenGL
+
+Para hacer la visualización con OpenGL (usando `resetMM` y `compMM`) se debe usar este código:
+
+```c++
+cauce->resetMM(); // M := Ide
+cauce->compMM(V); // M := M · V
+cauce->compMM(T1); // M := M · T1
+cauce->compMM(T2); // M := M · T2
+VisualizarObjetoA(); // visualizar A con M == V · T1 · T2
+cauce->resetMM(); // M := Ide
+cauce->compMM(V); // M := M · V
+cauce->compMM(T1); // M := M · T1
+cauce->compMM(T3); // M := M · T2
+VisualizarObjetoB(); // visualizar B con M == V · T1 · T3
+```
+
+Es decir: es necesario replicar llamadas para acumular en $M$ las matrices $V$ y $T_1$ . En grafos de escena complejos:
+
+- El código es poco legible y muy dificilmente modificable, ya que contiene líneas replicadas en muchos sitios.
+- Es lento, ya que se repiten llamadas
+
+### Guardar y recuperar la matriz modelview
+
+Para solventar los problemas descritos, en OpenGL se suelen usar funciones auxiliares que permiten guardar la matriz modelview $M$ y restaurarla después. Usando los métodos `pushMM` y `popMM` de la clase `Cauce`:
+
+```c++
+cauce->resetMM(); // M := Ide (unicamente al inicio del frame)
+cauce->compMM(V); // M := M · V
+cauce->compMM(T1); // M := M · T1
+
+cauce->pushMM(); // C := M (guarda una copia de M en C)
+cauce->compMM(T2); // M := M · T2
+VisualizarObjetoA(); // Visualizar A con M == V · T1 · T2
+cauce->popMM(); // M := C (restaura copia de M)
+
+cauce->pushMM(); // C := M (guarda una copia de M en C)
+cauce->compMM(T3); // M := M · T3
+VisualizarObjetoB(); // visualizar B con M == V · T1 · T3
+cauce->popMM(); // M := C (restaura copia de M)
+```
+
+El código entre `push` y `pop` es neutro en cuanto a la matriz $M$, es decir, no la modifica. Es cierto incluso cuando `push` y `pop` se anidan, pero para lo cual se necesita tener en su estado una pila LIFO $P$ de matrices de transformación **modelview** (inicialmente vacía), en lugar de una sola matriz `C`.
+
+```c++
+. . .
+cauce->pushMM();
+. . .
+cauce->popMM();
+. . .
+```
+
+> La función `resetMM` reinicializa la pila (únicamente la invocamos al inicio del frame).
+
+### Implementación de `push` y `pop` en el cauce básico
+
+La implementación de `pushMM` y `popMM` en el cauce básico de opengl3-minimo es sencilla, usa `std::vector<glm::mat4> pila_mat_modelview`:
+
+```c++
+void Cauce::resetMM()
+{
+	mat_modelview = mat4(1.0f);
+	pila_mat_modelview.clear(); // Se vacía la pila de matrices
+	glUniformMatrix4fv(loc_mat_modelview, 1, GL_FALSE, value_ptr(mat_modelview));
+}
+void Cauce::pushMM()
+{
+	pila_mat_modelview.push_back(mat_modelview);
+}
+void Cauce::popMM()
+{
+	assert( 0 < pila_mat_modelview.size() ); // Falla si pila está vacía
+	mat_modelview = pila_mat_modelview[pila_mat_modelview.size()-1];
+	pila_mat_modelview.pop_back(); // Elimina tope
+	glUniformMatrix4fv(loc_mat_modelview, 1, GL_FALSE, value_ptr(mat_modelview));
+}
+```
+
+### Visualización de grafos de escena con `push` y `pop`
+
+Un programa que siempre visualiza el mismo grafo de escena (tipo PHIGS) puede implementarse traduciendo dicho grafo a código:
+- Cada nodo se implementa con una secuencia de llamadas, entre operaciones `push` y `pop` (no modifica $M$).
+- Una entrada correspondiente a un nodo simple (una malla), supone una llamada al procedimiento para visualizarla.
+- Las entradas correspondientes a transformaciones suponen acumular la correspondiente matriz en modelview
+- Una entradas correspondiente a una referencia a otro nodo $B$ puede traducirse en:
+	- Una secuencia de llamadas correspondientes a $B$ entre `push` y `pop`
+	- Una llamada a un procedimiento específico del nodo $B$ (esto mejor si el nodo $B$ está referenciado desde más de un sitio, para no repetir código).
+### Ejemplo: Fachada
+
+```c++
+void Fachada()
+{ 
+	cauce->pushMM();
+	Casa();
+	cauce->pushMM(); // inst.puerta
+	cauce->compMM(translate(vec3{0.56, 0.0, 0.0}));
+	cauce->compMM(scale( vec3{ 0.3, 0.43, 1.0}));
+	Puerta();
+	cauce->popMM();
+	cauce->compMM(translate(vec3{0.13, 0.13, 0.0}));
+	InstVentana();
+	cauce->compMM(translate(vec3{0.0, 0.43, 0.0}));
+	InstVentana();
+	cauce->compMM(translate(vec3{0.43, 0.0, 0.0}));
+	InstVentana();
+	cauce->popMM();
+}
+void InstVentana()
+{ 
+	cauce->pushMM();
+	cauce->compMM(scale(vec3{0.3,0.3,1.0}));
+	Ventana();
+	cauce->popMM();
+}
+```
+
+### Métodos para `push` y `pop` en la clase Cauce 3D
+
+La clase `Cauce`, para visualización 3D, incluye, como variables de instancia, dos pilas:
+
+- Una de matrices de modelado (`pila_mat_modelado`)
+- Otra de matrices de modelado de normales (`pila_mat_modelado_nor`)
+
+Además, existen los métodos de manipulación de estas pilas:
+- Método `pushMM()` para apilar una copia de ambas matrices, cada una en su pila.
+- Método `popMM()` para restaurar las matrices usando las de los topes, y eliminarlos.
+
+> Además, hay que tener en cuenta que el método `fijarMatrizVista(V)` ahora vacía ambas pilas (se llama una vez al inicio del frame).
+
+```c++
+void Cauce::pushMM()
+{ 
+	// Hacer push en cada pila de las correspondiente matriz
+	pila_mat_modelado.push_back(mat_modelado);
+	pila_mat_modelado_nor.push_back(mat_modelado_nor);
+}
+void Cauce::popMM()
+{
+	// Copiar tope de cada pila en la correspondiente matriz
+	mat_modelado = pila_mat_modelado.back();
+	mat_modelado_nor = pila_mat_modelado_nor.back();
+	// Eliminar tope de cada pila
+	pila_mat_modelado.pop_back();
+	pila_mat_modelado_nor.pop_back();
+	// Fijar uniforms de los shaders
+	actualizarUniformsMatricesMN();
+}
+```
+
+Cuando se fija la matriz de vista (al principio de visualizar cada escena), se limpian las dos pilas de la instancia:
+
+```c++
+void Cauce::fijarMatrizVista( const Matriz4f & nue_mat_vista )
+{
+	// Inicializar matrices (variables de instancia)
+	. . .
+	// Inicializar pilas:
+	pila_mat_modelado.clear();
+	pila_mat_modelado_nor.clear();
+	// Fijar uniforms de los shaders
+	. . .
+}
+```
+
+### Visualización de grafos
+
+El ejemplo de visualización de un grafo de los anteriores es código específico para dicho grafo:
+
+- **Ventajas**: Es sencillo para escenas muy sencillas o partes simples de una escena, no requiere ninguna estructura de datos en memoria.
+- **Inconvenientes**: Distintas escenas requieren distinto código, no es posible cargar un grafo de escena almacenado en un archivo en disco.
+
+A continuación veremos como visualizar con OpenGL los grafos de escena que se han introducido en esta sección. Tiene estas ventajas:
+- Un único código sirve para visualizar cualquier grafo de escena.
+- Permite visualizar grafos almacenados en archivos, creados con herramientas de diseño asistido.
+
+```c++
+void NodoGrafoEscena::visualizarGL( )
+{
+	// Guarda modelview actual
+	cauce->pushMM();
+	// Recorrer todas las entradas del array que hay en el nodo:
+	for(unsigned i = 0 ; i < entradas.size(); i++)
+	{
+		switch( entradas[i].tipoE )
+		{ 
+			case TipoEntNGE::objeto :
+				// Si es entrada objeto:
+				entradas[i].objeto->visualizarGL(); // Visualizar objeto
+			break ;
+			case TipoEntNGE::transformacion :
+				// Si entrada transformacion:
+				cauce->compMM(*(entradas[i].matriz)); // Componer matriz
+			break ;
+			case .....
+			.....
+		}
+	}
+	// Restaura modelview guardada
+	cauce->popMM() ;
+}
+```
+
+## 5.5 Grafos parametrizables
+
+### Modelos parametrizables
+
+Un grafo de escena puede estar parametrizado respecto de ciertos valores reales. Dichos valores puede controlar, por ejemplo, un transformación:
+- Ángulo de rotación.
+- Factor de escala en una dimensión.
+- Distancia de traslación en una dirección dada.
+
+En otros casos pueden definir las dimensiones de un objeto u otros valores, como por ejemplo la posición de puntos de control en objetos deformables.
+
+>Un mismo grafo de escena parametrizado se traduce en objetos con distinta geometría para distintos valores concretos de los parámetros.
+
+### Grafos parametrizados
+
+Un grafo de escena puede venir definido por uno más parámetros (**grados de libertad**), usualmente valores reales. Por ejemplo, el objeto compuesto `FachadaP` admite dos parámetros: 
+- Altura de `Casa` ($h$)
+- Ángulo de rotación de `Casa` ($\alpha$)
+
+![](./resources/img99.png)
+
+```c++
+void FachadaP(float h, float alpha)
+{
+	cauce->pushMM();
+	cauce->compMM(rotate(alpha, vec3{0.0,0.0,1.0});
+	CasaEscY( h );
+	InstPuerta();
+	cauce->compMM( translate( vec3{ 0.13, 0.13, 0.0});
+	InstVentana();
+	cauce->compMM( translate( vec3{ 0.0, 0.43, 0.0});
+	InstVentana();
+	cauce->compMM(translate(vec3{ 0.43, 0.0, 0.0});
+	InstVentana();
+	cauce->popMM();
+}
+void CasaEscY(float h)
+{
+	cauce->pushMM();
+	cauce->compMM(scale(vec3{1.0, h/1.5, 1.0});
+	Casa();
+	cauce->popMM();
+}
+```
+
+### Representación de grafos parametrizables en memoria
+
+Una transformación parametrizable en un grafo puede representarse con una clase derivada de `NodoGrafoEscena`, en la cual hay:
+- Un método para cambiar el valor de cada parámetro.
+- Un puntero a la matriz o matrices afectadas por el parámetro.
+
+A modo de ejemplo, la clase `FachadaP` podría quedar así:
+
+```c++
+class FachadaP : public NodoGrafoEscena
+{
+protected: 
+	// Punteros a matrices
+	glm::mat4 *pm_rot_alpha = nullptr, *pm_escy_h = nullptr;
+public:
+	FachadaP(const float h_inicial, const float alpha_inicial);
+	void fijarH(const float h_nuevo);
+	void fijarAlpha(const float alpha_nuevo);
+};
+```
+
+Estos dos métodos recalculan las matrices correspondientes del grafo, en función del nuevo valor de un parámetro:
+
+```c++
+void FachadaP::fijarAlpha(const float alpha_nuevo)
+{
+	*pm_rot_alpha = rotate(alpha_nuevo, vec3(0.0, 0.0, 1.0));
+}
+void FachadaP::fijarH(const float h_nuevo)
+{
+	*pm_escy_h = scale(vec3(1.0, h_nuevo/1.5, 1.0));
+}
+```
+
+### Constructor de un nodo parametrizado
+
+```c++
+FachadaP::FachadaP(const float h_inicial, const float alpha_inicial)
+{
+	// Crear sub-nodo tipo Casa escalada en Y (casa_ey)
+	NodoGrafoEscena * casa_ey = new NodoGrafoEscena();
+	unsigned ind1 = casa_ey->agregar(scale(vec3(1.0,h_inicial/1.5,1.0)));
+	casa_ey->agregar(new Casa());
+	// Crear instancia de ventana y añadir entradas de FachadaP
+	Objeto3D * inst_ventana = new InstVentana();
+	unsigned ind2 = agregar(rotate(alpha_inicial, vec3{0,0,1});
+	agregar(casa_ey);
+	agregar(new InstPuerta());
+	agregar(translate(vec3{0.13,0.13,0.13})); 
+	agregar(inst_ventana);
+	agregar(translate(vec3{0.0,0.43,0.0}));
+	agregar(inst_ventana);
+	agregar(translate(vec3{0.43,0.0,0.0}));
+	agregar(inst_ventana);
+	// Guardar los punteros a las matrices que dependen de los parámetros:
+	pm_escy_h = casa_ey->leerPtrMatriz(ind1);
+	pm_rot_alpha = leerPtrMatriz(ind2);
+}
+```
+
+El método `leerPtrMatriz` de la clase `NodoGrafoEscena` devuelve el puntero a una matriz en una de sus entradas, dado el índice de la entrada
+
+```c++
+glm::mat4 * NodoGrafoEscena::leerPtrMatriz(const unsigned indice)
+{
+	assert(indice < entradas.size());
+	assert(entradas[indice].tipo == TipoEntNGE::transformacion);
+	assert(entradas[indice].matriz != nullptr);
+	return entradas[indice].matriz;
+}
+```

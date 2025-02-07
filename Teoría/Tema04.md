@@ -12,7 +12,7 @@ Un sistema SGI, por lo general, mantiene en memoria una estructura de datos (un 
 1. Espera o detecta una acción del usuario.
 2. Obtiene los datos que caracterizan dicha acción.
 3. Modifica el estado del modelo según dichos datos.
-4. Visualiza una nueva imagen obtenida a partir del nuevo estado del modelo
+4. Visualiza una nueva imagen obtenida a partir del nuevo estado del modelo.
 
 > La incoporación de interactividad permite realizar aplicaciones que respondan ágilmente a las acciones de los usuarios y les ofrezcan retroalimentación sobre el efecto de dichas acciones.
 
@@ -21,7 +21,7 @@ Un sistema SGI, por lo general, mantiene en memoria una estructura de datos (un 
 Los sistemas gráficos interactivos no siempre son sistemas de tiempo real:
 
 - En un sistema interactivo se requiere que el retardo (latencia) entre la acción del usuario y la respuesta del sistema sea suficientemente pequeño como para que el usuario perciba una relacción de causa-efecto.No obstante, eventualmente la respuesta puede demorarse algo más.
-- En un sistema de tiempo real la latencia debe ser menor o igualque un tiempo máximo de respuesta prefijado en las especificaciones del sistema. Un retraso superior a ese límite se considera un fallo del sistema.
+- En un sistema de tiempo real la latencia debe ser menor o igual que el tiempo máximo de respuesta prefijado en las especificaciones del sistema. Un retraso superior a ese límite se considera un fallo del sistema.
 
 ### Realimentación: utilidad
 
@@ -31,7 +31,7 @@ La información de realimentación que el sistema genera en cada momento depende
 
 ### Dispositivos lógicos de entrada
 
-Un dispositivos lógico de entrada es una componente software que usa uno o varios dispositivos físicos de entrada para producir información de más alto nivel o mas elaborada, obtenida a partir de los datos recibidos directamente de los dispositivos físicos (o indirectamente de otros dispositivos lógicos). Ejemplos:
+Un dispositivos lógico de entrada es una componente software que usa uno o varios dispositivos físicos de entrada para producir información de más alto nivel o más elaborada, obtenida a partir de los datos recibidos directamente de los dispositivos físicos (o indirectamente de otros dispositivos lógicos). Ejemplos:
 
 - **Puntero del ratón**: Permite entrar puntos en pantalla a partir de los desplazamientos físicos del ratón y del estado de sus botones.
 - **Selector de componentes** (_Picker_): Permite seleccionar un componente de un modelo 3D usando el puntero de ratón.
@@ -249,7 +249,7 @@ while (!terminar) // hasta que no sea necesario terminar...
 		VisualizarEscena();
 		redibujar = false;
 	}
-	// procesar eventos pendientes (sin esperar)
+	// Procesar eventos pendientes (sin esperar)
 	glfwPollEvents();
 	// Actualizamos el estado del modelo al siguiente estado de la animación
 	// si no terminamos ni redibujamos
@@ -328,8 +328,8 @@ Usamos una transformación lineal para convertir desde $(x_d, y_d)_{DC}$  hacia 
 $$
 x_w = l + (r − l)\left(\frac{x_d + 1/2}{n_x}\right) \hspace{1cm} y_w = t − (t − b)\left(\frac{y_d + 1/2}{n_y}\right)
 $$
-- $l$, $r$ son los límites del view-frustum 2D en X.
-- $b$, $t$ son los límites del view-frustum 2D en Y.
+- $l$, $r$ son los límites del view-frustum 2D en $X$.
+- $b$, $t$ son los límites del view-frustum 2D en $Y$.
 - $n_x$, $n_y$ son el ancho y el alto (en pixels) del viewport.
 
 ### Posicionamiento 3D: Restricción a un plano
@@ -432,8 +432,8 @@ En general podemos hacer tres operaciones de modificación interactiva de una c�
 - **Adelante/Detrás**: Traslaciones paralelas a $\vec{n}$.
 
 Cada vez que se modifica el estado de una cámara:
-1. Se actualizan las tuplas $a_t$ , $n$ y $s$
-2. Se recalcula el marco de cámara (tuplas $o_{ec}$ , $x_{ec}$ , $y_{ec}$ y $z_{ec}$).
+5. Se actualizan las tuplas $a_t$ , $n$ y $s$
+6. Se recalcula el marco de cámara (tuplas $o_{ec}$ , $x_{ec}$ , $y_{ec}$ y $z_{ec}$).
 
 A las cámaras que se pueden actualizar así las llamamos cámaras interactivas.
 
@@ -566,10 +566,10 @@ El radio nunca es inferior a $r_{min} > 0$. Para $\Delta_z \geq 1$ aleja, y para
 Esta operación supone hacer que el punto de atención se fije a unas coordenadas de mundo $c$ dadas, sin modificar el origen de cámara.
 
 - La operación `mirarHacia(c)` supone:
-1. $n = n + a_t − c$
-2. $s = Esfericas(n)$
-3. $a_t = c$
-4. Actualizar $x_{ec}$, $y_{ec}$ y $z_{ec}$ (el origen $o_{ec}$ no cambia)
+7. $n = n + a_t − c$
+8. $s = Esfericas(n)$
+9. $a_t = c$
+10. Actualizar $x_{ec}$, $y_{ec}$ y $z_{ec}$ (el origen $o_{ec}$ no cambia)
 
 Esta operación permite seleccionar un objeto y que pase a ocupar el centro de la imagen (fijando el punto de atención a un punto central de dicho objeto).
 
@@ -622,7 +622,7 @@ Se usa una funcionalidad de OpenGL, específica para este fin, requiere:
 - Visualizar con el modo de selección activado, OpenGL usa identificadores en lugar de colores (tomados de la pila de nombres).
 - Los identificadores visualizados se registran en un buffer de selección (en memoria) específicamente destinado a contenerlos.
 
-En nuestro caso, no usaremos esta funcionalidad, al no estar disponible en OpenGL 3.3.
+> En nuestro caso, no usaremos esta funcionalidad, al no estar disponible en OpenGL 3.3.
 ### Selección con un _frame-buffer_ invisible
 
 Se usa algún **frame buffer object** (array de colores de pixels en la memoria de la GPU) , hay dos opciones:
@@ -642,7 +642,7 @@ Si no se quiere usar funcionalidad obsoleta, se puede utilizar directamente visu
 - Creando un objeto OpenGL de tipo frame-buffer object (FBO), y haciendo rasterización con ese objeto como imagen de destino (rendering target).
 - Usando el modo de **doble buffer**: En este modo siempre existen dos FBOs creados por OpenGL, un buffer trasero (**back buffer**), que es donde se visualizan las primitivas, y un buffer delantero (**front buffer**), que es el que se visualiza en pantalla.
 
-Usaremos la primera opción al no depender de la existencia de doble buffer.
+> Usaremos la primera opción al no depender de la existencia de doble buffer.
 
 ### Visualización identificadores
 

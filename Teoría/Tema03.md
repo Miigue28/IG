@@ -30,6 +30,8 @@ En estas etapas del cauce gráfico, esencialmente los datos que se transforman s
 
 > Este esquema corresponde al recortado en CC (hay otras posibilidades, esta es la mejor)
 
+### Sistemas de coordenadas
+
 El cauce gráfico de OpenGL contempla una secuencia de 6 sistemas de coordenadas distintos. La transformación de coordenadas entre cada sistema de referencia y el siguiente en la lista se hace mediante una matriz específica.
 1. **Master coordinates, OC**: Las coordenadas son distancias relativas a un sistema de referencia específico o distinto de cada objeto, que se crea en este espacio.
 2. **World coordinates, WC**: Son distancias relativas a un sistema de referencia único, común para todos los objetos de una escena.
@@ -42,7 +44,7 @@ Las **matrices de transformación** ($4 \times 4$) involucradas permiten convert
 - La **matriz de modelado y vista** (_modelview_) $M$, compuesta de:
 	- **Matriz de modelado** $N$: Convierte de OC a WC
 	- **Matriz de vista** $V$: Convierte de WC a EC
-- La **matriz de proyección** $P$: Convierte de EC a CC. (recibe coordenadas con w = 1, pero produce coordenadas en general con $w \neq 1$)
+- La **matriz de proyección** $P$: Convierte de EC a CC. (recibe coordenadas con $w = 1$, pero produce coordenadas en general con $w \neq 1$)
 - La **matriz del viewport** D: Convierte de NDC a DC (depende de la resolución de la imagen en pantalla y de la zona de esta donde se visualiza).
 
 > Las coordenadas de dispositivo (con $w = 1$ y en unidades de pixels) se usan como entrada para las siguientes etapas del cauce gráfico (rasterización, EPO, iluminación y texturas)
@@ -51,15 +53,15 @@ Las **matrices de transformación** ($4 \times 4$) involucradas permiten convert
 La transformación de vista es el cálculo que permite convertir coordenadas de mundo (_world coordinates_, WC) en coordenadas de cámara (_eye or camera coordinates_, EC).
 
 Se usa un marco de referencia cartesiano 
-$$V = [ \hat{x}_{ec}, \hat{y}_{ec}, \hat{z}_{ec} , \dot{o}_{ec} ]$$
+$$\mathcal{V} = [ \hat{x}_{ec}, \hat{y}_{ec}, \hat{z}_{ec} , \dot{o}_{ec} ]$$
 llamado **marco de cámara** (o de vista), que está posicionado y alineado con la cámara virtual. 
 
-> Las **coordenadas de cámara** de un punto son las coordenadas de ese punto en el marco $V$ y estas se calculan gracias a la matriz de cambio de sistema de referencia $\mathcal{M}(W, V)$.
+> Las **coordenadas de cámara** de un punto son las coordenadas de ese punto en el marco $\mathcal{V}$ y estas se calculan gracias a la matriz de cambio de sistema de referencia $V = \mathcal{M}(\mathcal{W}, \mathcal{V})$.
 
 
 ![](./resources/img28.png)
 
-El sistema de referencia de vista $V$ , se define a partir de los siguientes parámetros:
+El sistema de referencia de vista $\mathcal{V}$, se define a partir de los siguientes parámetros:
 - $\dot{o}_{ec}$ : Es el punto del espacio foco de la proyección, donde estaría situado el observador ficticio que contempla la escena (_projection reference point_, PRP).
 - $\vec{n}$: Es el vector libre perpendicular al plano de visión (plano ficticio donde se proyecta la imagen perpendicular al eje óptico de la camara virtual, _view plane normal_, VPN).
 - $\dot{a}$: Es el punto en el eje óptico, también llamado punto de atención (_look-at point_);
@@ -81,8 +83,8 @@ O bien, si se conocen las tuplas $\hat{x}_{ec}$, $\hat{y}_{ec}$ , $\hat{z}_{ec}$
 
 ```c++
 // Construye V usando la matriz de traslación seguida con la de alineamiento
-glm::vec3 ejes[3] = {xec , yec , zec} ;
-glm::mat4 V = MAT_Vista(ejes, oec) ;
+glm::vec3 ejes[3] = {xec , yec , zec};
+glm::mat4 V = MAT_Vista(ejes, oec);
 ```
 
 ```c++
@@ -91,8 +93,8 @@ glm::mat4 MAT_Vista(const glm::vec3 ejes[3], const glm::vec3 & origen)
 	// Declaramos la matriz del sistema de referencia
 	glm::mat4 v = mat4(1.0);
 	// Copiamos cada vector de la base en una fila de la matriz
-	for( unsigned i = 0 ; i < 3 ; i++ )
-		for( unsigned j = 0 ; j < 3 ; j++ )
+	for (unsigned i = 0; i < 3; i++)
+		for (unsigned j = 0; j < 3; j++)
 			v[i][j] = ejes[j][i]; // en GLM, M[i][j] es la columna i, fila j de M
 	// Devolver la traslación del origen seguida de la matriz de la base
 	return v * translate(-origen);
@@ -104,7 +106,7 @@ glm::mat4 MAT_Vista(const glm::vec3 ejes[3], const glm::vec3 & origen)
 ### Matriz de vista en el cauce programable
 
 En un cauce programable, la aplicación debe dar estos pasos:
-- Construir la matriz de vista $V$ , usando las coordenadas de los vectores y el punto que definen el marco de coordenadas de vista 3D.
+- Construir la matriz de vista $V$, usando las coordenadas de los vectores y el punto que definen el marco de coordenadas de vista 3D.
 - Declarar un parámetro _uniform_ en el _vertex shader_ que contiene la matriz de vista.
 - Escribir el código del _vertex shader_ de forma que la posición de los vértices sea transformada usando la matriz de modelado y después la matriz de vista (o bien ambas a la vez usando la matriz _modelview_), de forma que obtengamos su posición en coordenadas de cámara.
 ### Transformación de modelado y vista en el vertex shader
@@ -119,8 +121,8 @@ uniform mat4 u_mat_vista; // Matriz de vista
 void main()
 {
 	// Calcular posición y normal en coords de mundo
-	vec4 posic_wcc = u_mat_modelado * vec4(in_posicion_occ, 1.0) ;
-	vec3 normal_wcc = (u_mat_modelado_nor * vec4(in_normal,0)).xyz ;
+	vec4 posic_wcc = u_mat_modelado * vec4(in_posicion_occ, 1.0);
+	vec3 normal_wcc = (u_mat_modelado_nor * vec4(in_normal,0)).xyz;
 	// Calcular posición y normal en coordenadas de cámara
 	v_posic_ecc = u_mat_vista*posic_wcc ;
 	v_normal_ecc = (u_mat_vista*vec4(normal_wcc,0)).xyz ;
@@ -181,8 +183,8 @@ En este caso, no hay transformación de escala, y la proyección se puede ver co
 ### El view-frustum
 
 El **view-frustum** designa la región del espacio de la escena que es visible en el viewport. Su forma depende del tipo de proyección:
-- Perspectiva: Es un tronco de pirámide rectangular (izq.).
-- Ortográfica: Es un paralelepípedo ortogonal u ortoedro (der.).
+- Perspectiva: Es un tronco de pirámide rectangular (izquierda).
+- Ortográfica: Es un paralelepípedo ortogonal u ortoedro (derecha).
 
 ![](./resources/img33.png)
 
@@ -214,12 +216,12 @@ Respecto de los otros cuatro valores, determinan la extensión en $X$ y en $Y$:
 - $l$ (_left_) y $r$ (_right_) son los límites en $X$ del view-frustum ($l \neq r$).
 - $b$ (_bottom_) y $t$ (_top_) son los límites en $Y$ ($b \neq t$).
 
-- En proy. ortográfica:
+- En proyección ortográfica:
 	- El plano $x_{ec} = l$ en EC se transforma en el plano $x_{ndc} = −1$ en NDC.
 	- El plano $x_{ec} = r$ en EC se transforma en el plano $x_{ndc} = +1$ en NDC.
 	- El plano $y_{ec} = b$ en EC se transforma en el plano $y_{ndc} = −1$ en NDC.
 	- El plano $y_{ec} = t$ en EC se transforma en el plano $y_{ndc} = +1$ en NDC.
-- En proy. perspectiva:
+- En proyección perspectiva:
 	- El plano $-nx_{ec} = lz_{ec}$ en EC se transforma en el plano $x_{ndc} = −1$ en NDC.
 	- El plano $-nx_{ec} = rz_{ec}$ en EC se transforma en el plano $x_{ndc} = +1$ en NDC.
 	- El plano $-ny_{ec} = bz_{ec}$ en EC se transforma en el plano $y_{ndc} = −1$ en NDC.
@@ -351,6 +353,8 @@ Si se usa un cauce programable 3D, es necesario:
 - Al inicio de la aplicación (o al inicio de la visualización de un frame), se debe construir la matriz de proyección $P$ (de tipo `mat4`) usando `frustum`, `ortho` u otras funciones parecidas.
 - Finalmente, usando la localización y $P$, se debe fijar el valor del parámetro _uniform_ con `glUniformMatrix4fv`.
 
+### Matriz de proyeccion en la clase `Cauce`
+
 Para la gestión de la matriz de proyección, en la clase `Cauce` y sus shaders se incluyen:
 - Una variable de instancia con la matriz de proyección actual (`mat_proyeccion`).
 - Un parámetro _uniform_ con esa matriz (`u_mat_proyeccion`).
@@ -372,11 +376,11 @@ void main()
 {
 	// Calcular posición y normal en coordenadas de mundo (transf. de modelado)
 	vec4 posic_wcc = u_mat_modelado * vec4(in_posicion_occ, 1.0);
-	vec3 normal_wcc = (u_mat_modelado_nor * vec4(in_normal,0)).xyz;
+	vec3 normal_wcc = (u_mat_modelado_nor * vec4(in_normal, 0.0)).xyz;
 	// Calcular posicion y normal en coordenadas de vista (transf. de vista)
-	v_posic_ecc = u_mat_vista*posic_wcc;
-	v_normal_ecc = (u_mat_vista*vec4(normal_wcc,0)).xyz;
-. . .
+	v_posic_ecc = u_mat_vista * posic_wcc;
+	v_normal_ecc = (u_mat_vista * vec4(normal_wcc, 0.0)).xyz;
+	. . .
 	// Calcular posición en coords. de recortado (transf. de proyección)
 	gl_Position = u_mat_proyeccion * v_posic_ecc;
 }
@@ -415,7 +419,7 @@ En coordenadas de dispositivo, podemos asociar una región cuadrada, de lado uni
 
 ![](./resources/img40.png)
 
-Los centros de los pixels (puntos azules) tienen coordenadas de dispositivo con parte fraccionaria igual a $1/2$. Los bordes entre pixels tienen coordenadas sin parte fraccionaria (enteras).
+> Los centros de los pixels (puntos azules) tienen coordenadas de dispositivo con parte fraccionaria igual a $1/2$. Los bordes entre pixels tienen coordenadas sin parte fraccionaria (enteras).
 
 ### El espacio de coordenadas de dispositivo
 
@@ -605,7 +609,7 @@ $$f(rL_r + gL_g + bL_b) ≈ (r, g, b)$$
 
 Un dispositivo de salida de color (monitor, impresora, proyector) tiene asociados tres primarios RGB (las distribuciones obtenidas cuando se muestra el rojo, verde y azul a máxima potencia en el dispositivo). Como consecuencia, cualquier color reproducible en un dispositivo se puede representar por una terna $(r, g, b)$, con
 $$0 \leq r,\,g,\,b \leq 1$$
-> Una misma terna (r, g, b) produce tonos de color y niveles de brillo ligeramente distintos en dispositivos distintos.
+> Una misma terna $(r, g, b)$ produce tonos de color y niveles de brillo ligeramente distintos en dispositivos distintos.
 
 Al conjunto de todas las ternas RGB con componentes entre 0 y 1 se le llama **espacio de color RGB**, y se puede visualizar como un cubo 3D con colores asociados a cada punto del mismo.
 
@@ -614,7 +618,7 @@ Al conjunto de todas las ternas RGB con componentes entre 0 y 1 se le llama **es
 > El espacio RGB no es el único esquema para representar computacionalmente los colores, pero sí el más usado hoy en día.
 ## 2.2 Emisión y reflexión de la radiación
 
-La radiación electromagnética visible se genera en las fuentes de luz, por procesos físicos diversos que convierten otras formas de energía en energía radiante. Hay de dos tipos:
+La radiación electromagnética visible se genera en las fuentes de luz, por diversos procesos físicos que convierten otras formas de energía en energía radiante. Hay de dos tipos:
 
 - **Fuentes naturales**: Sol o estrellas, fuego, objetos incandescentes, órganos de algunos animales, etc...
 - **Fuentes artificiales (luminarias)**: Filamentos incandescentes, tubos fluorescentes, LEDs, etc...
@@ -631,7 +635,7 @@ La radiancia $\mathcal{L}(\lambda, p, v)$ se puede escribir como suma de:
 - La radiancia emitida desde $p$ en la dirección $v$ ($0$ si $p$ no está en una fuente de luz),  que llamamos $L_{em} (\lambda, p, v)$.
 - La radiancia reflejada, suma, para cada dirección $u_i$ del producto de:
 	- $L_{in}(\lambda, p, u_i)$: Radiancia incidente sobre $p$ desde $u_i$
-	- $f_r(\lambda, p, v, u_i)$: Fracción de radiancia que se refleja desde $p$ en la dirección $v$, respecto del total incidente sobre $p$ proveniente de la dirección $u_i$ (con l.o. $\lambda$).
+	- $f_r(\lambda, p, v, u_i)$: Fracción de radiancia que se refleja desde $p$ en la dirección $v$, respecto del total incidente sobre $p$ proveniente de la dirección $u_i$ con longitud de onda $\lambda$.
 
 $$\mathcal{L}(\lambda, p, v) = L_{em} (\lambda, p, v) + \sum_{i} L_{in}(\lambda, p, u_i)f_r(\lambda, p, v, u_i)$$
 ### Reflexión local en un punto
@@ -646,7 +650,7 @@ La ecuación anterior es complicada (larga) de calcular. Por tanto, en OpenGL b�
 1. No se considera la radiancia emitida.
 2. No se considera la luz incidente que no provenga directamente de las fuentes de luz.
 3. Las fuentes de luz son puntuales o unidireccionales, no extensas, y hay un número finito de ellas.
-4. Los objetos o polígonos son totalmente opacos (no hay transparencias ni mat. traslúcidos).
+4. Los objetos o polígonos son totalmente opacos (no hay transparencias ni materiales traslúcidos).
 5. No se consideran sombras arrojadas (las fuentes son visibles desde cualquier cara delantera respecto de ellas).
 6. El espacio entre los objetos no dispersa la luz (la radiancia se conserva en el espacio entre los objetos).
 7. En lugar de considerar todas las longitudes de onda $\lambda$ posibles, usamos el modelo RGB.
@@ -752,7 +756,7 @@ La componente pseudo-especular modela como se refleja la luz en los objetos bril
 La expresión ideada por Bui Tuong Phong, y conocida como modelo de Phong es esta:
 $$f_{rs}(p, v, li ) = k_s(p) d_i [\max\{0, ri \cdot v\}]^e$$
 
-Donde $k_d(p)$ es un valor real entre $0$ y $1$, representa la fracción de luz reflejada de forma pseudo-especular. Además $r_i$  es el vector reflejado, depende tanto de $l_i$ como de $n_p$ , y está en el plano formado por ambos, con $n_p$ como bisectriz de ellos, se obtiene como:
+Donde $k_s(p)$ es un valor real entre $0$ y $1$, representa la fracción de luz reflejada de forma pseudo-especular. Además $r_i$  es el vector reflejado, depende tanto de $l_i$ como de $n_p$ , y está en el plano formado por ambos, con $n_p$ como bisectriz de ellos, se obtiene como:
 $$r_i = 2(l_i \cdot n_p)n_p − l_i$$
 Además, $e$ es el exponente de brillo, es decir, un valor real positivo que permite variar el tamaño de las zonas brillantes (a mayor valor, menor tamaño y más pulida o especular) y, $d_i$ vale $1$ si $n_p \cdot l_i > 0$ (fuente de cara a la superficie), y $0$ en otro caso (de espaldas).
 
@@ -848,9 +852,7 @@ $$(v_0 , u_0 ), (v_1 , u_1), \dotsc, (u_{n−1} , v_{n−1})$$
 > En este ejemplo se busca una asignación de coordenadas de texturas que sea continua en las aristas.
 
 - **Asignación procedural**: La función $f$ se implementa como un subprograma $CoordText(p)$ que calcula las coordenadas de textura (para un punto $p$ devuelve el par $(u, v) = f (p)$ con las coordenadas de textura de $p$). Hay dos opciones:
-
 	- **Asignación procedural a vértices**: Se invoca `CoordText(vi)` para calcular las coordenadas de textura en cada vértice $v_i$ , y las coordenadas obtenidas se almacenan y después se interpolan linealmente en el interior de los polígonos de la malla. Funciona de forma totalmente correcta (exacta) solo cuando $f$ es lineal, en otro caso es una aproximación lineal a trozos.
-
 	- **Asignación procedural a puntos**: Se invoca `CoordText(p)` cada vez que sea necesario evaluar el MIL en un punto de la superficie $p$. Permite exactitud incluso aunque $f$ sea no lineal.
 
 > En OpenGL, esto requiere programación del cauce gráfico, invocando a `CoordText` en cada pixel desde el fragment shader.
@@ -872,9 +874,9 @@ Este método funciona mejor (menor deformación) cuando la normal es aproximadam
 
 ### Coordenadas paramétricas
 
-Una **superficie paramétrica** es una variedad plana de dos dimensiones (que puede ser abierta o cerrada), para la cual existe una función $g$ (con dominio en $[0, 1] \times [0, 1]$) tal que, si $p$ es un punto de la superficie, entonces existen $(s, t)$ tales que $p = g(s, t)$:
+Una **superficie paramétrica** es una variedad plana de dos dimensiones (que puede ser abierta o cerrada), para la cual existe una función $g$ (con dominio en $[0, 1] \times [0, 1]$) tal que, si $p$ es un punto de la superficie, entonces existen $(s, t)$ tales que $p = g(s, t)$.
 
-TODO: COMPLETAR ESTA DEFINICIÓN DE SUPERFICIE PARAMÉTRICA
+> En este caso, al par $(s, t)$ se le llaman **coordenadas paramétricas** del punto $p$, y a la función $g$ se le llama **función de parametrización** de la superficie.
 
 Usando la capacidad de evaluar $g$, podemos construir una malla que aproxima cualquier superficie paramétrica. La posición $p_i$ del $i$-ésimo vértice se obtiene como $g(s_i , t_i)$, donde los $(s_i , t_i)$ forman una rejilla en $[0, 1] \times [0, 1]$.
 
@@ -890,7 +892,6 @@ Se obtiene $\alpha$ en el rango $[−\pi, \pi]$ y $\beta$ en el rango $[−\pi/2
 $$u = \frac{1}{2} + \frac{\alpha}{2\pi} \hspace{1cm} v = \frac{1}{2} + \frac{\beta}{\pi}$$
 
 ![](./resources/img65.png)
-
 ### Coordenadas cilíndricas
 
 Se usan las coordenadas polares (ángulo y altura) del punto $p$. Las coordenadas $(\alpha, h, r )$ se obtienen a partir de las coordenadas cartesianas $( x, y, z)$,  también con origen en el centro del objeto.
@@ -982,7 +983,7 @@ Con este sombreado se reproducen los brillos incluso a baja resolución:
 
 ### Comparación de sombreado de vértices y píxeles
 
-Sombreado de vértices (arriba) y de píxeles (abajo), en iguales condiciones de iluminación, observador y atributos material:
+Sombreado de vértices (_arriba_) y de píxeles (_abajo_), en iguales condiciones de iluminación, observador y atributos material:
 
 ![](./resources/img75.png)
 
@@ -1034,7 +1035,7 @@ glBindTexture(GL_TEXTURE_2D, nombre_tex);
 
 Antes de usar una textura en OpenGL (de tamaño $n_x \times n_y$), es necesario alojar en la memoria RAM una matriz con los colores de sus texels:
 
-- Cada texel se representa (usualmente) con tres bytes (enteros sin signo entre 0 y 255), que codifican la proporción de rojo, verde y azul, respecto al valor máximo (255).
+- Cada texel se representa (usualmente) con tres bytes (enteros sin signo entre $0$ y $255$), que codifican la proporción de rojo, verde y azul, respecto al valor máximo ($255$).
 - Los tres bytes de cada texel se almacenan contiguos, usualmente en orden RGB.
 - Se conoce la dirección de memoria del primer byte, que llamamos `texels` (es un puntero de tipo `void *`) con este esquema la imagen ocupará, lógicamente, $3 n_x n_y$ bytes consecutivos en memoria.
 
@@ -1056,7 +1057,7 @@ glTexImage2D
 	imagen // const void * data: puntero a texels en memoria apl.
 );
 // Generar mipmaps (versiones a resolución reducida)
-glGenerateMipmap( GL_TEXTURE_2D );
+glGenerateMipmap(GL_TEXTURE_2D);
 ```
 
 ### Selección de texels para texturas cercanas (magnificadas)
@@ -1099,7 +1100,7 @@ glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 
 Por último, es posible seleccionar que se hace cuando se especifican coordenadas de textura fuera de rango (es decir, fuera de $[0, 1]$).
 
-- En este caso,se puede elegiar entre truncar las coordenadas al valor mínimo o máximo, repetir la textura (descartar la parte entera), o repetirla con espejo.
+- En este caso, se puede elegir entre truncar las coordenadas al valor mínimo o máximo, repetir la textura (descartar la parte entera), o repetirla con espejo.
 - Esto se puede hacer de forma independiente para la coordenada $S$ o para la coordenada $T$.
 
 > Para repetir la textura en ambas coordenadas, hacemos:
@@ -1187,14 +1188,13 @@ La función principal del vertex shader hace la transformación de coordenadas d
 void main()
 {
 	// Calcular posicion y normal en coordenadas de mundo
-	vec4 posic_wc = u_mat_modelado
-	*vec4(in_posicion_occ,1.0);
-	vec3 normal_wc=(u_mat_modelado_nor*vec4(in_normal_occ,0.0)).xyz;
+	vec4 posic_wc = u_mat_modelado * vec4(in_posicion_occ, 1.0);
+	vec3 normal_wc=(u_mat_modelado_nor * vec4(in_normal_occ, 0.0)).xyz;
 	// Calcular variables varying
-	v_posic_ecc = u_mat_vista*posic_wcc ;
-	v_normal_ecc = (u_mat_vista*vec4(normal_wcc,0.0)).xyz;
-	v_vec_obs_ecc = (-v_posic_ecc).xyz ;
-	v_color = vec4( in_color, 1 ) ;
+	v_posic_ecc = u_mat_vista * posic_wcc;
+	v_normal_ecc = (u_mat_vista * vec4(normal_wcc, 0.0)).xyz;
+	v_vec_obs_ecc = (-v_posic_ecc).xyz;
+	v_color = vec4(in_color, 1);
 	v_coord_text = CoordsTextura();
 	// Calcular posición del vértice en coords. de recortado
 	gl_Position = u_mat_proyeccion * v_posic_ecc ;
@@ -1211,16 +1211,16 @@ vec2 CoordsTextura()
 	// Si textura desactivada
 	if (!u_eval_text) 
 		return vec2(0.0, 0.0);
-	// Si text. activadas, gener. desact.
+	// Si text. activadas, pero generacion de coord. text. desactivada
 	if (u_tipo_gct == 0 )
 		return in_coords_textura.st;
 	vec4 pos_ver;
 	// Si generación en coords. de objeto
 	if (u_tipo_gct == 1)
-		pos_ver = vec4( in_posicion_occ, 1.0 ); // dev. coords. obj.
+		pos_ver = vec4(in_posicion_occ, 1.0); // dev. coords. obj.
 	else
 		pos_ver = v_posic_ecc; // dev. coords. de cámara
-	return vec2(dot(pos_ver,u_coefs_s), dot(pos_ver,u_coefs_t));
+	return vec2(dot(pos_ver, u_coefs_s), dot(pos_ver, u_coefs_t));
 }
 ```
 
@@ -1245,9 +1245,9 @@ evaluando el MIL, si procede:
 void main()
 {
 	// Calcular el color base del objeto (color_obj)
-	vec4 color_obj ;
+	vec4 color_obj;
 	// Consultar textura si hay o usar color interpolado
-	if ( u_eval_text )
+	if (u_eval_text)
 		color_obj = texture(u_tex, v_coord_text);
 	else
 		color_obj = v_color;

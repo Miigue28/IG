@@ -44,6 +44,8 @@ Los **parámetros de visualización** son un conjunto amplio de valores que dete
 - **Cámara virtual**: Posición, orientación y ángulo de visión del observador ficticio que vería la escena como aparece en la imagen.
 - **Viewport**: Resolución de la imagen, y si procede, posición de la misma en la ventana.
 
+![](./resources/img90.png)
+
 ## 2.3 Rasterización y Ray-Tracing
 
 ### Visualización basada en rasterización
@@ -71,9 +73,9 @@ El método de Ray-Tracing y sus variantes suele ser más lento, pero consigue re
 
 ## 2.4 El Caucre Gráfico en Rasterización
 
-El **cauce gráfico** es el conjunto de etapas de cálculo que permiten la síntesis de imágenes por rasterización.
+El **cauce gráfico** es el conjunto de etapas de cálculo que permiten la síntesis de imágenes por rasterización. Las entradas al cauce gráfico se denominan **primitivas**, formas visibles que no se pueden descomponer en otras más simples, siendo típicamente triángulos o segmentos de líneas/puntos. 
 
-Las entradas al cauce gráfico se denominan **primitivas**, formas visibles que no se pueden descomponer en otras más simples, siendo típicamente triángulos o segmentos de líneas/puntos. Un **vertice** es un punto del espacio, extremo de una arista de un triángulo, o de un segmente de recta, o donde se dibuja un punto. 
+Un **vertice** es un punto del espacio, extremo de una arista de un triángulo, o de un segmente de recta, o donde se dibuja un punto. 
 
 > Una o varias primitivas se especifican mediante una lista de coordenadas de vértices, más alguna información adicional.
 
@@ -89,6 +91,7 @@ El cauce gráfico tiene las siguientes etapas:
 - **Sombreado**: En cada pixel cubierto se calcula el color que se le debe asignar. Se realiza por un programa llamado **Fragment Shader** o **Pixel Shader**.
 
 ![](./resources/img02.png)
+
 ## 3. OpenGL y GLFW
 
 **OpenGL** es la especificación de un conjunto de funciones útil para visualización 2D/3D basada en rasterización. **GLSL** (_GL Shading Languaje_) es el lenguaje de programación de shaders que se usa con OpenGL.
@@ -106,6 +109,8 @@ Las **funciones gestoras de eventos** (_event managers_, o _callbacks_) son func
 
 El programa establece que tipos de eventos se quieren gestionar y qué funciones lo harán. Tras invocar a una de estas funciones, se dice que el correspondiente evento ya ha sido **procesado** o **gestionado**.
 
+## 3.2 Estructura de un programa con OpenGL/GLFW
+
 ```c++
 void VisualizarFrame(){}
 void FGE_CambioTamano(GLFWwindow* ventana, int nuevoAncho, int nuevoAlto){}
@@ -116,10 +121,14 @@ void Inicializa_OpenGL(){}
 void BucleEventos_GLFW(){}
 int main(int argc, char* argv[])
 {
-	Inicializa_GLFW(argc, argv); // Crea una ventana
-	Inicializa_OpenGL(); // Inicializa estado del cauce
-	BucleEventos_GLFW(); // Ejecuta el bucle
-	glfwTerminate(); // Cerrar la ventana
+	// Crea una ventana
+	Inicializa_GLFW(argc, argv);
+	// Inicializa estado del cauce
+	Inicializa_OpenGL();
+	// Ejecuta el bucle
+	BucleEventos_GLFW();
+	// Cerrar la ventana
+	glfwTerminate();
 }
 ```
 
@@ -133,17 +142,18 @@ Una aplicación OpenGL/GLFW ejecuta un **bucle principal** o **bucle de gestión
 ```c++
 void Inicializa_GLFW(int argc, char* argv[])
 {
+	// Especificar que función se llamará ante un error de GLFW
+	glfwSetErrorCallback(ErrorGLFW);
 	// Intenta inicializar, termina si no puede
 	if (!glfwInit())
 	{
 		cout << "Imposible inicializar GLFW\n\nSaliendo..." << end;
 		exit(1);
 	}
-	// Especificar que función se llamará ante un error de GLFW
-	glfwSetErrorCallback(ErrorGLFW);
 	// Crear la ventana, activar el rendering context
 	ventana_glfw = glfwCreateWindow(ventana_tam_x, ventana_tam_y, "Test", nullptr, nullptr);
-	glfwMakeContextCurrent(ventana_glfw); // Necesario para OpenGL
+	// Establecemos el contexto de OpenGL creado como el actual
+	glfwMakeContextCurrent(ventana_glfw);
 	. . . 
 }
 ```
@@ -209,8 +219,10 @@ En el caso de las primitivas de tipo triángulos, OpenGL puede visualizarlos de 
 Las APIs de rasterización permiten especificar una secuencia de vértices (con repeticiones) a partir de una secuencia de vértices únicos:
 - Se parte de una secuencia $V_n$ de $n$ coordenadas arbitrarias de vértices $V_n = \{v_0, v_1, \dotsc, v_{n-1}\}$.
 - Se usa una secuencia $I_m$ de $m$ índices $I_m = \{i_0, i_1, \dotsc, i_{m-1}\}$ donde cada valor $i_j$ es un entero entre $0$ y $n-1$ (ambos incluidos). Puede tener índices repetidos.
-- La secuencia de vértices $V_n$ y la de índices determinan otra secuenci $S_m$ de $m$ vértices que tiene las mismas coordenadas de vértices $V_n$ pero en el orden especificado por los índices en $I_m$
+- La secuencia de vértices $V_n$ y la de índices $I_m$ determinan otra secuencia $S_m$ de $m$ vértices que tiene las mismas coordenadas de vértices $V_n$ pero en el orden especificado por los índices en $I_m$
 $$S_m = \{v_{i_0}, v_{i_1}, \dotsc, v_{i_{m-1}}\}$$
+
+![](./resources/img91.png)
 
 ## 3.3 Atributos de vértices
 
@@ -223,7 +235,6 @@ Las coordenadas de su posición se considera un **atributo** de los vértices, p
 
 > El valor de cada atributo está definido en cada pixel donde se proyecta la primitva. Estos valores se calculan durante la rasterización usando **interpolación**.
 
-
 ## 3.4 Almacenamiento de vértices y atributos
 
 Cuando usamos arrays o tablas de coordenadas y atributos en memoria, tenemos dos opciones:
@@ -233,31 +244,27 @@ Cuando usamos arrays o tablas de coordenadas y atributos en memoria, tenemos dos
 ```c++
 struct
 {
-	float posicion[3],
-		  color[3],
-		  normal[3],
-		  coord_text[2];
+	float posicion[3], color[3], normal[3], coord_text[2];
 }
-secuenciaAOS[num_vertices];
+secuenciaAOS[n_vert];
 struct
 {
-	float posiciones[num_vertices*3], 
-		  colores[num_vertices*3],
-		  normales[num_vertices*3],
-		  coord_text[num_vertices*2];
+	float posiciones[n_vert*3], colores[n_vert*3], normales[n_vert*3], coord_text[n_vert*2];
 }
 secuanciaSOA;
 ```
+
+![](./resources/img92.png)
 
 Usaremos la librería estándar de C++ junto con la librería **GLM** para gestionar el almacenamiento de las tablas de atributos e índices de una secuencia de vértices en la aplicación.
 
 ```c++
 #include<glm>
 std::vector<glm::vec3> posiciones; // Coordenadas de posición de los vértices
-std::vector<glm::vec3> colores; // Colores de los vértices
-std::vector<glm::vec3> normales; // Normales de los vértices
+std::vector<glm::vec3> colores;    // Colores de los vértices
+std::vector<glm::vec3> normales;   // Normales de los vértices
 std::vector<glm::vec2> coord_text; // Coordenadas de textura de los vértices
-std::vector<unsigned int> indices; // Indices
+std::vector<glm::uvec3> indices;   // Indices
 ```
 
 El almacenamiento de las tablas lo realizaremos en la GPU mediante los Vertex Buffer Objects
@@ -269,6 +276,8 @@ El uso de este bloque de memoria se hace exclusivamente a través de llamadas a 
 > El identificador (_buffer_) del VBO y el _offset_ deben almacenarse en la memoria de la aplicación, de forma que podamos acceder a los datos en el VBO:
 
 ![](./resources/img03.png)
+
+### Clase para descriptores de VBOs de atributos
 
 Por otro lado, una tabla de atributos se puede describir usando un conjunto de valores o metadatos relativos a la propia tabla. A ese conjunto lo llamamos **parámetros descriptores**, son los siguientes:
 
@@ -291,8 +300,6 @@ constexpr GLuint
 - **Número de bytes por valor** (`unsigned val_size`): Número de bytes por dato, se puede calcular con la función `sizeof`, exclusivamente en base a `type`.
 - **Tamaño en bytes** (`GLsizeiptr tot_size`): Tamaño de la tabla completa, se calcula como producto de `val_size`, `size` y `count`.
 - **Nombre o identificador del VBO** (`GLuint buffer`): Identificador único del VBO, asignado por OpenGL cuando se crea el VBO.
-
-### Clase para descriptores de VBOs de atributos
 
 ```c++
 class DescrVBOAtribs
@@ -317,6 +324,8 @@ class DescrVBOAtribs
 }
 ```
 
+### Clase para descriptores de VBOs de índices
+
 En el caso de una tabla de índices, sus **parámetros descriptores** son:
 
 - **Tipo de los índices** (`GLenum type`): Se usan tipos enteros sin signo, es decir, `GL_UNSIGNED_BYTE`, `GL_UNSIGNED_SHORT` o `GL_UNSIGNED_INT`.
@@ -326,8 +335,6 @@ En el caso de una tabla de índices, sus **parámetros descriptores** son:
 - **Tamaño en bytes** (`GLsizeiptr tot_size`): Tamaño de la tabla completa, se calcula como producto de `ind_size` y `count`.
 - **Desplazamiento** (`const void* offset`): Número de bytes que hay en el VBO entre el inicio del VBO y el inicio de esta tabla.
 - **Idenficador del VBO** (`GLuint buffer`): Identificador del VBO en la GPU que contiene la tabla.
-
-### Clase para descriptores de VBOs de índices
 
 ```c++
 class DescrVBOInds
@@ -360,6 +367,8 @@ class DescrVBOInds
 	- Si está habilitada, parámetros descriptores de esa tabla.
 - Si la secuencia es indexadam parámetros descriptores de la tabla de índices.
 
+### Clase para descriptores de VAO
+
 Para gestionar todos los datos relativos a una secuencia de vértices, las APIs de rasterización usan determinadas estructuras de datos. En OpenGL se llaman **Vertex Array Objects**:
 
 > Un **Vertex Array Object (VAO)** es una estructura de datos, gestionada por OpenGL, que almacena toda la información sobre una secuencia de vértices, es decir, la localización y el formato de las coordenadas, otros atributos, e índices.
@@ -371,8 +380,6 @@ Una aplicación debe crear una de estas estructuras por cada secuencia de vérti
 - Siempre hay un VAO activo y en uso. Inicialmente es el VAO con identificador `0`, el cual no se puede usar para visualizar.
 
 ![](./resources/img04.png)
-
-### Clase para descriptores de VAO
 
 ```c++
 class DescrVAO
@@ -484,7 +491,7 @@ if(coord_text.size() > 0)
 
 Para visualizar una secuencia de vértices en el modo diferido se usan exclusivamente las funciones `glDrawArrays` (array no indexado) y `glDrawElements` (array indexado).
 
-Antes de la primera visualización debemos almacenar las secuencias de coordenadas, atributos e índices (si proceda) en uno o verios VBOs dentro de un VAO específico. En cada visualización solo es necesario activar el VAO (con `glBindVertexArray`) y visualizar con una única llamada (con `glDrawArrays` o `glDrawElements`).
+Antes de la primera visualización debemos almacenar las secuencias de coordenadas, atributos e índices (si proceda) en uno o varios VBOs dentro de un VAO específico. En cada visualización solo es necesario activar el VAO (con `glBindVertexArray`) y visualizar con una única llamada (con `glDrawArrays` o `glDrawElements`).
 
 > Ambas funciones visualizan la secuencia de forma síncrona, es decir, durante la llamada la visualización se pone en marcha, pero no necesariamente ha acabado cuando termina de ejecutarse la función.
 
@@ -566,7 +573,6 @@ void Cauce::fijarColor(const glm::vec3 & nuevo_color)
 	glVertexAttrib(ind_atrib_colores, color.r, color.g, color.b);
 }
 ```
-
 
 ### Cambio del modo de visualización de polígonos
 
@@ -661,7 +667,46 @@ void FGE_CambioTamano(int nuevoAncho, int nuevoAlto)
 
 ### Región visible
 
-NO SE SI ESTO ES IMPORTANTE
+La **región visible** en pantalla es (inicialmente) un cubo de lado 2 y centro en el origen:
+
+![](./resources/img93.png)
+
+> Las primitivas o partes de primitivas fuera de esta región no se dibujan (quedan _descartadas_ o _recortadas_)
+
+Inicialmente, OpenGL usa una proyección paralela la eje $Z$, hacia la rama negativa de dicho eje. Podemos imaginar los pixeles del **viewport** sobre la cara delantera del cubo:
+
+![](./resources/img94.png)
+
+> Si se activa la EPO, las primitivas con valor de coordenada $Z$ menor ocultan a las primitvas con $Z$ mayor.
+
+La zona visible original puede cambiarse a cualquier requión de posición y tamaño arbitrarios (**ortoedro**):
+
+![](./resources/img95.png)
+
+OpenGL mantiene una matriz $P \in \mathcal{M}_{4 \times 4}(\mathbb{R})$, llamada **matriz de proyección**, que se aplica a las coordenadas de todos los vértices que envía la aplicación, antes de visualizar.
+
+Para cambiar la zona visible hay que fijar la matriz $P$ a estos valores:
+$$P = \begin{pmatrix}s_x & 0 & 0 & -c_x \cdot s_x \\ 0 & s_y & 0 & -c_y \cdot s_y \\ 0 & 0 & s_z & -c_z \cdot s_z \\ 0 & 0 & 0 & 1\end{pmatrix}$$
+donde
+$$\begin{align}s_x & = \frac{2}{x_1 - x_0}  & c_x & = \frac{x_0 + x_1}{2} \\ s_y & = \frac{2}{y_1 - y_0} & c_y & = \frac{y_0 + y_1}{2} \\ s_z & = \frac{2}{z_1 - z_0} & c_z & = \frac{z_0 + z_1}{2} \end{align}$$
+
+Para realizar este cambio, podemos definir una matriz
+
+```c++
+const GLfloat matriz_proyeccion[16] =
+{ 
+	sx, 0, 0, -cx*sx, 
+	0, sy, 0, -cy*sy, 
+	0, 0, sz, -cz*sz,
+	0, 0, 0, 1
+};
+```
+
+Para cambiar la zona visible, debemos de usar una variable (`loc_proyeccion`) con un entero que identifica a la matriz de proyeccion en el cauce programable, y usar la función `glUniformMatrix4fv`:
+
+```c++
+glUniformMatrix4fv(loc_proyeccion, 1, GL_TRUE, matriz_proyeccion);
+```
 
 ### La función de redibujado
 
@@ -684,6 +729,8 @@ void VisualizarFrame()
 	CError();
 }
 ```
+
+> La función `glfwSwapBuffers` espera a que se rasterizen las primitivas en el framebuffer y después se visualiza en la ventana la imagen ya creada en dicho framebuffer
 
 ### Detección de errores de OpenGL
 
@@ -724,13 +771,11 @@ El cauce gráfico (_programmable pipeline_) incluye varias etapas y tipos de sha
 - Procesado de fragmentos con el **Fragment Shader** (programable, obligatorio).
 - Procesado de muestras, esto es, etapas adicionales que se ejecutan después (algunas antes) del procesado de fragmentos, incluyendo, por ejemplo, el test de profundidad (no programable).
 
-![](./resources/img08.png)
-
 ## 4.2 Estructura de los shaders
 
 Necesitamos como mínimo, un texto fuente del **Vertex Shader** y otro del **Fragment Shader**. Los fuentes de los dos shaders deben estar almacenados en memoria en variables de tipo `char*`, aunque se pueden guardar en archivos en el sistema de archivos mediante la extensión `.glsl` y leerlos al inicio del programa.
 
-Los dos shaders deben compilarse usando llamadas a OpenGL, una vez compilados correctamente, los dos shaders se enlazan, creándose un **program objecto**. Cada objeto programa tiene asociado un identificador, esto es un entero positivo único.
+Los dos shaders deben compilarse usando llamadas a OpenGL, una vez compilados correctamente, los dos shaders se enlazan, creándose un **program object**. Cada objeto programa tiene asociado un identificador, esto es un entero positivo único.
 
 El código fuente de un shader tiene declaraciones de:
 
@@ -746,16 +791,16 @@ El código fuente de un shader tiene declaraciones de:
 
 - **Entradas**: 
 	- Parámetros `uniform`
-	- Atributos del vértice (`layout..in`): posición, color, etc.
+	- Atributos del vértice (`layout..in`): Posición, color, etc.
 - **Salidas**:
-	- Variables varying(`out`): para ser interpoladas.
+	- Variables varying(`out`): Para ser interpoladas.
 	- Variable `gl_Position`: Coordenadas transformadas del vértice.
 
 > **Fragment Shaders** (Se ejecutan una vez por pixel)
 
 - **Entradas**:
 	- Parámetros `uniform`
-	- Variables varying(`in`): ya interpoladas en el pixel
+	- Variables varying(`in`): Ya interpoladas en el pixel
 - **Salida**:
 	- Variable (`layout..out`) con color del pixel
 
@@ -774,52 +819,52 @@ const char * fuente_fs = R"glsl(
 
 ```c++
 #version 330 core
+
 // Parámetros uniform
-uniform mat4 u_mat_modelview; // matriz de transformación de posiciones
-uniform mat4 u_mat_proyeccion; // matriz de proyección
+uniform mat4 u_mat_modelview; // Matriz de transformación de posiciones
+uniform mat4 u_mat_proyeccion; // Matriz de proyección
 uniform bool u_usar_color_plano; // 1 -> usar color plano, 0 -> usar interpolado
+
 // Atributos de vértice
-layout( location = 0 ) in vec3 atrib_posicion ; // atributo 0: posición
-layout( location = 1 ) in vec3 atrib_color ;
-// atributo 1: color RGB
+layout(location = 0) in vec3 atrib_posicion;
+layout(location = 1) in vec3 atrib_color;
+
 // Variables ’varying’
-out
-vec3 var_color
-; // color RGB del vértice
+out vec3 var_color; // Color RGB del vértice
 flat out vec3 var_color_plano ; // idem (no se interpola)
+
 // Función principal
 void main()
 {
-var_color
-= atrib_color ;
-var_color_plano = atrib_color ;
-gl_Position
-= u_mat_proyeccion * u_mat_modelview *
-vec4( atrib_posicion, 1);
+	var_color = atrib_color;
+	var_color_plano = atrib_color;
+	gl_Position = u_mat_proyeccion * u_mat_modelview * vec4(atrib_posicion, 1);
 }
 ```
 
 ### Ejemplo de shaders mínimos: Fragment Shader
 
 ```c++
-
 #version 330 core
+
 // Parámetros uniform
 uniform bool u_usar_color_plano; // 1 -> usar color plano, 0 -> usar interpolado
+
 // Variables ’varying’
-in
-vec3 var_color ;
-// color interpolado en el pixel.
-flat in vec3 var_color_plano ; // color (plano) producido por el ’provoking vertex’
+in vec3 var_color;
+
+// Color interpolado en el pixel.
+flat in vec3 var_color_plano; // color (plano) producido por el ’provoking vertex’
 // Salida (color del pixel)
-layout( location = 0 ) out vec4 out_color_fragmento ;
+layout(location = 0) out vec4 out_color_fragmento;
+
 // Función principal
 void main()
 {
-if ( u_usar_color_plano )
-out_color_fragmento = vec4( var_color_plano, 1 );
-else
-out_color_fragmento = vec4( var_color, 1 );
+	if (u_usar_color_plano)
+		out_color_fragmento = vec4(var_color_plano, 1);
+	else
+		out_color_fragmento = vec4(var_color, 1);
 }
 ```
 
@@ -831,7 +876,7 @@ En todo momento existe un _program object_ activado (en uso para visualización)
 
 > Una aplicación OpenGL debe de crear un objeto programa usable y activarlo antes de visualizar.
 
-Un _program object_ tendrá asociados varios shaders, la información de cada uno de ellos se encapsula en una estructura de datos interna de OpenGL que se llama **Shader Object**, o simplemente shader. Cada _shader object_ tiene asociado un identificador único, creado mediante `glCreateShader`.
+Un _program object_ tendrá asociados varios shaders, la información de cada uno de ellos se encapsula en una estructura de datos interna de OpenGL que se llama **Shader Object**. Cada _shader object_ tiene asociado un identificador único, creado mediante `glCreateShader`.
 
 La aplicación debe de asociar a un _program object_ todos los _shader objects_ del mismo. Después debemos enlazar el _program object_ con `glLinkProgram`, tras lo que deberemos verificar si ha habido errores, con `glGetProgram`. Si los ha habido hay que obtener (con `glGetProgramInfoLog`) e imprimir el log de errores.
 
@@ -857,14 +902,14 @@ GLuint Cauce::compilarAdjuntarShader(GLenum tipo_shader, const string & nombre_a
 	// Verificar e informar errores o warnings y, si procede, abortar
 	glGetShaderInfoLog(id_shader, longi_max, &report_length, report_buffer);
 	if (report_length > 0)
-		cout << "Errores o warnings: " << endl << report_buffer << endl ;
+		cout << "Errores o warnings: " << endl << report_buffer << endl;
 	GLint compile_status;
 	glGetShaderiv( id_shader, GL_COMPILE_STATUS, &compile_status);
 	if (compile_status != GL_TRUE)
 		exit(1);
 	// Adjuntar el shader y devolver el nombre
 	glAttachShader(id_prog, id_shader);
-	return id_shader ;
+	return id_shader;
 }
 // Este método usa el anterior para crear, compilar, enlazar y verificar el program object
 void Cauce::crearObjetoPrograma()
@@ -876,7 +921,7 @@ void Cauce::crearObjetoPrograma()
 	id_vert_shader = compilarAdjuntarShader(GL_VERTEX_SHADER, naf_vert);
 	// Enlazar y verificar el objeto programa
 	glLinkProgram(id_prog);
-	GLint resultado ;
+	GLint resultado;
 	glGetProgramInfoLog(id_prog, longi_max, &report_length, report_buffer);
 	if (report_length > 0)
 		cout << "Errores o warnings:" << endl << report_buffer << endl ;
@@ -926,7 +971,7 @@ void Inicializa_OpenGL()
 Una vez creado un programa, para usarlo debemos activarlo, para ello usamos el siguiente método
 
 ```c++
-void Cauce::activar() { glUseProgram( id_prog ); }
+void Cauce::activar() { glUseProgram(id_prog); }
 ```
 
 Para fijar los parámetros, usamos métodos especificos que dan valor a los parámetros `uniform`. Por tanto, el programa puede quedar así:
