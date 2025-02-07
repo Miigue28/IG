@@ -46,7 +46,7 @@
 	\parbox[t]{\textwidth}{
 	   	\raggedright % Texto alineado a la izquierda
 	   	\fontsize{40pt}{40pt}\selectfont\sffamily\color{white}{
-		  	\textbf{\Huge{Práctica 3}}\\
+		  	\textbf{\Huge{Prácticas}}\\
 			\textbf{Modelo Jerárquico}\\
 			\huge{\asignatura}\\
 			2024-25\\
@@ -436,4 +436,141 @@
 		\theta = -\frac{\pi}{12} - \frac{\pi}{12}\sin(2 \pi t)
 	\end{equation*}
 \end{enumerate}
+
+\section{Materiales y Texturas}
+
+\begin{center}
+	\includegraphics[width=15cm]{resources/img18.png}
+	\includegraphics[width=15cm]{resources/img19.png}
+	\newpage
+	\includegraphics[width=15cm]{resources/img20.png}
+	\includegraphics[width=15cm]{resources/img21.png}
+\end{center}
+
+\newpage
+
+\subsection{Grafo PHIGS}
+
+\begin{center}
+	\includegraphics[width=15cm]{resources/img23.png}
+	\newpage
+	\includegraphics[width=15cm]{resources/img24.png}
+	\newpage
+	\includegraphics[width=15cm]{resources/img25.png}
+	\newpage
+	\includegraphics[width=15cm]{resources/img26.png}
+	\newpage
+	\includegraphics[width=15cm]{resources/img27.png}
+\end{center}
+\newpage
+
+\subsection{Especificación de Materiales}
+
+\begin{enumerate}
+	\item \textbf{Material}: clay\_material
+	
+	Este material tiene asociada la textura \emph{plunger\_mute.jpg} con generación automática de coordenadas de textura en los objetos \emph{base}, \emph{cup}, \emph{griptrunk} de la clase \emph{Mute} y con coordenadas explícitas de textura para el objeto \emph{gripend}.
+
+	Por otro lado, el valor de los coeficientes es el siguiente:
+	\begin{equation*}
+		k_a = 0.25, \hspace{0.5cm} k_d = 0.85, \hspace{0.5cm} k_s = 0.15, \hspace{0.5cm} e = 10.0
+	\end{equation*}
+	\item \textbf{Material}: brass\_material
+	
+	Este material no tiene asociada ninguna textura y el valor de los coeficientes es el siguiente:
+	\begin{equation*}
+		k_a = 0.5, \hspace{0.5cm} k_d = 0.75, \hspace{0.5cm} k_s = 0.85, \hspace{0.5cm} e = 5.0
+	\end{equation*}
+	Además, se encuentra en los siguientes objetos:
+	\begin{itemize}
+		\item Bell: \emph{tunningslide}, \emph{joint}
+		\item OuterSlide: \emph{tube1}, \emph{tube2}, \emph{gripbeam}
+		\item InnerSlide: \emph{gripbeam}
+	\end{itemize}
+	\item \textbf{Material}: silver\_material
+	
+	Este material no tiene asociada ninguna textura y el valor de los coeficientes es el siguiente:
+	\begin{equation*}
+		k_a = 0.35, \hspace{0.5cm} k_d = 0.85, \hspace{0.5cm} k_s = 0.65, \hspace{0.5cm} e = 10.0
+	\end{equation*}
+	Además, se encuentra en los siguientes objetos:
+	\begin{itemize}
+		\item Mouthpiece: \emph{basecinlinder}, \emph{basetorus}, \emph{trunksemisphere}, \emph{trunkcilinder}, \emph{mouthtorus}
+		\item InnerSlide: \emph{tube1}, \emph{tube2}
+	\end{itemize}
+	\item \textbf{Material}: nickel\_material
+	
+	Este material no tiene asociada ninguna textura y el valor de los coeficientes es el siguiente:
+	\begin{equation*}
+		k_a = 0.75, \hspace{0.5cm} k_d = 0.35, \hspace{0.5cm} k_s = 0.85, \hspace{0.5cm} e = 10.0
+	\end{equation*}
+	Además, se encuentra en los siguientes objetos:
+	\begin{itemize}
+		\item Bell: \emph{upperdecorator}, \emph{lowerdecorator1}, \emph{lowerdecorator2}, \emph{beam1}, \emph{beam2}
+		\item OuterSlide: \emph{beamdecorator1}, \emph{beamdecorator2}, \emph{elbow}
+		\item InnerSlide: \emph{clip1}, \emph{clip1}, \emph{beamdecorator1}, \emph{beamdecorator2}, \emph{bellattach}, \emph{mouthpieceattach}
+	\end{itemize}
+	\item \textbf{Material}: dark\_nickel\_material
+	
+	Este material no tiene asociada ninguna textura y el valor de los coeficientes es el siguiente:
+	\begin{equation*}
+		k_a = 0.65, \hspace{0.5cm} k_d = 0.5, \hspace{0.5cm} k_s = 0.85, \hspace{0.5cm} e = 40.0
+	\end{equation*}
+	Además, se encuentra en los siguientes objetos:
+	\begin{itemize}
+		\item Bell: \emph{screw}
+	\end{itemize}
+\end{enumerate}
+
+\section{Identificadores de Selección}
+
+\subsection{Grafo PHIGS}
+
+\begin{center}
+	\includegraphics[width=15cm]{resources/img28.png}
+	\newpage
+	\includegraphics[width=15cm]{resources/img29.png}
+	\newpage
+	\includegraphics[width=15cm]{resources/img30.png}
+	\newpage
+	\includegraphics[width=15cm]{resources/img31.png}
+	\newpage
+	\includegraphics[width=15cm]{resources/img32.png}
+\end{center}
+
+\newpage
+
+\subsection{Especificación de Identificadores}
+
+\begin{enumerate}
+	\item \textbf{Identificador}: \emph{slide\_id} = 1
+	
+	Identificador asociado a la vara del trombón. Dicho identificador lo podemos encontrar en:
+	\begin{itemize}
+		\item Clase: Trombone
+		\item Linea: 437
+	\end{itemize}
+	\item \textbf{Identificador}: \emph{bell\_id} = 2
+	
+	Identificador asociado a la campana del trombón. Dicho identificador lo podemos encontrar en:
+	\begin{itemize}
+		\item Clase: Trombone
+		\item Linea: 445
+	\end{itemize}
+	\item \textbf{Identificador}: \emph{mouthpiece\_id} = 3
+	
+	Identificador asociado a la boquilla del trombón. Dicho identificador lo podemos encontrar en:
+	\begin{itemize}
+		\item Clase: Trombone
+		\item Linea: 452
+	\end{itemize}
+	\item \textbf{Identificador}: \emph{mute\_id} = 4
+	
+	Identificador asociado a la sordina del trombón. Dicho identificador lo podemos encontrar en:
+	\begin{itemize}
+		\item Clase: Trombone
+		\item Linea: 461
+	\end{itemize}
+\end{enumerate}
+
 \end{document}
