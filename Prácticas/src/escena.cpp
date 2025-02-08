@@ -54,15 +54,18 @@
 
 Escena::Escena()
 {
+   using namespace glm;
+
    // Iniciar la colección de fuentes y el material inicial
    col_fuentes = new Col2Fuentes();
    //material_ini = new Material();
    material_ini = new Material(0.4f, 0.8f, 0.0f, 2.0f);
 
-   camaras.push_back(new CamaraOrbitalSimple());
-   //camaras.push_back(new Camara3Modos(true, {5.0, 0.0, 0.0}, 1.0, {0.0, 0.0, 0.0}, 70.0));
-   //camaras.push_back(new Camara3Modos(false, {-5.0, 5.0, 5.0}, 1.0, {0.0, 0.0, 0.0}, 50.0));
-   //camaras.push_back(new Camara3Modos(true, {2.0, 2.0, 2.0}, 1.0, {0.0, 0.0, 0.0}, 70.0));
+   //camaras.push_back(new CamaraOrbitalSimple());
+   camaras.push_back(new Camara3Modos(true, *(new vec3({2.0, 2.0, 2.0})), 1.0, *(new vec3({0.0, 0.0, 0.0})), 60.0));
+   camaras.push_back(new Camara3Modos(false, *(new vec3({5.0, 5.0, 5.0})), 1.0, *(new vec3({0.0, 0.0, 0.0})), 60.0));
+   camaras.push_back(new Camara3Modos(false, *(new vec3({-2.5, 2.5, 2.5})), 1.0, *(new vec3({0.0, 0.0, 0.0})), 50.0));
+   camaras.push_back(new Camara3Modos(true, *(new vec3({5.0, -2.5, 5.0})), 1.0, *(new vec3({0.5, 3.0, 0.0})), 70.0));
 }
 
 // Visualiza la escena en la ventana actual, usando la configuración especificada en el cauce gráfico
@@ -185,7 +188,7 @@ void Escena::visualizarGL_Seleccion()
    cauce->fijarEvalText(false);
 
    // Poner el color actual del cauce a 0 (por defecto los objetos no son seleccionables)
-   cauce->fijarColor({0.0, 0.0, 0.0, 1.0});
+   cauce->fijarColor(glm::vec4(0.0, 0.0, 0.0, 1.0));
 
    // Limpiar el framebuffer con color (0,0,0) para indicar que en ningún pixel hay nada seleccionable
    glClearColor(0, 0, 0, 1);
@@ -208,18 +211,19 @@ void Escena::visualizarNormales()
 
    // Desactivar la iluminación
    cauce->fijarEvalMIL(false);
+
    // Desactivar el uso de texturas
    cauce->fijarEvalText(false);
+
    // Fijar el color
    cauce->fijarColor(1.0, 1.0, 1.0);
+   
    // Visualizar las normales del objeto actual de la escena
    objetoActual()->visualizarNormalesGL();
 
 }
 
-// -----------------------------------------------------------------------------------------------
-// pasa la cámara actual a la siguiente
-
+// Pasa la cámara actual a la siguiente
 void Escena::siguienteCamara()
 {
    assert(ind_camara_actual < camaras.size());
@@ -228,9 +232,7 @@ void Escena::siguienteCamara()
    cout << "Cámara actual cambiada a: " << (ind_camara_actual + 1) << "/" << camaras.size() << ": " << camaras[ind_camara_actual]->descripcion() << endl;
 }
 
-// -----------------------------------------------------------------------------------------------
-// pasa el objeto actual al siguiente
-
+// Pasa el objeto actual al siguiente
 void Escena::siguienteObjeto()
 {
    if (objetos.size() == 0)
@@ -242,40 +244,36 @@ void Escena::siguienteObjeto()
         << " (" << (ind_objeto_actual + 1) << "/" << objetos.size() << ")." << endl;
 }
 
-// -----------------------------------------------------------------------------------------------
-// devuelve puntero al objeto actual
-
+// Devuelve puntero al objeto actual
 Objeto3D *Escena::objetoActual()
 {
    assert(ind_objeto_actual < objetos.size());
    assert(objetos[ind_objeto_actual] != nullptr);
    return objetos[ind_objeto_actual];
 }
-// -----------------------------------------------------------------------------------------------
-// devuelve un puntero a la cámara actual
 
+// Devuelve un puntero a la cámara actual
 CamaraInteractiva *Escena::camaraActual()
 {
    assert(ind_camara_actual < camaras.size());
    assert(camaras[ind_camara_actual] != nullptr);
    return camaras[ind_camara_actual];
 }
-// -----------------------------------------------------------------------------------------------
-// devuelve un puntero a la colección de fuentes actual
 
+// Devuelve un puntero a la colección de fuentes actual
 ColFuentesLuz *Escena::colFuentes()
 {
    assert(col_fuentes != nullptr);
    return col_fuentes;
 }
+
 // -----------------------------------------------------------------------------------------------
 
 constexpr bool lunes = false;
 
 Escena1::Escena1()
 {
-   using namespace std;
-   cout << "Creando objetos de la Práctica 1" << endl;
+   std::cout << "Creando objetos de la Práctica 1" << std::endl;
 
    //objetos.push_back(new Cubo());
    //objetos.push_back(new Tetraedro());
@@ -288,12 +286,9 @@ Escena1::Escena1()
    objetos.push_back(new Ejercicio01());
 }
 
-// -------------------------------------------------------------------------
-
 Escena2::Escena2()
 {
-   using namespace std;
-   cout << "Creando objectos de la Práctica 2" << endl;
+   std::cout << "Creando objectos de la Práctica 2" << std::endl;
 
    //objetos.push_back(new MallaPLY("beethoven.ply"));
    //objetos.push_back(new MallaPLY("big_dodge.ply"));
@@ -307,8 +302,6 @@ Escena2::Escena2()
    objetos.push_back(new Ejercicio02(1));
 }
 
-// -------------------------------------------------------------------------
-
 Escena3::Escena3()
 {
    std::cout << "Creando objetos de la Práctica 3" << std::endl;
@@ -316,15 +309,17 @@ Escena3::Escena3()
    //objetos.push_back(new GrafoEstrellaX(6));
    //objetos.push_back(new GrafoCubos());
    //objetos.push_back(new CubePair(0.5f, 0.25f));
-   //objetos.push_back(new Trombone());
-   objetos.push_back(new Ejercicio03(2, 0.2));
+   objetos.push_back(new Trombone());
+   //objetos.push_back(new Ejercicio03(2, 0.2));
 }
 
 Escena4::Escena4()
 {
    std::cout << "Creando objetos de la Práctica 4" << std::endl;
 
-   objetos.push_back(new NodoCubo24());
+   //objetos.push_back(new NodoDiscoP4());
+   //objetos.push_back(new Beethoven());
+   //objetos.push_back(new NodoCubo24());
    objetos.push_back(new LataPeones());
 }
 
@@ -332,5 +327,7 @@ Escena5::Escena5()
 {
    std::cout << "Creando objetos de la Práctica 5" << std::endl;
 
+   objetos.push_back(new GrafoEsferasP5());
+   objetos.push_back(new GrafoEsferasP5_2());
    objetos.push_back(new VariasLatasPeones());
 }

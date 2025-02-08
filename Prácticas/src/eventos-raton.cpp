@@ -92,8 +92,8 @@ void FGE_PulsarLevantarBotonRaton(GLFWwindow *window, int button, int action, in
    else if (button == GLFW_MOUSE_BUTTON_RIGHT)
    {
       // Pulsar botón derecho: inicio de modo arrastrar con botón derecho pulsado:
-      x_ant_mabd = x; // registrar posición de inicio en X
-      y_ant_mabd = y; // registrar posición de inicio en Y
+      x_ant_mabd = x; // Registrar posición de inicio en X
+      y_ant_mabd = y; // Registrar posición de inicio en Y
       aplicacionIG->revisualizar_escena = true;
    }
 }

@@ -25,6 +25,7 @@ class Peon : public NodoGrafoEscena
 {
 protected:
     glm::mat4 * traslation_movement = nullptr;
+    float shift = 1.0;
 public:
     Peon(int profiles);
 

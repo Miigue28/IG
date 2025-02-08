@@ -9,9 +9,10 @@ Peon::Peon(int profiles)
     traslation_movement = leerPtrMatriz(index);
 }
 
-bool Peon::cuandoClick(const glm::vec3 & centro_wc)
+bool Peon::cuandoClick(const glm::vec3 &centro_wc)
 {
-    *traslation_movement += glm::translate(glm::vec3(0.0, 0.0, 1.0));
+    *traslation_movement = glm::translate(glm::vec3(0.0, 0.0, shift++));
+    return true;
 }
 
 Lata::Lata(const std::string & filename)
@@ -33,7 +34,7 @@ Lata::Lata(const std::string & filename)
 
     NodoGrafoEscena * lata = new NodoGrafoEscena();
     lata->agregar(inf);
-    lata-agregar(trunk);
+    lata->agregar(trunk);
     lata->agregar(sup);
 
     agregar(lata);
@@ -43,41 +44,46 @@ LataPeones::LataPeones()
 {
     using namespace glm;
 
-    // Peón de madera
-    NodoGrafoEscena * peon_madera = new NodoGrafoEscena();
+    // Identificadores
     unsigned ident_peon_madera = 1;
+    unsigned ident_peon_blanco = 2;
+    unsigned ident_peon_negro = 3;
+    unsigned ident_lata = 4;
+
+    // Materiales y texturas
+    Material * material_peon_madera = new Material(new Textura("text-madera.jpg"), 0.5, 0.6, 0.5, 50.0);
+    Material * material_peon_blanco = new Material(0.5, 0.2, 0.5, 5.0);
+    Material * material_peon_negro = new Material(0.01, 0.2, 0.5, 50.0);
+
+    // Peón de madera
+    Peon * peon_madera = new Peon(35);
     peon_madera->ponerNombre("Peón de madera");
     peon_madera->ponerIdentificador(ident_peon_madera);
-    peon_madera->agregar(new Material(new Textura("text-madera.jpg"), 0.5, 0.6, 0.5, 50.0));
-    peon_madera->agregar(new Peon(35));
 
     // Peón blanco
-    NodoGrafoEscena * peon_blanco = new NodoGrafoEscena();
-    unsigned ident_peon_blanco = 2;
+    Peon * peon_blanco = new Peon(35);
     peon_blanco->ponerNombre("Peón blanco");
     peon_blanco->ponerIdentificador(ident_peon_blanco);
-    peon_blanco->agregar(translate(vec3(2.5, 0.0, 0.0)));
-    peon_blanco->agregar(new Material(0.5, 0.2, 0.5, 5.0));
-    peon_blanco->agregar(new Peon(35));
 
     // Peón negro
-    NodoGrafoEscena * peon_negro = new NodoGrafoEscena();
-    unsigned ident_peon_negro = 3;
+    Peon * peon_negro = new Peon(35);
     peon_negro->ponerNombre("Peón negro");
     peon_negro->ponerIdentificador(ident_peon_negro);
-    peon_negro->agregar(translate(vec3(5.0, 0.0, 0.0)));
-    peon_negro->agregar(new Material(0.01, 0.2, 0.5, 50.0));
-    peon_negro->agregar(new Peon(35));
 
     NodoGrafoEscena * peones = new NodoGrafoEscena();
     peones->agregar(translate(vec3(0.0, 0.4, 0.7)));
     peones->agregar(scale(vec3(0.25, 0.25, 0.25)));
+
+    peones->agregar(material_peon_madera);
     peones->agregar(peon_madera);
+    peones->agregar(translate(vec3(2.5, 0.0, 0.0)));
+    peones->agregar(material_peon_blanco);
     peones->agregar(peon_blanco);
+    peones->agregar(translate(vec3(2.5, 0.0, 0.0)));
+    peones->agregar(material_peon_negro);
     peones->agregar(peon_negro);
 
     NodoGrafoEscena * lata = new NodoGrafoEscena;
-    unsigned ident_lata = 4;
     lata->ponerNombre("Lata de Coca-Cola");
     lata->ponerIdentificador(ident_lata);
     lata->agregar(new Lata("lata-coke.jpg"));

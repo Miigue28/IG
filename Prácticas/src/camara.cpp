@@ -40,12 +40,7 @@
 #include "ig-aux.h"
 #include "camara.h"
 
-// *********************************************************************
-// clase: Viewport
-
-// ---------------------------------------------------------------------
-// crea viewport de 512 x 512 con origen en (0,0)
-
+// Crea viewport de 512 x 512 con origen en (0,0)
 Viewport::Viewport()
 {
    org_x = 0;
@@ -57,8 +52,6 @@ Viewport::Viewport()
    matrizVp = MAT_Viewport(org_x, org_y, ancho, alto);
    matrizVpInv = MAT_Viewport_inv(org_x, org_y, ancho, alto);
 }
-
-// ---------------------------------------------------------------------
 
 Viewport::Viewport(int p_org_x, int p_org_y, int p_ancho, int p_alto)
 {
@@ -72,13 +65,7 @@ Viewport::Viewport(int p_org_x, int p_org_y, int p_ancho, int p_alto)
    matrizVpInv = MAT_Viewport_inv(org_x, org_y, ancho, alto);
 }
 
-// *********************************************************************
-// class Camara
-// clase base para cámaras
-
-// -------------------------------------------------------------------------------
-// fija las matrices model-view y projection en el cauce
-
+// Fija las matrices model-view y projection en el cauce
 void Camara::activar(Cauce &cauce)
 {
    using namespace std;
@@ -90,59 +77,45 @@ void Camara::activar(Cauce &cauce)
    // cout << __FUNCTION__ << ": final " << descripcion() << "'" << endl ;
 }
 
-// -------------------------------------------------------------------------------
-// cambio el valor de 'ratio_vp' (alto/ancho del viewport)
-
+// Cambio el valor de 'ratio_vp' (alto/ancho del viewport)
 void Camara::fijarRatioViewport(const float nuevo_ratio)
 {
    ratio_vp = nuevo_ratio;
    matrices_actualizadas = false;
 }
 
-// -----------------------------------------------------------------------------
-// actualiza 'matriz_vista' y 'matriz_proye' a partir del ratio
-
+// Actualiza 'matriz_vista' y 'matriz_proye' a partir del ratio
 void Camara::actualizarMatrices()
 {
-   using namespace glm;
-
    if (matrices_actualizadas)
       return;
 
-   matriz_vista = mat4(1.0);
-   matriz_proye = scale(vec3{1.0f, 1.0f / ratio_vp, 1.0f}); // MAT_Escalado( 1.0f, 1.0f/ratio_vp, 1.0f );
+   matriz_vista = glm::mat4(1.0);
+   matriz_proye = glm::scale(glm::vec3(1.0f, 1.0f / ratio_vp, 1.0f));
    matrices_actualizadas = true;
 }
-// -----------------------------------------------------------------------------
-// lee la descripción de la cámara (y probablemente su estado)
 
+// Lee la descripción de la cámara (y probablemente su estado)
 std::string Camara::descripcion()
 {
-   return "cámara (clase base)";
+   return "Cámara (clase base)";
 }
 
 // ################################################################################
 // class CamaraInteractiva
 // clase base (abstracta) para cámaras interactivas (cámaras manipulables)
 
-// ----------------------------------------------------------------------------
-// hacer que apunte hacía el punto de atención 'paten' y cambiar de modo a modo examinar
-// por defecto imprime mensaje de advertencia de que la cámra no ofrece esta funcionalidad
 
+// Hacer que apunte hacía el punto de atención 'paten' y cambiar de modo a modo examinar
 void CamaraInteractiva::mirarHacia(const glm::vec3 &paten)
 {
-   using namespace std;
-   cout << "esta cámara no puede apuntar a ningún objeto." << endl;
+   std::cout << "Esta cámara no puede apuntar a ningún objeto." << std::endl;
 }
 
-// ----------------------------------------------------------------------------
-// cambiar el modo de la camara al siguiente modo o al primero
-// por defecto imprime mensaje de advertencia de que no ofrece esta funcionalidad
-
+// Cambiar el modo de la camara al siguiente modo o al primero
 void CamaraInteractiva::siguienteModo()
 {
-   using namespace std;
-   cout << "esta cámara no tiene definidos varios modos de funcionamiento." << endl;
+   std::cout << "Esta cámara no tiene definidos varios modos de funcionamiento." << std::endl;
 }
 
 // ******************************************************************
@@ -249,9 +222,7 @@ glm::vec3 Esfericas(const glm::vec3 &cartesianas)
    return glm::vec3{atan2f(x, z), atan2f(y, rh), r};
 }
 
-// ----------------------------------------------------------------------------
-// comprueba que las conversiones entre cartesianas y esféricas son correctas
-
+// Comprueba que las conversiones entre cartesianas y esféricas son correctas
 void TestCartesianasPolares()
 {
    using namespace glm;
@@ -277,9 +248,7 @@ void TestCartesianasPolares()
    cout << "Test: cart2 - cart, max diff sq == " << max << endl;
 }
 
-// ----------------------------------------------------------------------------
-// crea una cámara perspectiva con valores por defecto
-
+// Crea una cámara perspectiva con valores por defecto
 Camara3Modos::Camara3Modos()
 {
    // Todos los parámetros toman valores por defecto, ver la decl. de la clase)
@@ -317,12 +286,15 @@ Camara3Modos::Camara3Modos(const bool perspectiva_ini, const glm::vec3 &origen_i
 // Desplazar o rotar la cámara en horizontal 'dx' unidades y en vertical 'dy' unidades
 void Camara3Modos::desplRotarXY(const float da, const float db)
 {
+   float da2 = da / 100.0;
+   float db2 = db / 100.0;
+
    switch (modo_actual)
    {
    case ModoCam::examinar:
    {
       // Actualizar los ángulos de las coordenadas polares
-      org_polares += glm::vec3(da, db, 0.0);
+      org_polares += glm::vec3(da2, db2, 0.0);
 
       // Actualizar las coordenadas cartesianas a partir de las polares
       org_cartesianas = Cartesianas(org_polares);
@@ -334,7 +306,7 @@ void Camara3Modos::desplRotarXY(const float da, const float db)
    case ModoCam::prim_pers_rot:
    {
       // Actualizar los ángulos de las coordenadas polares
-      org_polares += glm::vec3(da, db, 0.0);
+      org_polares += glm::vec3(da2, db2, 0.0);
 
       // Calcular las nuevas coordenada cartesianas
       glm::vec3 aux = Cartesianas(org_polares);
@@ -356,7 +328,7 @@ void Camara3Modos::desplRotarXY(const float da, const float db)
    {
       // Desplazar el punto de atención 'da' unidades en el eje X de la cámara, 
       // y 'db' unidades en el eje Y de la cámara.
-      punto_atencion += (da * eje[X] + db * eje[Y]);
+      punto_atencion += (da2 * eje[X] + db2 * eje[Y]);
 
       break;
    }
@@ -388,8 +360,10 @@ void Camara3Modos::moverZ(const float dz)
    case ModoCam::prim_pers_rot:
    case ModoCam::prim_pers_despl:
    {
+      float dz2 = dz / 10.0;
+
       // Desplazar el punto de atención 'dz' unidades en el eje Z
-      punto_atencion += (dz * eje[Z]);
+      punto_atencion += (dz2 * eje[Z]);
 
       break;
    }
@@ -445,11 +419,13 @@ void Camara3Modos::actualizarMatrices()
 
    matriz_vista = MAT_Vista(eje, org);
    if (perspectiva)
-      matriz_proye = perspective(radians(fovy_grad), 1.0f / ratio_vp, near, far); // CUA: ratio_vp es y/x, pero esta función espera el 'aspect', que parece ser x/y
+   {
+      matriz_proye = perspective(radians(fovy_grad), 1.0f / ratio_vp, near, far);
+   }
    else
    {
       constexpr float s = 8.0;
-      matriz_proye = ortho(-s / 2.0f, +s / 2.0f, -s * ratio_vp / 2.0f, +s * ratio_vp / 2.0f, -20.0f, 100.0f); // MAT_Ortografica( -s/2.0f, +s/2.0f, -s*ratio_vp/2.0f, +s*ratio_vp/2.0f, -20.0f, 100.0f );
+      matriz_proye = ortho(-s / 2.0f, +s / 2.0f, -s * ratio_vp / 2.0f, +s * ratio_vp / 2.0f, -20.0f, 100.0f);
    }
    matrices_actualizadas = true;
 }
@@ -462,7 +438,5 @@ glm::vec3 Camara3Modos::puntoAtencion()
 // Lee la descripción de la cámara (y probablemente su estado)
 std::string Camara3Modos::descripcion()
 {
-   return std::string("Cámara de 3 modos, ") +
-          (perspectiva ? "perspectiva" : "ortográfica") +
-          ", modo actual: " + nombre_modo[int(modo_actual)] + ")";
+   return std::string("Cámara de 3 modos, ") + (perspectiva ? "perspectiva" : "ortográfica") + ", modo actual: " + nombre_modo[int(modo_actual)] + ")";
 }

@@ -77,10 +77,10 @@ AplicacionIG::AplicacionIG()
    assert(pila_materiales != nullptr);
 
    // Crea los objetos y las escenas que forman, insertar escenas en 'escenas'
-   //escenas.push_back(new Escena1());
-   //escenas.push_back(new Escena2());
+   escenas.push_back(new Escena1());
+   escenas.push_back(new Escena2());
    escenas.push_back(new Escena3());
-   //escenas.push_back(new Escena4());
+   escenas.push_back(new Escena4());
    escenas.push_back(new Escena5());
 
    cout << "Objetos creados." << endl;

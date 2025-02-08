@@ -327,11 +327,11 @@ void NodoGrafoEscena::calcularCentroOC()
       case TipoEntNGE::objeto:
          // Calculamos el centro de cada subobjeto
          entrada.objeto->calcularCentroOC();
-         centro_acumulado += vec3(matriz_modelado * vec4(entrada.objeto->leerCentroOC(), 1.0f));
+         centro_acumulado = centro_acumulado + vec3(matriz_modelado * vec4(entrada.objeto->leerCentroOC(), 1.0f));
          contador_centros++;
       break;
       case TipoEntNGE::transformacion:
-         matriz_modelado *= *(entrada.matriz);
+         matriz_modelado = matriz_modelado * *(entrada.matriz);
       break;
       default:
       break;
@@ -339,7 +339,12 @@ void NodoGrafoEscena::calcularCentroOC()
    }
 
    // Hacemos el promedio de los centros
-   centro_acumulado /= static_cast<float>(contador_centros);
+   //centro_acumulado /= static_cast<float>(contador_centros);
+
+   for (int i = 0; i < 3; i++)
+   {
+      centro_acumulado[i] /= static_cast<float>(contador_centros);
+   }
 
    // Poner centro y apuntar que ya se ha calculado
    ponerCentroOC(centro_acumulado);
@@ -382,7 +387,7 @@ bool NodoGrafoEscena::buscarObjeto(
             return true;
       break;
       case TipoEntNGE::transformacion:
-         matriz_modelado *= *(entrada.matriz);
+         matriz_modelado = matriz_modelado * *(entrada.matriz);
       break;
       default:
       break;
@@ -551,4 +556,131 @@ NodoCubo24::NodoCubo24()
 {
    agregar(new Material(new Textura("window-icon.jpg"), 0.5, 0.4, 0.3, 40.0));
    agregar(new Cubo24());
+}
+
+MallaDiscoP4::MallaDiscoP4()
+{
+   ponerColor({1.0f, 1.0f, 1.0f});
+   const unsigned ni = 23, nj = 31;
+   for (unsigned i = 0; i < ni; ++i)
+   {
+      for (unsigned j = 0; j < nj; ++j)
+      {
+         const float fi = static_cast<float>(i)/static_cast<float>(ni - 1.0f);
+         const float fj = static_cast<float>(j)/static_cast<float>(nj - 1.0f);
+         const float ai = 2.0f*M_PI*fi;
+         const float x = fj * cos(ai);
+         const float y = fj * sin(ai);
+         const float z = 0.0;
+         
+         vertices.push_back({x, y, z}); // Ejercicio 1
+         cc_tt_ver.push_back({0.5 + 0.5*x, 0.5 + 0.5*y});
+         //cc_tt_ver.push_back({fj, fi}); // Ejercicio 2
+      }
+   }
+   for (unsigned i = 0; i < ni - 1; ++i)
+   {
+      for (unsigned j = 0; j < nj - 1; ++j)
+      {
+         triangulos.push_back({i * nj + j, i * nj + (j + 1), (i + 1) * nj + (j + 1)});
+         triangulos.push_back({i * nj + j, (i + 1) * nj + (j + 1), (i + 1)*nj + j});
+      }
+   }
+}
+
+NodoDiscoP4::NodoDiscoP4()
+{
+   ponerNombre("Nodo ejercicio adicional práctica 4, examen 27 enero 2021");
+   agregar(new Material(new Textura("cuadricula.jpg"), 0.5, 0.4, 0.3, 40.0));
+   agregar(new MallaDiscoP4());
+}
+
+Beethoven::Beethoven()
+{
+   ponerNombre("Beethoven");
+   agregar(new Material(new Textura("text-madera.jpg"), 0.5, 0.4, 0.3, 40.0));
+   agregar(new MallaPLY("beethoven.ply"));
+}
+
+EsferaGrafoP5::EsferaGrafoP5(unsigned i, unsigned j)
+{
+   this->i = i;
+   this->j = j;
+   ponerNombre("Esfera para el grafo de esferas del ejercicio 1 de la práctica 5");
+   ponerIdentificador(i + j + 1);
+   agregar(new Material(0.5, 0.4, 0.3, 40.0));
+   agregar(new Sphere(30, 30));
+}
+
+bool EsferaGrafoP5::cuandoClick(const glm::vec3 &centro_wc)
+{
+   std::cout << "Se ha seleccionado la esfera número " << i+1 << " de la fila número " << j+1 << std::endl;
+   return true;
+}
+
+GrafoEsferasP5::GrafoEsferasP5()
+{
+   const unsigned n_filas_esferas = 8;
+   const unsigned n_esferas_x_fila = 5;
+   const float e = 0.4/static_cast<float>(n_esferas_x_fila);
+
+   ponerNombre("Grafo de esferas del ejercicio 1 de la práctica 5");
+   agregar(glm::scale(glm::vec3(e, e, e)));
+
+   for (unsigned i = 0; i < n_filas_esferas; ++i)
+   {
+      NodoGrafoEscena *fila_esferas = new NodoGrafoEscena();
+      for (unsigned j = 0; j < n_esferas_x_fila; ++j)
+      {
+         EsferaGrafoP5 *esfera = new EsferaGrafoP5(i, j);
+         esfera->ponerIdentificador(i*n_esferas_x_fila + j + 1);
+         fila_esferas->agregar(glm::translate(glm::vec3(2.2, 0.0, 0.0)));
+         fila_esferas->agregar(esfera);
+      }
+      agregar(fila_esferas);
+      agregar(glm::translate(glm::vec3(0.0, 0.0, 5.0)));
+   }
+}
+
+EsferaGrafoP5_2::EsferaGrafoP5_2()
+{
+   ponerNombre("Esfera para el grafo de esferas del ejercicio 2 de la práctica 5");
+   agregar(new Material(0.5, 0.4, 0.3, 40.0));
+   agregar(new Sphere(30, 30));
+}
+
+bool EsferaGrafoP5_2::cuandoClick(const glm::vec3 &centro_wc)
+{
+   if (leerColor() == glm::vec3(1.0f, 0.0f, 0.0f))
+      ponerColor({1.0f, 1.0f, 1.0f});
+   else
+      ponerColor({1.0f, 0.0f, 0.0f});
+   return true;
+}
+
+GrafoEsferasP5_2::GrafoEsferasP5_2()
+{
+   using namespace glm;
+   const unsigned n_filas_esferas = 8;
+   const unsigned n_esferas_x_fila = 5;
+   const float e = 2.5/static_cast<float>(n_esferas_x_fila);
+
+   ponerNombre("Grafo de esferas del ejercicio 2 de la práctica 5");
+   agregar(glm::scale(glm::vec3(e, e, e)));
+
+   for (unsigned i = 0; i < n_filas_esferas; ++i)
+   {
+      NodoGrafoEscena *fila_esferas = new NodoGrafoEscena();
+      fila_esferas->agregar(glm::translate(glm::vec3(3.0, 0.0, 0.0)));
+      for (unsigned j = 0; j < n_esferas_x_fila; ++j)
+      {
+         EsferaGrafoP5_2 *esfera = new EsferaGrafoP5_2();
+         esfera->ponerColor({1.0f, 1.0f, 1.0f});
+         esfera->ponerIdentificador(i*n_esferas_x_fila + j + 1);
+         fila_esferas->agregar(glm::translate(glm::vec3(2.2, 0.0, 0.0)));
+         fila_esferas->agregar(esfera);
+      }
+      agregar(fila_esferas);
+      agregar(glm::rotate(glm::radians(360.0f/static_cast<float>(n_filas_esferas)), glm::vec3(0.0, 1.0, 0.0)));
+   }
 }

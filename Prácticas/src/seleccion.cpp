@@ -39,19 +39,16 @@
 #include "seleccion.h"
 #include "grafo-escena.h"
 
-// ----------------------------------------------------------------------------------
-// calcula un color usando un identificador entero no negativo
-
+// Calcula un color usando un identificador entero no negativo
 glm::vec4 ColorDesdeIdent(const int ident) // 0 ≤ ident < 2^24
 {
    using namespace glm;
    assert(0 <= ident);
 
-   // decodificar: extraer los tres bytes menos significativos del valor entero.
-   const unsigned char
-       byteR = (ident) % 0x100U,            // rojo  = byte menos significativo
-       byteG = (ident / 0x100U) % 0x100U,   // verde = byte intermedio
-       byteB = (ident / 0x10000U) % 0x100U; // azul  = byte más significativo
+   // Decodificar: extraer los tres bytes menos significativos del valor entero.
+   const unsigned char byteR = (ident) % 0x100U;            // Rojo  = byte menos significativo
+   const unsigned char byteG = (ident / 0x100U) % 0x100U;   // Verde = byte intermedio
+   const unsigned char byteB = (ident / 0x10000U) % 0x100U; // Azul  = byte más significativo
 
    // log(" RGB == ",(unsigned int)byteR,", ",(unsigned int)byteG,", ", (unsigned int)byteB);
 
@@ -59,21 +56,19 @@ glm::vec4 ColorDesdeIdent(const int ident) // 0 ≤ ident < 2^24
    // (otra posibilidad es pasarle los bytes directamente a 'glVertexAttrib4Nubv')
    // (ver: https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glVertexAttrib.xhtml)
 
-   return vec4{float(byteR) / 255.0f, float(byteG) / 255.0f, float(byteB) / 255.0f, 1.0f};
+   return vec4(float(byteR) / 255.0f, float(byteG) / 255.0f, float(byteB) / 255.0f, 1.0f);
 }
 
-// ----------------------------------------------------------------------------------
-// leer un identificador entero codificado en el color de un pixel en el
-// framebuffer activo actualmente
-
+// Lee un identificador codificado en el color de un pixel en el framebuffer activo
 int LeerIdentEnPixel(int xpix, int ypix)
 {
-   // para guardar los tres bytes
-   unsigned char bytes[3] ; 
-   // leer los 3 bytes del frame-buffer
-   glReadPixels(xpix,ypix, 1,1, GL_RGB,GL_UNSIGNED_BYTE, (void *)bytes);
-   // reconstruir el identificador y devolverlo:
-   return int(bytes[0]) + ( int(0x100U)*int(bytes[1]) ) + ( int(0x10000U)*int(bytes[2]) );
+   unsigned char bytes[3]; 
+
+   // Lee los 3 bytes del frame-buffer
+   glReadPixels(xpix, ypix, 1, 1, GL_RGB, GL_UNSIGNED_BYTE, (void *)bytes);
+
+   // Reconstruir el identificador y devolverlo
+   return int(bytes[0]) + (int(0x100U)*int(bytes[1])) + (int(0x10000U) * int(bytes[2]));
 }
 
 // Función principal de selección, se llama al hacer click con el botón izquierdo
@@ -81,7 +76,6 @@ int LeerIdentEnPixel(int xpix, int ypix)
 // (x,y) = posición donde se ha hecho click en coordenadas del sistema de ventanas (enteras)
 //
 // devuelve: true si se ha seleccionado algún objeto, false si no
-
 bool AplicacionIG::seleccion(int x, int y)
 {
    using namespace std;
@@ -95,14 +89,14 @@ bool AplicacionIG::seleccion(int x, int y)
    assert(escena != nullptr);
 
    // Nos aseguramos que solo se crea la primera vez
-   if (fbo == nullptr)
+   if (aplicacionIG->fbo == nullptr)
    {
       // Crear el framebuffer
-      fbo = new Framebuffer(ventana_tam_x, ventana_tam_y);
+      aplicacionIG->fbo = new Framebuffer(ventana_tam_x, ventana_tam_y);
    }
 
    // Activar el framebuffer
-   fbo->activar(ventana_tam_x, ventana_tam_y);
+   aplicacionIG->fbo->activar(ventana_tam_x, ventana_tam_y);
 
    // Visualizar la escena actual en modo selección
    escena->visualizarGL_Seleccion();
@@ -111,7 +105,7 @@ bool AplicacionIG::seleccion(int x, int y)
    int id = LeerIdentEnPixel(x, y);
 
    // Desactivar el FBO (vuelve a activar el FBO por defecto, con identificador '0')
-   fbo->desactivar();
+   aplicacionIG->fbo->desactivar();
 
    // Si el identificador del pixel es 0, imprimir mensaje y terminar
    if (id == 0)
@@ -126,9 +120,9 @@ bool AplicacionIG::seleccion(int x, int y)
    mat4 * identity = new mat4(1.0f);
 
    // Buscar el identificador del objeto raiz de la escena y ejecutar 'cuandoClick'
-   if (objeto->buscarObjeto(id, *identity, &target, centro));
+   if (objeto->buscarObjeto(id, *identity, &target, centro))
    {
-      return objeto->cuandoClick(centro);
+      return target->cuandoClick(centro);
    }
 
    // Si el flujo de control llega aquí, es que no se encuentra ese identificador

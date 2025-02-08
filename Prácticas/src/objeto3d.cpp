@@ -104,6 +104,7 @@ bool Objeto3D::cuandoClick(const glm::vec3 &centro_wc)
 
    cout << "Ejecutando método 'cuandoClick' por defecto." << endl;
    cout << "Click realizado sobre el objeto: '" << leerNombre() << "'" << endl;
+   cout << centro_wc[0] << ", " << centro_wc[1] << ", " << centro_wc[2] << endl;
 
    // Recuperar la camara actual de la escena y hacer que apunte al punto central de este objeto
    escena->camaraActual()->mirarHacia(centro_wc);
@@ -140,7 +141,9 @@ bool Objeto3D::buscarObjeto(const int ident_busc, const glm::mat4 &mmodelado, Ob
       return true;
    }
    else
+   {
       return false;
+   }
 }
 
 // Devuelve el número de parámetros de este objeto

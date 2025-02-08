@@ -173,4 +173,52 @@ public:
    NodoCubo24();
 };
 
+class MallaDiscoP4 : public MallaInd
+{
+public:
+   MallaDiscoP4();
+};
+
+class NodoDiscoP4 : public NodoGrafoEscena
+{
+public:
+   NodoDiscoP4();
+};
+
+class Beethoven : public NodoGrafoEscena
+{
+public:
+   Beethoven();
+};
+
+class EsferaGrafoP5 : public NodoGrafoEscena
+{
+protected:
+   unsigned i, j;
+public:
+   EsferaGrafoP5(unsigned i, unsigned j);
+
+   virtual bool cuandoClick(const glm::vec3 &centro_wc);
+};
+
+class GrafoEsferasP5 : public NodoGrafoEscena
+{
+public:
+   GrafoEsferasP5();
+};
+
+class EsferaGrafoP5_2 : public NodoGrafoEscena
+{
+public:
+   EsferaGrafoP5_2();
+
+   virtual bool cuandoClick(const glm::vec3 &centro_wc);
+};
+
+class GrafoEsferasP5_2 : public NodoGrafoEscena
+{
+public:
+   GrafoEsferasP5_2();
+};
+
 #endif // GRAFO_ESCENA_HPP

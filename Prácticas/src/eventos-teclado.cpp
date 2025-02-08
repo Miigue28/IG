@@ -83,9 +83,10 @@ void FGE_PulsarLevantarTecla(GLFWwindow *window, int key, int scancode, int acti
       return;
    }
 
-   constexpr float
-       cam_d_incre_tecla = 1.0,  // incremento de 'cam_d' por teclado (debe ser >= 1.0)
-       cam_ab_incre_tecla = 3.0; // incremento de ángulos por teclado
+   // Incremento de 'cam_d' por teclado (debe ser >= 1.0)
+   constexpr float cam_d_incre_tecla = 1.0;
+   // Incremento de ángulos por teclado
+   constexpr float cam_ab_incre_tecla = 3.0;
 
    switch (key)
    {
