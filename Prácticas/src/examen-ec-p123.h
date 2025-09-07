@@ -32,6 +32,8 @@ protected:
     glm::mat4 *cuberotation = nullptr;
     glm::mat4 *cubescaling = nullptr;
     glm::mat4 *inducedtranslation = nullptr;
+
+    float width, height;
 public:
     Ejercicio03
     (

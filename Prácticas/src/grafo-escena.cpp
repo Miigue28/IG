@@ -37,6 +37,7 @@
 #include "aplicacion-ig.h"
 #include "seleccion.h" // para 'ColorDesdeIdent'
 #include "malla-revol.h"
+#include "modelo-jer.h"
 
 
 // Constructor para entrada de tipo Sub-objeto
@@ -682,5 +683,259 @@ GrafoEsferasP5_2::GrafoEsferasP5_2()
       }
       agregar(fila_esferas);
       agregar(glm::rotate(glm::radians(360.0f/static_cast<float>(n_filas_esferas)), glm::vec3(0.0, 1.0, 0.0)));
+   }
+}
+
+Piramide::Piramide() : MallaInd("Piramide con 16 vértices")
+{
+   vertices = 
+   {
+      // Cara frontal
+      {-1.0, +0.0, +1.0},
+      {+1.0, +0.0, +1.0},
+      {+0.0, +2.0, +0.0},
+      // Cara lateral derecha
+      {+1.0, +0.0, +1.0},
+      {+1.0, +0.0, -1.0},
+      {+0.0, +2.0, +0.0},
+      // Cara trasera
+      {+1.0, +0.0, -1.0},
+      {-1.0, +0.0, -1.0},
+      {+0.0, +2.0, +0.0},
+      // Cara lateral derecha
+      {-1.0, +0.0, -1.0},
+      {-1.0, +0.0, +1.0},
+      {+0.0, +2.0, +0.0},
+      // Base de la piramide
+      {-1.0, +0.0, +1.0},
+      {+1.0, +0.0, +1.0},
+      {+1.0, +0.0, -1.0},
+      {-1.0, +0.0, -1.0}
+   };
+   triangulos =
+   {
+      // Cara frontal
+      {0, 1, 2},
+      // Cara lateral derecha
+      {3, 4, 5},
+      // Cara trasera
+      {6, 7, 8},
+      // Cara lateral izquierda
+      {9, 10, 11},
+      // Base de la piramide
+      {12, 13, 14},
+      {12, 14, 15}
+   };
+   calcularNormales();
+   cc_tt_ver = 
+   {
+      // Cara frontal
+      {0.0, 1.0},
+      {1.0, 1.0},
+      {0.5, 0.0},
+      // Cara lateral derecha
+      {0.0, 1.0},
+      {1.0, 1.0},
+      {0.5, 0.0},
+      // Cara trasera
+      {0.0, 1.0},
+      {1.0, 1.0},
+      {0.5, 0.0},
+      // Cara lateral izquierda
+      {0.0, 1.0},
+      {1.0, 1.0},
+      {0.5, 0.0},
+      // Base de la piramide
+      {0.0, 0.0},
+      {1.0, 0.0},
+      {1.0, 1.0},
+      {0.0, 1.0}
+   };
+}
+
+NodoPiramideUGR::NodoPiramideUGR()
+{
+   ponerNombre("Piramide de la UGR");
+   agregar(new Material(new Textura("window-icon.jpg"), 0.7, 0.5, 0.0, 30.0));
+   agregar(new Piramide());
+}
+
+Triangle::Triangle(const glm::vec3 &a, const glm::vec3 &b, const glm::vec3 &c)
+{
+   vertices = {a, b, c};
+   triangulos = {{0, 1, 2}};
+   calcularNormales();
+   ponerCentroOC((a + b + c)/3.0f);
+   ponerNombre("Trianglulo" + std::to_string(leerIdentificador()));
+   ponerColor({1.0f, 1.0f, 1.0f});
+}
+
+bool Triangle::cuandoClick(const glm::vec3 &centro_wc)
+{
+   MallaInd::cuandoClick(centro_wc);
+   if (leerColor() == glm::vec3(1.0f, 0.0f, 0.0f))
+      ponerColor({1.0f, 1.0f, 1.0f});
+   else
+      ponerColor({1.0f, 0.0f, 0.0f});
+   return true;
+}
+
+NodoPiramideUGR_2::NodoPiramideUGR_2()
+{
+   Triangle *frontal = new Triangle({-1.0, 0.0, 1.0}, {1.0, 0.0, 1.0}, {0.0, 2.0, 0.0});
+   frontal->ponerIdentificador(1);
+   Triangle *derecho = new Triangle({1.0, 0.0, 1.0}, {1.0, 0.0, -1.0}, {0.0, 2.0, 0.0});
+   derecho->ponerIdentificador(2);
+   Triangle *trasero = new Triangle({1.0, 0.0, -1.0}, {-1.0, 0.0, -1.0}, {0.0, 2.0, 0.0});
+   trasero->ponerIdentificador(3);
+   Triangle *izquierdo = new Triangle({-1.0, 0.0, -1.0}, {-1.0, 0.0, 1.0}, {0.0, 2.0, 0.0});
+   izquierdo->ponerIdentificador(4);
+   Triangle *base_1 = new Triangle({-1.0, 0.0, 1.0}, {1.0, 0.0, 1.0}, {1.0, 0.0, -1.0});
+   base_1->ponerIdentificador(5);
+   Triangle *base_2 = new Triangle({-1.0, 0.0, 1.0}, {1.0, 0.0, -1.0}, {-1.0, 0.0, -1.0});
+   base_2->ponerIdentificador(6);
+   
+   ponerNombre("Piramide de la UGR sin textura");
+   agregar(frontal);
+   agregar(derecho);
+   agregar(trasero);
+   agregar(izquierdo);
+   agregar(base_1);
+   agregar(base_2);
+}
+
+ExtremidadAndroid::ExtremidadAndroid()
+{
+   NodoGrafoEscena *semiesfera_superior = new NodoGrafoEscena();
+   semiesfera_superior->agregar(glm::translate(glm::vec3(0.0, 3.0, 0.0)));
+   semiesfera_superior->agregar(new SemiSphere(30, 30));
+
+   NodoGrafoEscena *tronco = new NodoGrafoEscena();
+   tronco->agregar(glm::scale(glm::vec3(1.0, 3.0, 1.0)));
+   tronco->agregar(new Cilinder(30, 30));
+
+   NodoGrafoEscena *semiesfera_inferior = new NodoGrafoEscena();
+   semiesfera_inferior->agregar(glm::rotate(glm::pi<float>(), glm::vec3(0.0, 0.0, 1.0)));
+   semiesfera_inferior->agregar(new SemiSphere(30, 30));
+
+   agregar(semiesfera_superior);
+   agregar(tronco);
+   agregar(semiesfera_inferior);
+   ponerColor({0.0f, 1.0f, 0.0f});
+}
+
+CabezaAndroid::CabezaAndroid()
+{
+   NodoGrafoEscena *ojo_izquierdo = new NodoGrafoEscena();
+   ojo_izquierdo->agregar(glm::translate(glm::vec3(-0.35, 0.5, 0.75)));
+   ojo_izquierdo->agregar(glm::scale(glm::vec3(0.1, 0.1, 0.1)));
+   ojo_izquierdo->agregar(new Sphere(30, 30));
+   ojo_izquierdo->ponerColor({0.0f, 0.0f, 0.0f});
+
+   NodoGrafoEscena *ojo_derecho = new NodoGrafoEscena();
+   ojo_derecho->agregar(glm::translate(glm::vec3(0.35, 0.5, 0.75)));
+   ojo_derecho->agregar(glm::scale(glm::vec3(0.1, 0.1, 0.1)));
+   ojo_derecho->agregar(new Sphere(30, 30));
+   ojo_derecho->ponerColor({0.0f, 0.0f, 0.0f});
+
+   NodoGrafoEscena *cabeza = new NodoGrafoEscena();
+   cabeza->agregar(new SemiSphere(30, 30));
+   cabeza->ponerColor({0.0f, 1.0f, 0.0f});
+
+   NodoGrafoEscena *antena_derecha = new NodoGrafoEscena();
+   antena_derecha->agregar(glm::translate(glm::vec3(0.35, 0.95, 0.0)));
+   antena_derecha->agregar(glm::rotate(glm::pi<float>()/-6.0f, glm::vec3(0.0, 0.0, 1.0)));
+   antena_derecha->agregar(glm::scale(glm::vec3(0.05, 0.5, 0.05)));
+   antena_derecha->agregar(new Cilinder(30, 30));
+   antena_derecha->ponerColor({0.0f, 1.0f, 0.0f});
+
+   NodoGrafoEscena *antena_izquierda = new NodoGrafoEscena();
+   antena_izquierda->agregar(glm::translate(glm::vec3(-0.35, 0.95, 0.0)));
+   antena_izquierda->agregar(glm::rotate(glm::pi<float>()/6.0f, glm::vec3(0.0, 0.0, 1.0)));
+   antena_izquierda->agregar(glm::scale(glm::vec3(0.05, 0.5, 0.05)));
+
+   antena_izquierda->agregar(new Cilinder(30, 30));
+   antena_izquierda->ponerColor({0.0f, 1.0f, 0.0f});
+
+   agregar(ojo_izquierdo);
+   agregar(ojo_derecho);
+   agregar(cabeza);
+   agregar(antena_derecha);
+   agregar(antena_izquierda);
+}
+
+Android::Android(const float alpha, const float beta, const float gamma)
+{
+   NodoGrafoEscena *brazo_izquierdo = new NodoGrafoEscena();
+   brazo_izquierdo->agregar(glm::translate(glm::vec3(-1.45, 1.0, 0.0)));
+   unsigned int id_brazo_izq = brazo_izquierdo->agregar(glm::rotate(alpha, glm::vec3(1.0, 0.0, 0.0)));
+   brazo_izquierdo->agregar(glm::scale(glm::vec3(-0.35, -0.35, 0.35)));
+   brazo_izquierdo->agregar(new ExtremidadAndroid());
+
+   rotacion_brazo_izquierdo = brazo_izquierdo->leerPtrMatriz(id_brazo_izq);
+
+   NodoGrafoEscena *brazo_derecho = new NodoGrafoEscena();
+   brazo_derecho->agregar(glm::translate(glm::vec3(1.45, 1.0, 0.0)));
+   unsigned int id_brazo_drch = brazo_derecho->agregar(glm::rotate(beta, glm::vec3(1.0, 0.0, 0.0)));
+   brazo_derecho->agregar(glm::scale(glm::vec3(-0.35, -0.35, 0.35)));
+   brazo_derecho->agregar(new ExtremidadAndroid());
+
+   rotacion_brazo_derecho = brazo_derecho->leerPtrMatriz(id_brazo_drch);
+
+   NodoGrafoEscena *tronco = new NodoGrafoEscena();
+   tronco->agregar(glm::scale(glm::vec3(1.0, 2.0, 1.0)));
+   tronco->ponerColor({0.0, 1.0, 0.0});
+   tronco->agregar(new Cilinder(30, 30));
+
+   NodoGrafoEscena *cabeza = new NodoGrafoEscena();
+   cabeza->agregar(glm::translate(glm::vec3(0.0, 2.1, 0.0)));
+   unsigned id_cabeza = cabeza->agregar(glm::rotate(gamma, glm::vec3(0.0, 1.0, 0.0)));
+   cabeza->ponerColor({0.0, 1.0, 0.0});
+   cabeza->agregar(new CabezaAndroid());
+
+   rotacion_cabeza = cabeza->leerPtrMatriz(id_cabeza);
+
+   NodoGrafoEscena *pierna_izquierda = new NodoGrafoEscena();
+   pierna_izquierda->agregar(glm::translate(glm::vec3(-0.5, -1.0, 0.0)));
+   pierna_izquierda->agregar(glm::scale(glm::vec3(0.35, 0.35, 0.35)));
+   pierna_izquierda->agregar(new ExtremidadAndroid());
+
+   NodoGrafoEscena *pierna_derecha = new NodoGrafoEscena();
+   pierna_derecha->agregar(glm::translate(glm::vec3(0.5, -1.0, 0.0)));
+   pierna_derecha->agregar(glm::scale(glm::vec3(0.35, 0.35, 0.35)));
+   pierna_derecha->agregar(new ExtremidadAndroid());
+
+   agregar(brazo_izquierdo);
+   agregar(brazo_derecho);
+   agregar(tronco);
+   agregar(cabeza);
+   agregar(pierna_izquierda);
+   agregar(pierna_derecha);
+}
+
+unsigned Android::leerNumParametros() const
+{
+   return 3;
+}
+
+void Android::actualizarEstadoParametro(const unsigned iParam, const float t_sec)
+{
+   assert(iParam < leerNumParametros());
+
+   float min = -1.0f, max = 1.0f;
+   float a = (min + max)/2, b = (max - min)/2; 
+   float n = 0.25;
+
+   switch (iParam)
+   {
+   case 0:
+      *rotacion_brazo_izquierdo = glm::rotate(static_cast<float>(a + b*sin(2*M_PI*n*t_sec)), glm::vec3(1.0, 0.0, 0.0));
+   break;
+   case 1:
+      *rotacion_brazo_derecho = glm::rotate(static_cast<float>(a + b*sin(2*M_PI*n*t_sec)), glm::vec3(1.0, 0.0, 0.0));
+   break;
+   case 2:
+      *rotacion_cabeza = glm::rotate(static_cast<float>(a + b*sin(2*M_PI*n*t_sec)), glm::vec3(0.0, 1.0, 0.0));
+   break;
    }
 }

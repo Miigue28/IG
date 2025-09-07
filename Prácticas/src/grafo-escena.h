@@ -221,4 +221,54 @@ public:
    GrafoEsferasP5_2();
 };
 
+class Piramide : public MallaInd
+{
+public:
+   Piramide();
+};
+
+class NodoPiramideUGR : public NodoGrafoEscena
+{
+public:
+   NodoPiramideUGR();
+};
+
+class Triangle : public MallaInd
+{ 
+public:
+   Triangle(const glm::vec3 &x, const glm::vec3 &y, const glm::vec3 &z);
+   virtual bool cuandoClick(const glm::vec3 &centro_wc);
+};
+class NodoPiramideUGR_2 : public NodoGrafoEscena
+{
+public:
+   NodoPiramideUGR_2();
+};
+
+class ExtremidadAndroid : public NodoGrafoEscena
+{
+public:
+   ExtremidadAndroid();
+};
+
+class CabezaAndroid : public NodoGrafoEscena
+{
+public:
+   CabezaAndroid();
+};
+
+class Android : public NodoGrafoEscena
+{
+protected:
+   glm::mat4 *rotacion_brazo_izquierdo = nullptr;
+   glm::mat4 *rotacion_brazo_derecho = nullptr;
+   glm::mat4 *rotacion_cabeza = nullptr;
+public:
+   Android(const float alpha, const float beta, const float gamma);
+
+   virtual unsigned leerNumParametros() const;
+
+   virtual void actualizarEstadoParametro(const unsigned iParam, const float t_sec);
+};
+
 #endif // GRAFO_ESCENA_HPP

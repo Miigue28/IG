@@ -1,5 +1,3 @@
-# Tema 5: Realismo en Rasterización. Ray-Tracing
-
 > Autor: Miguel Ángel Moreno Castro
 >
 > Fuente: Carlos Ureña Almagro
@@ -34,7 +32,7 @@ En la parte más cercana se usa en ambos casos la textura original. Con mipmaps,
 
 Algunos tipos de superficies presentan cambios de orientación a pequeña escala (rugosidades). Esto se puede reproducir con mallas de polígonos con muchos polígonos pequeños, o con polígonos de detalle de diferente orientación. En cualquier caso, la complejidad en tiempo y espacio del proceso de rendering es muy alta.
 
-Una solución consiste en usar un textura para modificar a pequeña escala el vector normal que se usa en el MIL, a esto se le llama mapas de perturbación de la normal (**bump-maps**).
+Una solución consiste en usar una textura para modificar a pequeña escala el vector normal que se usa en el MIL, a esto se le llama mapas de perturbación de la normal (**bump-maps**).
 
 Es necesario usar una función real $f_h$ , tal que para cada par de coordenadas de textura $(u, v)$, el valor real $f_h(u, v)$ se interpreta como la altura de la superficie rugosa respecto del plano del polígono en el punto de coordenadas de textura $(u, v)$
 
@@ -42,7 +40,7 @@ Es necesario usar una función real $f_h$ , tal que para cada par de coordenadas
 
 Para evaluar $f_h(u, v)$ dados $u$ y $v$ se pueden usar dos opciones:
 
-- $f_h$ puede representarse como una función con una expresión analítica conocida y evaluable con algún algoritmo que tiene a $u$ y $v$ como datos de entrada (se llaman texturas procedurales.
+- $f_h$ puede representarse como una función con una expresión analítica conocida y evaluable con algún algoritmo que tiene a $u$ y $v$ como datos de entrada (se llaman **texturas procedurales**).
 - La opción más usual es que $f_h$ este codificada como una textura cuyos texels son valores escalares (tonos de gris) que codifican la altura. Para evaluar $f_h(u, v)$ se usa el mismo método visto para acceso a texturas en la sección anterior (se usan los texels más cercanos a $(u, v)$ en el espacio de coordenadas de textura).
 
 El procedimiento de perturbación de la normal usa como parámetros las derivadas parciales de $f_h$ ($d_u$ y $d_v$):
@@ -121,7 +119,7 @@ Supondremos escenas formadas por poliedros opacos delimitados por caras planas o
 
 ### Algoritmo de Weilter-Atherton-Greenberg
 
-Otros algoritmos de sombras arrojadas (más eficientes) están basados en algoritmos de elminación de partes ocultas ya existentes. Un ejemplo es el algoritmo de _Weiler-Atherton-Greenberg_ (1978) para sombras arrojadas:
+Otros algoritmos de sombras arrojadas (más eficientes) están basados en algoritmos de eliminación de partes ocultas ya existentes. Un ejemplo es el algoritmo de _Weiler-Atherton-Greenberg_ (1978) para sombras arrojadas:
 
 - Se usa el algoritmo de Weiler-Atherton para eliminación de partes ocultas
 - Se produce un modelo con polígonos iluminados asociados a los originales (son también polígonos de detalle).
@@ -181,7 +179,7 @@ for cada polígono transparente Q do
 	Mt = color transparente de Q
 	for cada pixel (x, y) ocupado por Q do
 		if Q es visible en (x, y) then
-			I[x, y] = kt * Mt * I[ x, y]
+			I[x, y] = kt * Mt * I[x, y]
 ```
 
 ### Combinación de reflexión y refracción
@@ -336,26 +334,26 @@ Los pixels se procesan secuencialmente, en cada uno se crea un rayo (llamado **r
 
 El pseudocódigo del algoritmo, que recorre todos los pixels, puede quedar así:
 
-```
+```sh
 o : = Posición del observador, en coords. del mundo
-for cada pixel (i, j ) de la imagen do
-	q := punto central (en WCC) del pixel (i, j)
-	u := vector desde o hasta q normalizado
-	rad := RayTracing(o,u,1)
+for cada pixel (i, j) de la imagen do
+	q := Punto central (en WCC) del pixel (i, j)
+	u := Vector desde 'o' hasta 'q' normalizado
+	rad := RayTracing(o, u, 1)
 	fijar el pixel (i, j) al valor rad
 ```
 
 > La función `RayTracing` es recursiva, calcula la radiancia incidente sobre el punto $o$, proveniente de la dirección $u$ (como una terna RGB). El entero $n$ es el nivel de profundidad en las llamadas recursivas.
 
-```
-function RayTracing( punto o, vector u, entero n )
+```sh
+function RayTracing(punto o, vector u, entero n)
 	if n > max then
 		return (0,0,0) // si se ha superado máximo nivel de recursión devolver radiancia nula
-	O := Primer objeto visible desde o en la dir. u // (por ray-casting)
+	O := Primer objeto visible desde 'o' en la dirección 'u' // (por ray-casting)
 	if no existe ningun objeto visible then
-		return radiancia de fondo correspondiente a u
+		return radiancia de fondo correspondiente a 'u'
 	p := Punto de O intersecado
-	return EvaluaMILRec( O, p, −u, n )
+	return EvaluaMILRec(O, p, −u, n)
 ```
 
 ### Evaluación del MIL
@@ -386,26 +384,26 @@ También es posible tener en cuenta superficies perfectamente especulares y/o pe
 
 Da lugar a un árbol de rayos asociado al árbol de llamadas recursivas.
 
-```
+```sh
 function EvaluaMILREC(O, p, v, n)
 	Obtener parámetros del material de O en p (n, C, ka , kd , ks , kps , MPS , MT , kt)
 	Obtener parámetros de fuentes de luz (nL, li, Si)
-	rad := ME (p) + AG (p) // emisividad y comp. ambiente global
+	rad := ME(p) + AG(p) // emisividad y componente ambiente global
 	for i := 0 to nL − 1 do // para cada fuente de luz
-		if la fuente i es visible desde p then
+		if la fuente i es visible desde 'p' then
 			rad := rad + Si · Directa(p, v, li) // ilum. directa
-	if k t > 0 and n < max then
-		t := vector refractado respecto de v
+	if kt > 0 and n < max then
+		t := Vector refractado respecto de v
 		rad := rad + k t · MT · RayTracing(p, t, n + 1) // componente refractada
 	if k ps > 0 and n < max then
-		r := vector reflejado respecto de v
+		r := Vector reflejado respecto de v
 		rad := rad + k ps · MPS · RayTracing(p, r, n + 1) // componente reflejada
 	return rad
 ```
 
 La función `Directa` evalúa $L_{dir}$ (las componentes ambiental, difusa y especular correspondientes a una fuente de luz)
 
-```
+```sh
 function Directa(p, v, l)
 	rad := k a · C
 	if k d > 0 then
@@ -427,14 +425,14 @@ Hay dos algoritmos fundamentales:
 
 ### Intersecciones rayo-objeto: método general
 
-Calcular la intersección de un rayo $(o, v)$ con un objeto cuya geometría es $O ⊆ R$ consiste en obtener el mínimo valor de $t > 0$ (si hay alguno) tal que $o + tv \in \partial O$. El objeto O puede estar caracterizado por estas dos funciones:
+Calcular la intersección de un rayo $(o, v)$ con un objeto cuya geometría es $O ⊆ R$ consiste en obtener el mínimo valor de $t > 0$ (si hay alguno) tal que $o + tv \in \partial O$. El objeto $O$ puede estar caracterizado por estas dos funciones:
 
 - **Ecuación implícita**: Un campo escalar $F$ tal que si $p \in \partial O$ entonces $F(p) = 0$.
 - **Condiciones adicionales**: Un predicado o función lógica $C$ tal que $p \in \partial O$ si y solo si $F (p) = 0$ y $C (p)$.
 
 El algoritmo requiere:
 1. Calcular el conjunto $S = \{ t_0, t_1, \dotsc, t_{n−1} \}$ con las raíces de la ecuación $F (o + tv) = 0$.
-2. Eliminar de $S$ los $t_i que no cumplen $C (o + ti v)$.
+2. Eliminar de $S$ los $t_i$ que no cumplen $C (o + ti v)$.
 3. Si $S \neq \emptyset$ la solución es $t = \min(S)$. Si $S = \emptyset$ no hay intersección.
 ### Intersecciones rayo-objeto: métodos de solución
 
@@ -462,10 +460,10 @@ Un método iterativo, llamado **Sphere Tracing**, usa las SDFs $F_i$ de los obje
 
 ![](./resources/img132.png)
 
-```
+```sh
 function InterseccionSDF(o, v, O0 , . . . , On−1)
-	p = o // mejor punto de intersección encontrado hasta ahora
-	d = 0 // d ≡ máxima distancia que se puede avanzar desde p
+	p = o // Mejor punto de intersección encontrado hasta ahora
+	d = 0 // Máxima distancia que se puede avanzar desde 'p'
 	repeat
 		p = p + dv // avanzamos a lo largo del rayo
 		d = mı́n {F0(p), . . . , Fn−1(p)} // actualizamos d en p

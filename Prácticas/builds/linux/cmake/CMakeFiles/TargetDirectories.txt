@@ -1,0 +1,4 @@
+/home/m1kebrown/Documents/2024-25/IG/Prácticas/builds/linux/cmake/CMakeFiles/debug_exe.dir
+/home/m1kebrown/Documents/2024-25/IG/Prácticas/builds/linux/cmake/CMakeFiles/release_exe.dir
+/home/m1kebrown/Documents/2024-25/IG/Prácticas/builds/linux/cmake/CMakeFiles/edit_cache.dir
+/home/m1kebrown/Documents/2024-25/IG/Prácticas/builds/linux/cmake/CMakeFiles/rebuild_cache.dir

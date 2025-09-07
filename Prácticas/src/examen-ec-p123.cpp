@@ -58,80 +58,85 @@ Ejercicio02::Ejercicio02(unsigned n)
 {
     assert(n > 0);
     
-    const float angle = 2*M_PI/static_cast<float>(n);
+    const float angle = 2*glm::pi<float>()/static_cast<float>(n);
 
-    // TODO: Rotarlo bien porque está haciendo unas rotaciones raras
+    const glm::mat4 M = glm::rotate(angle, glm::vec3(0.0, 0.0, 1.0));
 
-    // Tabla de vértices
-    for (unsigned i = 0; i < n; ++i)
+    vertices.push_back({1.0, 0.0, 0.0}); // 0
+    vertices.push_back({1.0, 0.0, 1.0}); // 1
+    vertices.push_back({1.5, 1.0, 0.0}); // 2
+    vertices.push_back({1.5, 0.0, 1.0}); // 3
+    vertices.push_back({2.0, 1.0, 0.0}); // 4
+    vertices.push_back({2.0, 0.0, 1.0}); // 5
+    vertices.push_back({2.5, 1.0, 0.0}); // 6
+    vertices.push_back({2.5, 0.0, 1.0}); // 7
+    vertices.push_back({3.0, 1.0, 0.0}); // 8
+    vertices.push_back({3.0, 0.0, 1.0}); // 9
+    for (unsigned i = 0; i < n - 1; ++i)
     {
-        vertices.push_back({0.0 + cos(i*angle), 0.0 + sin(i*angle), 0.0}); // 1
-        vertices.push_back({0.5 + cos(i*angle), 0.0 + sin(i*angle), 0.0}); // 2
-        vertices.push_back({1.0 + cos(i*angle), 1.0 + sin(i*angle), 0.0}); // 3
-        vertices.push_back({1.5 + cos(i*angle), 1.0 + sin(i*angle), 0.0}); // 4
-        vertices.push_back({2.0 + cos(i*angle), 1.0 + sin(i*angle), 0.0}); // 5
-        vertices.push_back({0.0 + cos(i*angle), 0.0 + sin(i*angle), 1.0}); // 7
-        vertices.push_back({0.5 + cos(i*angle), 0.0 + sin(i*angle), 1.0}); // 8
-        vertices.push_back({1.0 + cos(i*angle), 0.0 + sin(i*angle), 1.0}); // 9
-        vertices.push_back({1.5 + cos(i*angle), 0.0 + sin(i*angle), 1.0}); // 10
-        vertices.push_back({2.0 + cos(i*angle), 0.0 + sin(i*angle), 1.0}); // 11
+        for (size_t j = 0; j < 10; ++j)
+        {
+            glm::vec4 tmp = glm::vec4(vertices[10*i + j], 1.0);
+            vertices.push_back(M*tmp);
+        }
     }
     vertices.push_back({0.0, 0.0, 0.0});
     vertices.push_back({0.0, 0.0, 1.0});
-
-    // Tabla de triángulos
     for (unsigned i = 0; i < n; ++i)
     {
-        triangulos.push_back({10*n, 12*i, 10*n+1});
-        triangulos.push_back({12*i, 10*n+1, 12*i + 5});
+        triangulos.push_back({vertices.size() - 2, vertices.size() - 1, (10*i) % (10*n)});
+        triangulos.push_back({vertices.size() - 1, 10*i % (10*n), (10*i + 1) % (10*n)});
         for (unsigned j = 0; j < 4; ++j)
         {
-            triangulos.push_back({12*i + j, 12*i + j + 1, 12*i + j + 6});
-            triangulos.push_back({12*i + j + 1, 12*i + j + 6, 12*i + j + 1 + 6});
+            triangulos.push_back({10*i + 2*j, 10*i + (2*j + 1), 10*i + (2*j + 2)});
+            triangulos.push_back({10*i + (2*j + 1), 10*i + (2*j + 2), 10*i + (2*j + 3)});
         }
     }
 
     // Tabla de colores
     for (unsigned i = 0; i < n; ++i)
     {
-        col_ver.push_back({0.5, 0.5, 0.5});
-        col_ver.push_back({0.5, 0.5, 0.5});
-        col_ver.push_back({1.0, 1.0, 1.0});
-        col_ver.push_back({1.0, 1.0, 1.0});
-        col_ver.push_back({1.0, 1.0, 1.0});
-        col_ver.push_back({1.0, 1.0, 1.0});
-        col_ver.push_back({0.5, 0.5, 0.5});
-        col_ver.push_back({0.5, 0.5, 0.5});
-        col_ver.push_back({1.0, 1.0, 1.0});
-        col_ver.push_back({1.0, 1.0, 1.0});
-        col_ver.push_back({1.0, 1.0, 1.0}); 
-        col_ver.push_back({1.0, 1.0, 1.0}); 
+        col_ver.push_back({0.5, 0.5, 0.5}); // 0
+        col_ver.push_back({0.5, 0.5, 0.5}); // 1
+        col_ver.push_back({1.0, 1.0, 1.0}); // 2
+        col_ver.push_back({1.0, 1.0, 1.0}); // 3
+        col_ver.push_back({1.0, 1.0, 1.0}); // 4
+        col_ver.push_back({1.0, 1.0, 1.0}); // 5
+        col_ver.push_back({1.0, 1.0, 1.0}); // 6
+        col_ver.push_back({1.0, 1.0, 1.0}); // 7
+        col_ver.push_back({1.0, 1.0, 1.0}); // 8
+        col_ver.push_back({1.0, 1.0, 1.0}); // 9
     }
+    col_ver.push_back({0.5, 0.5, 0.5});
+    col_ver.push_back({0.5, 0.5, 0.5});
 };
 
 Ejercicio03::Ejercicio03(float w, float h)
 {
     assert(w > 1 && h < 0.3);
 
-    using namespace glm;
+    this->width = w;
+    this->height = h;
+
+    Cubo *cubo = new Cubo();
 
     NodoGrafoEscena *tablero = new NodoGrafoEscena();
-    unsigned ind_escalado = tablero->agregar(scale(vec3(1.0, 1.0, 1.0)));
-    tablero->agregar(scale(vec3(w, h, w)));
-    tablero->agregar(new Cubo());
+    unsigned ind_escalado = tablero->agregar(glm::scale(glm::vec3(1.0, 1.0, 1.0)));
+    tablero->agregar(glm::scale(glm::vec3(w, h, w)));
+    tablero->agregar(cubo);
 
     cubescaling = tablero->leerPtrMatriz(ind_escalado);
 
     NodoGrafoEscena *cuborotatorio = new NodoGrafoEscena();
-    unsigned ind_rotacion = cuborotatorio->agregar(rotate(0.0f, vec3(0.0, 1.0, 0.0)));
-    cuborotatorio->agregar(translate(vec3(0.0, 2*h, w-0.2)));
-    cuborotatorio->agregar(scale(vec3(0.2, 0.2, 0.2)));
-    cuborotatorio->agregar(new Cubo());
+    unsigned ind_rotacion = cuborotatorio->agregar(glm::rotate(0.0f, glm::vec3(0.0, 1.0, 0.0)));
+    cuborotatorio->agregar(glm::translate(glm::vec3(0.0, 2*h, w-h)));
+    cuborotatorio->agregar(glm::scale(glm::vec3(h, h, h)));
+    cuborotatorio->agregar(cubo);
 
     cuberotation = cuborotatorio->leerPtrMatriz(ind_rotacion);
 
     agregar(tablero);
-    unsigned ind_traslacion = agregar(translate(vec3(0.0, 0.0, 0.0)));
+    unsigned ind_traslacion = agregar(glm::translate(glm::vec3(0.0, 0.0, 0.0)));
     agregar(cuborotatorio);
 
     inducedtranslation = leerPtrMatriz(ind_traslacion);
@@ -163,7 +168,7 @@ void Ejercicio03::actualizarEstadoParametro(const unsigned iParam, const float t
     case 1:
         // TODO: Coordinar estos dos movimientos
         *cubescaling = scale(vec3(1.0, -static_cast<float>(a + b*sin(2*M_PI*n*t_sec)), 1.0));
-        *inducedtranslation = translate(vec3(0.0, static_cast<float>((a + b*sin(2*M_PI*n*t_sec))/10.0f), 0.0));
+        *inducedtranslation = translate(vec3(0.0, static_cast<float>((a + b*sin(2*M_PI*n*t_sec))*height), 0.0));
     break;
     }
 }

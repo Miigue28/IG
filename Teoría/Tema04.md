@@ -520,7 +520,7 @@ private:
 
 ### Cámara en primera persona con traslaciones
 
-En el modo de primera persona con traslaciones, la actualización de la cámara supone simplemente trasladar el origen del marco de cámara oec y el punto de atención at de forma solidaria:
+En el modo de primera persona con traslaciones, la actualización de la cámara supone simplemente trasladar el origen del marco de cámara $\dot{o}_{ec}$ y el punto de atención $\dot{a}_t$ de forma solidaria:
 - La operación `desplRotarXY(∆a , ∆b)` supone:
 	1. $a_t = a_t + \Delta_x x_{ec} + \Delta_y y_{ec}$
 	2. $o_{ec} = a_t + n$

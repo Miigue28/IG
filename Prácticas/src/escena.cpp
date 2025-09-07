@@ -51,6 +51,7 @@
 #include "modelo-jer.h"
 #include "examen-ec-p123.h"
 #include "latapeones.h"
+#include "examen-extr.h"
 
 Escena::Escena()
 {
@@ -283,7 +284,10 @@ Escena1::Escena1()
    //objetos.push_back(new Cuadrado());
    //objetos.push_back(new PiramideL());
    //objetos.push_back(new EstrellaZ(8));
-   objetos.push_back(new Ejercicio01());
+   //objetos.push_back(new Ejercicio01());
+   //objetos.push_back(new NodoPiramideUGR());
+   //objetos.push_back(new NodoPiramideUGR_2());
+   objetos.push_back(new EjercicioExtr01());
 }
 
 Escena2::Escena2()
@@ -299,7 +303,8 @@ Escena2::Escena2()
    //objetos.push_back(new PiramideEstrellaZ(8));
    //objetos.push_back(new RejillaY(3, 3));
    //objetos.push_back(new MallaTorre(3));
-   objetos.push_back(new Ejercicio02(1));
+   //objetos.push_back(new Ejercicio02(8));
+   objetos.push_back(new EjercicioExtr02());
 }
 
 Escena3::Escena3()
@@ -309,8 +314,11 @@ Escena3::Escena3()
    //objetos.push_back(new GrafoEstrellaX(6));
    //objetos.push_back(new GrafoCubos());
    //objetos.push_back(new CubePair(0.5f, 0.25f));
-   objetos.push_back(new Trombone());
+   //objetos.push_back(new Trombone());
+   //objetos.push_back(new Android(0.0f, 0.0f, 0.0f));
    //objetos.push_back(new Ejercicio03(2, 0.2));
+   //objetos.push_back(new KeyCap(1, 1));
+   objetos.push_back(new EjercicioExtr03(3, 3));
 }
 
 Escena4::Escena4()
@@ -320,14 +328,16 @@ Escena4::Escena4()
    //objetos.push_back(new NodoDiscoP4());
    //objetos.push_back(new Beethoven());
    //objetos.push_back(new NodoCubo24());
-   objetos.push_back(new LataPeones());
+   //objetos.push_back(new LataPeones());
+   objetos.push_back(new EjercicioExtr04(3, 3));
 }
 
 Escena5::Escena5()
 {
    std::cout << "Creando objetos de la Práctica 5" << std::endl;
 
-   objetos.push_back(new GrafoEsferasP5());
-   objetos.push_back(new GrafoEsferasP5_2());
-   objetos.push_back(new VariasLatasPeones());
+   //objetos.push_back(new GrafoEsferasP5());
+   //objetos.push_back(new GrafoEsferasP5_2());
+   //objetos.push_back(new VariasLatasPeones());
+   objetos.push_back(new EjercicioExtr05(3, 3));
 }

@@ -183,8 +183,8 @@ En este caso, no hay transformación de escala, y la proyección se puede ver co
 ### El view-frustum
 
 El **view-frustum** designa la región del espacio de la escena que es visible en el viewport. Su forma depende del tipo de proyección:
-- Perspectiva: Es un tronco de pirámide rectangular (izquierda).
-- Ortográfica: Es un paralelepípedo ortogonal u ortoedro (derecha).
+- **Perspectiva**: Es un tronco de pirámide rectangular (izquierda).
+- **Ortográfica**: Es un paralelepípedo ortogonal u ortoedro (derecha).
 
 ![](./resources/img33.png)
 

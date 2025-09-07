@@ -303,17 +303,17 @@ struct TiraTri
 {
 	std::vector<glm::vec3> vertices;
 	DescrVAO * vao = nullptr;
-} ;
+};
 
-class MallaTT : public Objeto3D // Malla compuesta de tiras de triángulos
+class MallaTT : public Objeto3D // Malla compuesta de Tiras de Triángulos
 {
 protected:
 	std::vector<TiraTri> tiras; // Vector de tiras
 . . .
 public:
-	virtual void visualizarGL( );
+	virtual void visualizarGL();
 . . .
-} ;
+};
 ```
 
 > Cada tira tiene su propio VAO y se visualiza con `draw` usando `GL_TRIANGLE_STRIP` como tipo de primitiva.

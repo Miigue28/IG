@@ -13,6 +13,7 @@ El valor de $n$ ($> 2$) es un parámetro entero sin signo. El VAO sería la base
 - `GL_LINE_LOOP`
 - `GL_LINES`
 En este problema y el siguiente se pide únicamente generar las tablas y el VAO, en ningún caso se pide visualizar nada.
+### Solución
 
 ```c++
 void DrawPolygon(unsigned int num_verts)
@@ -32,10 +33,8 @@ void DrawPolygon(unsigned int num_verts)
 		polygon = new VertexArrayObject(1, 
 			new AttribBufferObject(cauce->ind_atrib_posiciones, GL_DOUBLE, 2, num_verts, vertices));
 	}
-	assert(glGetError() == GL_NO_ERROR);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	polygon->draw(GL_LINE_LOOP);
-	assert(glGetError() == GL_NO_ERROR);
 }
 ```
 
@@ -56,10 +55,8 @@ void DrawPolygon(unsigned int num_verts)
 		polygon = new VertexArrayObject(1, 
 			new AttribBufferObject(cauce->ind_atrib_posiciones, GL_DOUBLE, 2, num_verts, vertices));
 	}
-	assert(glGetError() == GL_NO_ERROR);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	polygon->draw(GL_LINES);
-	assert(glGetError() == GL_NO_ERROR);
 }
 ```
 
@@ -70,6 +67,7 @@ Escribe otra función para generar una tabla de vértices y una tabla de índice
 La tabla está destinada a ser visualizada con el tipo de primitiva `GL_TRIANGLES`. Escribe dos variantes del código: 
 - Usa una secuencia no indexada con $3n$ vértices
 - Usa una secuencia indexada (sin vértices repetidos), con $n + 1$ vértices y $3n$ índices.
+### Solución
 
 ```c++
 void DrawPolygon(unsigned int num_verts)
@@ -89,10 +87,8 @@ void DrawPolygon(unsigned int num_verts)
 		polygon = new VertexArrayObject(1, 
 					new AttribBufferObject(cauce->ind_atrib_posiciones, vertices));
 	}
-	assert(glGetError() == GL_NO_ERROR);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	polygon->draw(GL_TRIANGLES);
-	assert(glGetError() == GL_NO_ERROR);
 }
 ```
 
@@ -100,7 +96,6 @@ void DrawPolygon(unsigned int num_verts)
 void DrawPolygon(unsigned int num_verts)
 {
 	assert(2 < num_verts);
-	assert(glGetError() == GL_NO_ERROR);
 	if (polygon == nullptr)
 	{
 		std::vector<glm::vec2> vertices;
@@ -120,33 +115,51 @@ void DrawPolygon(unsigned int num_verts)
 					new AttribBufferObject(cauce->ind_atrib_posiciones, vertices));
 		polygon->add(new IndexBufferObject(indices));
 	}
-	assert(glGetError() == GL_NO_ERROR);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	polygon->draw(GL_TRIANGLES);
-	assert(glGetError() == GL_NO_ERROR);
 }
 ```
 
 ## Ejercicio 3
 
 Modifica el código de los ejercicios anteriores para incluir una nueva función para visualizar las aristas y el relleno del polígono regular de $n$ lados, usando los dos descriptores de VAO que se mencionan en
-- El enunciado del problema 1.1 (`GL_LINE_LOOP`) para las aristas,
-- El enunciado del problema 1.2 (secuencia indexada) para el relleno.
+- El enunciado del ejercicio 1 (`GL_LINE_LOOP`) para las aristas,
+- El enunciado del ejercicio 2 (secuencia indexada) para el relleno.
 
 El polígono se verá relleno de un color plano y las aristas con otro color (también plano), distintos ambos del color de fondo. Debes usar un VAO para las aristas y otro para el relleno. No uses una tabla de colores de vértices para este problema, en su
 lugar usa la función `glVertexAttrib` para cambiar el color antes de dibujar.
 
 Incluye todo el código en una función de visualización (nueva), esa función debe incluir tanto la creación de tablas y VAOs (en la primera llamada), como la visualización (en todas las llamadas).
+### Solución
 
 ```c++
-// Esto está regular CORREGIR
-void DrawPolygon(unsigned int num_verts)
+void DrawBoundedPolygon(unsigned int num_verts)
 {
-	cauce->fijarUsarColorPlano(true);
-	cauce->fijarColor({1.0, 0.0, 0.0});
-	DrawPolygon1(num_verts);
-	cauce->fijarColor({0.0, 0.0, 1.0});
-	DrawPolygon2(num_verts);
+	assert(2 < num_verts);
+	assert(glGetError() == GL_NO_ERROR);
+	VertexArrayObject *polygon = nullptr;
+	VertexArrayObject *boundary = nullptr;
+	
+	std::vector<glm::vec2> vertices;
+	std::vector<glm::uvec3> indices;
+	
+	for (size_t i = 0; i < num_verts; ++i)
+	{
+		float angle = 2.0f * M_PI * i / num_verts;
+		vertices.push_back(glm::vec2(0.5f * cos(angle), 0.5f * sin(angle)));
+		indices.push_back(glm::uvec3(i, (i + 1) % num_verts, num_verts));
+	}
+	boundary = new VertexArrayObject(1, new AttribBufferObject(cauce->ind_atrib_posiciones, vertices));
+	polygon = new VertexArrayObject(1, new AttribBufferObject(cauce->ind_atrib_posiciones, vertices));
+	polygon->add(new IndexBufferObject(indices));
+	
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	glVertexAttrib3f(cauce->ind_atrib_colores, 1.0, 0.0, 0.0);
+	polygon->draw(GL_TRIANGLES);
+	
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glVertexAttrib3f(cauce->ind_atrib_colores, 0.0, 0.0, 0.0);
+	boundary->draw(GL_LINE_LOOP);
 }
 ```
 
@@ -154,24 +167,25 @@ void DrawPolygon(unsigned int num_verts)
 
 Repite el problema anterior, pero ahora intenta usar el mismo VAO para las aristas y los triángulos rellenos. Para eso
 puedes usar una única tabla de $n + 1$ posiciones de vértices, esa tabla sirve de base para el relleno, usando índices. Para las aristas, puedes usar `GL_LINE_LOOP`, pero teniendo en cuenta únicamente los $n$ vértices del polígono (sin usar el vértice en el origen).
+### Solución
 
 ```c++
-// NO FUNCIONA DEL TODO BIEN, PROBAR CON EL TRIÁNGULO
 void DrawPolygon(unsigned int num_verts)
 {
 	assert(2 < num_verts);
-	assert(glGetError() == GL_NO_ERROR);
+	
+	std::vector<glm::vec2> vertices;
+	std::vector<glm::uvec3> indices;
+	
 	if (polygon == nullptr)
 	{
-		std::vector<glm::vec2> vertices;
-		std::vector<glm::vec3> colors;
-		std::vector<glm::uvec3> indices;
 		for (size_t i = 0; i < num_verts; ++i)
 		{
 			float angle = 2.0f * M_PI * i / num_verts;
 			vertices.push_back(glm::vec2(0.5f * cos(angle), 0.5f * sin(angle)));
 		}
-			vertices.push_back(glm::vec2(0.0f, 0.0f)); 
+		vertices.push_back(glm::vec2(0.0f, 0.0f));
+		
 		for (size_t i = 0; i < num_verts; ++i)
 		{
 			indices.push_back(glm::uvec3(i, (i + 1) % num_verts, num_verts));
@@ -180,33 +194,177 @@ void DrawPolygon(unsigned int num_verts)
 					new AttribBufferObject(cauce->ind_atrib_posiciones, vertices));
 		polygon->add(new IndexBufferObject(indices));
 	}
-	assert(glGetError() == GL_NO_ERROR);
 	polygon->createVAO();
-	assert(glGetError() == GL_NO_ERROR);
+	
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	cauce->fijarUsarColorPlano(true);
-	cauce->fijarColor({1.0, 0.0, 0.0});
-	glDrawElements(GL_TRIANGLES, 3*indices.size(), GL_UNSIGNED_INT, 0);
-	assert(glGetError() == GL_NO_ERROR);
+	glVertexAttrib3f(cauce->ind_atrib_colores, 1.0, 0.0, 0.0);
+	glDrawElements(GL_TRIANGLES, 3*indices.size(), GL_UNSIGNED_INT, (void *)0);
+	
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	cauce->fijarUsarColorPlano(true);
-	cauce->fijarColor({0.0, 0.0, 0.0});
+	glVertexAttrib3f(cauce->ind_atrib_colores, 0.0, 0.0, 0.0);
 	glDrawArrays(GL_LINE_LOOP, 0, num_verts);
-	assert(glGetError() == GL_NO_ERROR);
 }
 ```
 
 
 ## Ejercicio 5
 
-## Ejercicio 6
-
-## Ejercicio 7
-
-Modifica el código del ejemplo `opengl3-minimo` para añadir a la clase `Cauce` un método que permita especificar la región visible. El método debe de fijar el valor del parámetro uniform con la matriz de proyección, según lo visto en las transparencias anteriores.
+Repite el problema anterior, pero ahora el relleno, en lugar de hacerse todo del mismo color plano, se hará mediante interpolación de colores (las aristas siguen estando con un único color). Para eso se debe generar una tabla de colores de vértices (`vector<vec3>`), inicializada con colores aleatorios para cada uno de los $n + 1$ vértices. Ten en cuenta que para visualizar las aristas, debes de deshabilitar antes el uso de la tabla de colores.
+### Solución
 
 ```c++
-void fijarRegionVisible(const float x0, const float x1, const float y0, const float y1, const float z0, const float z1);
+void DrawPolygon(unsigned int num_verts)
+{
+	assert(2 < num_verts);
+	
+	std::vector<glm::vec2> vertices;
+	std::vector<glm::vec3> colors;
+	std::vector<glm::uvec3> indices;
+	
+	if (polygon == nullptr)
+	{
+		for (size_t i = 0; i < num_verts; ++i)
+		{
+			float angle = 2.0f * M_PI * i / num_verts;
+			vertices.push_back(glm::vec2(0.5f * cos(angle), 0.5f * sin(angle)));
+			colors.push_back(glm::vec3(0.5f * cos(angle) + 0.5f, 0.5f * sin(angle) + 0.5f, 0.5f));
+		}
+		vertices.push_back(glm::vec2(0.0f, 0.0f));
+		colors.push_back(glm::vec3(0.5f, 0.5f, 0.5f));
+		
+		for (size_t i = 0; i < num_verts; ++i)
+		{
+			indices.push_back(glm::uvec3(i, (i + 1) % num_verts, num_verts));
+		}
+		polygon = new VertexArrayObject(cauce->num_atribs, 
+					new AttribBufferObject(cauce->ind_atrib_posiciones, vertices));
+		polygon->add(new AttribBufferObject(cauce->ind_atrib_colores, colors));
+		polygon->add(new IndexBufferObject(indices));
+	}
+	
+	polygon->createVAO();
+	
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	glEnableVertexAttribArray(cauce->ind_atrib_colores);
+	glDrawElements(GL_TRIANGLES, 3*indices.size(), GL_UNSIGNED_INT, (void *)0);
+	
+	glDisableVertexAttribArray(cauce->ind_atrib_colores);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glVertexAttrib3f(cauce->ind_atrib_colores, 0.0, 0.0, 0.0);
+	glDrawArrays(GL_LINE_LOOP, 0, num_verts);
+}
+```
+
+## Ejercicio 6
+
+Repite el problema anterior, pero ahora, para guardar las posiciones y los vértices, se usará una estructura tipo AOS, es decir, se usa un array de estructuras o bloques de datos, en cada estructura o bloque se guardan 3 flotantes para la posición y 3 flotantes para el color RGB.
+
+La estructura completa se debe alojar en un único VBO de atributos con todos los flotantes de las posiciones y colores, así que no uses la clase `DescrVAO`, sino que escribe el código OpenGL directamente.
+### Solución
+
+```c++
+void DrawPolygonWithoutVAO(unsigned int num_verts)
+{
+	assert(2 < num_verts); 
+	static GLuint vao = 0;
+	static GLuint vbo_vertices = 0;
+	static GLuint vbo_indices = 0;
+	std::vector<std::pair<glm::vec2, glm::vec3>> vertices;
+	std::vector<glm::uvec3> indices;
+	if (polygon == nullptr)
+	{
+		for (size_t i = 0; i < num_verts; ++i)
+		{
+			float angle = 2.0f * M_PI * i / num_verts;
+			vertices.emplace_back(
+				glm::vec2(cos(angle), sin(angle)), 
+				glm::vec3(cos(angle) + 0.5f, sin(angle) + 0.5f, 0.5f)
+			);
+		}
+		vertices.emplace_back(glm::vec2(0.0f, 0.0f), glm::vec3(0.5f, 0.5f, 0.5f));
+		for (size_t i = 0; i < num_verts; ++i)
+		{
+			indices.push_back(glm::uvec3(i, (i + 1) % num_verts, num_verts));
+		}
+		// Create the VAO
+		glGenVertexArrays(1, &vao);
+		// Bind the VAO
+		glBindVertexArray(vao);
+		// Create the VBO for the vertices
+		glGenBuffers(1, &vbo_vertices);
+		// Bind the VBO of vertices
+		glBindBuffer(GL_ARRAY_BUFFER, vbo_vertices);
+		// Copy the data to the VBO of vertices
+		glBufferData(
+			GL_ARRAY_BUFFER, 
+			vertices.size() * sizeof(glm::vec2) + vertices.size() * sizeof(glm::vec3), 
+			vertices.data(), 
+			GL_STATIC_DRAW
+		);
+		// Specify the location and data format of the array of vertices
+		glVertexAttribPointer(
+			cauce->ind_atrib_posiciones, 
+			2, 
+			GL_FLOAT, 
+			GL_FALSE, 
+			sizeof(glm::vec2) + sizeof(glm::vec3), 
+			(void *)0
+		);
+		// Enable the vertex attribute array
+		glEnableVertexAttribArray(cauce->ind_atrib_posiciones);
+		// Specify the location and data format of the array of colors
+		glVertexAttribPointer(
+			cauce->ind_atrib_colores, 
+			3, 
+			GL_FLOAT, 
+			GL_FALSE, 
+			sizeof(glm::vec2) + sizeof(glm::vec3), 
+			(void *)(sizeof(glm::vec2))
+		);
+		// Enable the vertex attribute array
+		glEnableVertexAttribArray(cauce->ind_atrib_colores);
+		// Create the VBO for the indices
+		glGenBuffers(1, &vbo_indices);
+		// Bind the VBO of indices
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo_indices);
+		// Copy the data to the VBO of indices
+		glBufferData(
+			GL_ELEMENT_ARRAY_BUFFER, 
+			indices.size() * sizeof(glm::uvec3), 
+			indices.data(), 
+			GL_STATIC_DRAW
+		);
+	}
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	glEnableVertexAttribArray(cauce->ind_atrib_colores);
+	glDrawElements(GL_TRIANGLES, 3*indices.size(), GL_UNSIGNED_INT, (void *)0);
+	
+	glDisableVertexAttribArray(cauce->ind_atrib_colores);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glVertexAttrib3f(cauce->ind_atrib_colores, 0.0, 0.0, 0.0);
+	glDrawArrays(GL_LINE_LOOP, 0, num_verts);
+}
+```
+## Ejercicio 7
+
+Modifica el código del ejemplo `opengl3-minimo` para añadir a la clase `Cauce` un método que permita especificar la región visible. El método debe de fijar el valor del parámetro uniform con la matriz de proyección, según lo visto en las transparencias de teoria.
+
+```c++
+void Cauce::setVisibleRegion(const glm::vec3 min, const glm::vec3 max)
+{
+	assert(loc_mat_proyeccion != -1);
+	assert(glGetError() == GL_NO_ERROR);
+	glm::vec3 s = {2.0f / (max.x - min.x), 2.0f / (max.y - min.y), 2.0f / (max.z - min.z)};
+	glm::vec3 c = {(min.x + max.x)/2.0f, (min.y + max.y)/2.0f, (min.z + max.z)/2.0f};
+	mat_proyeccion = glm::mat4(
+		s.x, 0, 0, -c.x * s.x,
+		0, s.y, 0, -c.y * s.y,
+		0, 0, s.z, -c.z * s.z,
+		0, 0, 0, 1
+	);
+	glUniformMatrix4fv(loc_mat_proyeccion, 1, GL_FALSE, glm::value_ptr(mat_proyeccion));
+	assert(glGetError() == GL_NO_ERROR);
+}
 ```
 
 
@@ -215,20 +373,50 @@ void fijarRegionVisible(const float x0, const float x1, const float y0, const fl
 Modifica el código del ejemplo `opengl3-minimo` para que no se introduzcan deformaciones cuando la ventana se redimensiona y el alto queda distinto del ancho. El código original del repositorio presenta los objetos deformados (escalados con distinta escala en vertical y horizontal) cuando la ventana no es cuadrada, ya que visualiza en el viewport (no cuadrado) una cara (cuadrada) del cubo de lado $2$. 
 
 Para evitar este problema, en cada cuadro se deben de leer las variables que contienen el tamaño actual de la ventana y en función de esas variables modificar la zona visible, que ya no será siempre un cubo de lado $2$ unidades, sino que será un ortoedro que contendrá dicho cubo de lado $2$, pero tendrá unas dimensiones superiores a $2$ (en $X$ o en $Y$, no en ambas), adaptadas a las proporciones de la ventana (el ancho en $X$ dividido por el alto en $Y$ es un valor que debe coincidir en el ortoedro visible y en el viewport).
+### Solución
 
+```c++
+void ShowFrame()
+{
+	. . .
+	// Set the projection matrix
+	cauce->setProjectionMatrix(glm::mat4(1.0));
+	// Set the visible region of the projection matrix
+	const float aspect_ratio = static_cast<float>(width) / static_cast<float>(height);
+	if (aspect_ratio < 1.0)
+	{
+		cauce->setVisibleRegion({-1.0, -1.0 / aspect_ratio, -1.0}, {1.0, 1.0 / aspect_ratio, 1.0});
+	}
+	else
+	{
+		cauce->setVisibleRegion({-aspect_ratio, -1.0, -1.0}, {aspect_ratio, 1.0, 1.0});
+	}
+	// Clear the color and depth buffers
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	. . .
+}
+```
 
 ## Ejercicio 9
 
 Demuestra que el producto escalar de dos vectores se puede calcular usando sus coordenadas en cualquier marco cartesiano como la suma del producto componente a componente, a partir de las propiedades que definen dicho producto escalar.
+### Solución
+
+Sea $R =[ \dot{o}, \vec{x}, \vec{y}, \vec{z}]$  un sistema de referencia ortonormal cualquiera del espacio afín $\mathbb{R}^3$, entonces el producto escalar es una aplicación bilineal 
+$$\langle \cdot, \cdot \rangle \colon \mathbb{R}^3 \times \mathbb{R}^3 \to \mathbb{R}$$
+Por tanto podemos considerar la matriz asociada a dicha forma bilineal
+$$A = \begin{pmatrix} \langle \vec{x}, \vec{x} \rangle & \langle \vec{x}, \vec{y} \rangle & \langle \vec{x}, \vec{z} \rangle \\ \langle \vec{y}, \vec{x} \rangle & \langle \vec{y}, \vec{y} \rangle & \langle \vec{y}, \vec{z} \rangle \\ \langle \vec{z}, \vec{x} \rangle & \langle \vec{z}, \vec{y} \rangle & \langle \vec{z}, \vec{z} \rangle \end{pmatrix} = \begin{pmatrix} 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{pmatrix}$$
+de forma que dados $u = (u_1, u_2, u_3)$ y $v = (v_1, v_2, v_3)$ se tiene que
+$$\langle u, v \rangle = u^t \cdot A \cdot v = \begin{pmatrix} u_1 & u_2 & u_3 \end{pmatrix} \cdot \begin{pmatrix} v_1 \\ v_2 \\ v_3 \end{pmatrix} = u_1 \cdot v_1 + u_2 \cdot v_2 + u_3 \cdot v_3 $$
 
 ## Ejercicio 10
 
-Demuestra que el producto vectorial de dos vectores se puede calcular usando sus coordenadas en cualquier marco cartesiano según se indica en la transparencia anterior, a partir de las propiedades que definen dicho producto vectorial.
-
-## Ejercicio 11
-
 Demuestra que el producto vectorial de dos vectores es perpendicular a cada uno de esos dos vectores.
+### Solución
 
+Dados $x = (x_1, x_2, x_3)$ e $y = (y_1, y_2, y_3)$ se tiene que
+$$\langle x, x \times y \rangle = x_1 \cdot \begin{vmatrix} x_2 & x_3 \\ y_2 & y_3 \end{vmatrix} + x_2 \cdot \begin{vmatrix} x_3 & x_1 \\ y_3 & y_1 \end{vmatrix} + x_3 \cdot \begin{vmatrix} x_1 & x_2 \\ y_1 & y_2 \end{vmatrix} = \begin{vmatrix} x_1 & x_2 & x_3 \\ x_1 & x_2 & x_3 \\ y_1 & y_2 & y_3 \end{vmatrix} = 0$$
+$$\langle y, x \times y \rangle = y_1 \cdot \begin{vmatrix} x_2 & x_3 \\ y_2 & y_3 \end{vmatrix} + y_2 \cdot \begin{vmatrix} x_3 & x_1 \\ y_3 & y_1 \end{vmatrix} + y_3 \cdot \begin{vmatrix} x_1 & x_2 \\ y_1 & y_2 \end{vmatrix} = \begin{vmatrix} y_1 & y_2 & y_3 \\ x_1 & x_2 & x_3 \\ y_1 & y_2 & y_3 \end{vmatrix} = 0$$
 # Tema 2
 
 ## Ejercicio 1
@@ -257,15 +445,46 @@ Considerando que cada meridiano/paralelo tiene $k$ vértices, será necesario al
 
 ## Ejercicio 2
 
-Considera una malla indexada (tabla de vértices y caras, esta última con índices de vértices) con topología de rejilla como la de la figura, en la cual hay $n$ columnas de pares de triángulos y $m$ filas (es decir, hay $n + 1$ filas de vértices y $m + 1$ columnas de vértices, con $n, m > 0$).
+Considera una malla indexada (tabla de vértices y caras, esta última con índices de vértices) con topología de rejilla como la de la figura, en la cual hay $m$ columnas de pares de triángulos y $n$ filas (es decir, hay $n + 1$ filas de vértices y $m + 1$ columnas de vértices, con $n,\,m > 0$).
+
+![](./resources/img133.png)
 
 En relación a este tipo de mallas, responde a estas dos cuestiones:
 - Supongamos que un `float` ocupa $4$ bytes (igual a un `int`) ¿que tamaño en memoria ocupa la malla completa, en bytes?(Tener en cuenta únicamente el tamaño de la tabla de vértices y triángulos, suponiendo que se almacenan usando los tipos `float` e `int`, respectivamente). Expresa el tamaño como una función de `m` y `n`.
 - Escribe el tamaño en KB suponiendo que $m = n = 128$.
-- Supongamos que $m$ y $n$ son ambos grandes (es decir, asumimos que $1/n$ y $1/m$ son prácticamente $0$). deduce que relación hay entre el número de caras $n_C$ y el número de vértices $n_V$ en este tipo de mallas.
+- Supongamos que $m$ y $n$ son ambos grandes (es decir, asumimos que $1/n$ y $1/m$ son prácticamente $0$). Deduce que relación hay entre el número de caras $n_C$ y el número de vértices $n_V$ en este tipo de mallas.
+### Solución
 
+Respecto a la tabla de vértices, sabemos que tenemos $n + 1$ filas de vértices con $m + 1$ vértices en cada una, y considerando que cada vértice es de tipo `vec3`, esto es, tres coordenadas de tipo `float`, dicha tabla ocupará
+$$12 \cdot(n + 1)(m + 1) \; \text{ bytes }$$
+Análogamente, respecto a la tabla de triángulos, sabemos que cada triángulo está formado por tres coordenadas de tipo `int` y, tenemos $2n$ triángulos en cada una de las $m$ columnas, por tanto ocupa un total de
+$$12 \cdot (2 \cdot n \cdot m) \; \text{ bytes }$$
+Si consideramos $m = n = 128$, la malla nos ocupará unos $579$ KB. Por otro lado, si consideramos que $m$ y $n$ son ambos muy grandes
+$$\frac{n_C}{n_V} = \frac{2nm}{(n+1)(m+1)} \overset{n \to \infty}{\longrightarrow} 2 \; \Longrightarrow n_C = 2n_V$$
 ## Ejercicio 3
 
+Imagina de nuevo una malla como la del ejercicio anterior, supongamos que usamos una representación como tiras de triángulos, de forma que cada fila de triángulos (con $2n$ triángulos) se almacena en una tira, habiendo un total de $m$ tiras.
+
+La tabla de punteros a tiras tiene un entero (el número de tiras) y $m$ punteros, cada puntero suponemos que tiene $8$ bytes de tamaño. De nuevo, asume que las coordenadas son de tipo float ($4$ bytes). Responde a estas cuestiones:
+
+- Indica que cantidad de memoria ocupa esta representación, en estos dos casos:
+	- Como función de $n$ y $m$, en bytes.
+	- Suponiendo $m = n = 128$, en KB.
+- Para $m$ y $n$ grandes (es decir, cuando $1/n$ y $1/m$ son casi nulos), describe que relación hay entre el tamaño en memoria de la malla indexada del problema anterior y el tamaño de la malla almacenada como tiras de triángulos.
+- Si suponemos que la transformación de cada vértice se hace en un tiempo constante igual a la unidad, describe que relación hay entre los tiempos de procesamiento de vértices para esta malla cuando se representa como una malla indexada y como tiras de triángulos.
+### Solución
+
+Sabemos que, en este caso, la malla es una estructura con varias tiras. Cada tira es un array con $2n + 2$ vértices ($2n$ triángulos más los $2$ vértice adicionales para cerrar el primer y último triángulo), el cuál cada uno ocupa $12$ bytes. Por tanto, la malla ocupará un total de
+$$12 \cdot (2n + 2) \cdot m \; \text{ bytes }$$
+
+Adicionalmente, la tabla de tiras almacena el número de tiras y un puntero por cada tira, dicha estructura ocupará un total de 
+$$4 + 8 \cdot m \; \text{ bytes  }$$
+Luego, concluimos que nos harán falta
+$$12 \cdot (2n + 2) \cdot m + 4 + 8 \cdot m \; \text{ bytes }$$
+Si consideramos $m = n = 128$, la estructura en su conjunto nos ocupará unos $388$ KB. Por otro lado, si consideramos que $m$ y $n$ son ambos muy grandes
+$$\frac{Tamaño_{TT}}{Tamaño_{MI}} = \frac{12\cdot (2n +2) \cdot m + 4 + 8\cdot m}{12 \cdot (2 \cdot n \cdot m)} = \frac{3\cdot (2n +2) \cdot m + 1 + 2\cdot m}{6 \cdot (n \cdot m)} \overset{n \to \infty}{\longrightarrow} \frac{1}{2}$$
+Finalmente, estudiamos los tiempos de procesamiento de vértices para ambas estructuras
+$$\frac{Procesamiento_{TT}}{Procesamiento_{MI}} = \frac{Vertices_{TT} \cdot 1}{Vertices_{MI} \cdot 1} = \frac{(2n + 2)m}{(n+1)(m+1)} \overset{n \to \infty}{\longrightarrow} 2$$
 ## Ejercicio 4
 
 Supongamos una malla cerrada, simplemente conexa (topológicamente equivalente a una esfera), cuyas caras son
@@ -465,7 +684,9 @@ Demuestra que el producto vectorial de dos vectores rota igual que lo hacen esos
 $$R_{\theta}(\vec{a} \times \vec{b}) = R_{\theta}(\vec{a}) \times R_{\theta}(\vec{b})$$
 ### Solución
 
-
+Consideramos $\vec{a} = (a_1, a_2, a_3)$ y $\vec{b} = (b_1, b_2, b_3)$ de tal forma
+$$R_\theta(\vec{a}) \times R_\theta(\vec{b}) = \begin{pmatrix} \cos \theta & - \sin \theta & 0 \\ \sin \theta & \cos \theta & 0 \\ 0 & 0 & 1\end{pmatrix} \begin{pmatrix} a_1 \\ a_2 \\ a_3 \end{pmatrix} \times \begin{pmatrix} \cos \theta & - \sin \theta & 0 \\ \sin \theta & \cos \theta & 0 \\ 0 & 0 & 1\end{pmatrix} \begin{pmatrix} b_1 \\ b_2 \\ b_3 \end{pmatrix} = \begin{pmatrix} a_1\cos \theta - a_2\sin \theta \\ a_1 \sin \theta + a_2 \cos \theta \\ a_3 \end{pmatrix} \times \begin{pmatrix} b_1\cos \theta - b_2\sin \theta \\ b_1 \sin \theta + b_2 \cos \theta \\ b_3 \end{pmatrix}$$
+$$R_\theta(\vec{a} \times \vec{b}) = \begin{pmatrix} \cos \theta & - \sin \theta & 0 \\ \sin \theta & \cos \theta & 0 \\ 0 & 0 & 1\end{pmatrix} \begin{pmatrix} a_2 b_3 - a_3 b_2 \\ a_3 b_1 - a_1 b_3\\ a_1 b_2 - a_2 b_1 \end{pmatrix}$$
 ## Ejercicio 15
 
 Escribe una función llamada gancho para dibujar con OpenGL en modo diferido la polilínea de la figura (cada segmento recto tiene longitud unidad, y el extremo inferior está en el origen).
@@ -526,13 +747,35 @@ Escribe el pseudocódigo OpenGL otra función (`gancho_2p`) para dibujar esa mis
 Escribe una solución:
 - Acumulando matrices de rotación, traslación y escalado en la matriz modelview de OpenGL. 
 - En la cual la matriz modelview se calcula directamente sin necesidad de usar funciones trigonometricas (como lo son el arcotangente, el seno, coseno, arcoseno o arcocoseno).
-
 ### Solución
+
+En primer lugar, podemos observar que la altura de la figura estará determinada por la distancia entre $\dot{p}_0$ y $\dot{p}_1$. Además, habrá que rotarla en función del ángulo que determine el vector $\vec{p_0p_1}$ con respecto al eje $\vec{x}$.
+
+```c++
+void DrawHook4(const glm::vec2 p_0, const glm::vec2 p_1)
+{
+	const glm::vec2 v = p_1 - p_0;
+	float angle = glm::acos(glm::dot(glm::vec2{1.0f, 0.0f}, v) / glm::length(v));
+	if (v.y < 0)
+	{
+		angle = -angle;
+	}
+	cauce->resetMM();
+	cauce->compMM(glm::translate(glm::vec3{p_0, 0.0f}));
+	cauce->compMM(glm::rotate(angle, glm::vec3{0.0f, 0.0f, 1.0f}));
+	cauce->compMM(glm::scale(glm::vec3{glm::length(v)/2.0f, glm::length(v)/2.0f, 1.0f}));
+	DrawHook4();
+}
+```
 
 ## Ejercicio 18
 
-
+Usa la función del problema anterior para construir estas dos nuevas figuras, en las cuales hay un número variable de instancias de la figura original, dispuestas en circulo.
 ### Solución
+
+```c++
+
+```
 
 ## Ejercicio 19
 
@@ -545,6 +788,11 @@ Construye los grafos tipo PHIGS equivalentes más sencillos posible (en el senti
 ### Solución
 
 
+
+
+
+
+
 ## Ejercicio 20
 
 Escribe una función llamada `FiguraSimple` que dibuje con OpenGL en modo diferido la figura que aparece aquí (un cuadrado de lado unidad, relleno de color, con la esquina inferior izquierda en el origen, con un triángulo inscrito, relleno del color de fondo).
@@ -553,7 +801,6 @@ Escribe una función llamada `FiguraSimple` que dibuje con OpenGL en modo diferi
 ```c++
 void DrawSimpleFigure()
 {
-	assert(glGetError() == GL_NO_ERROR);
 	VertexArrayObject *square = nullptr;
 	VertexArrayObject *triangle = nullptr;
 	const std::vector<glm::vec2> vertices_square =
@@ -572,9 +819,11 @@ void DrawSimpleFigure()
 	{
 		{0, 1, 2}
 	};
-	square = new VertexArrayObject(1, new AttribBufferObject(cauce->ind_atrib_posiciones, vertices_square));
+	square = new VertexArrayObject(1, 
+							new AttribBufferObject(cauce->ind_atrib_posiciones, vertices_square));
 	square->add(new IndexBufferObject(indices_square));
-	triangle = new VertexArrayObject(1, new AttribBufferObject(cauce->ind_atrib_posiciones, vertices_triangle));
+	triangle = new VertexArrayObject(1, 
+							new AttribBufferObject(cauce->ind_atrib_posiciones, vertices_triangle));
 	triangle->add(new IndexBufferObject(indices_triangle));
 	
 	assert(glGetError() == GL_NO_ERROR);
@@ -586,8 +835,6 @@ void DrawSimpleFigure()
 	
 	cauce->setColor({1.0, 1.0, 1.0});
 	triangle->draw(GL_TRIANGLES);
-	
-	assert(glGetError() == GL_NO_ERROR);
 }
 ```
 
@@ -595,19 +842,292 @@ void DrawSimpleFigure()
 
 Usando exclusivamente llamadas a la función del ejercicio anterior construye otra función llamada `FiguraCompleja` que dibuja la figura de aquí. Para lograrlo puedes usar manipulación de la pila de la matriz modelview (`pushMM` y `popMM`), junto con `glm::translate` y `glm::rotate`:
 
+![](./resources/img135.png)
+
 ### Solución
 
 ```c++
-
+void DrawComplexFigure()
+{
+	cauce->resetMM();
+	cauce->pushMM();
+	cauce->compMM(glm::scale(glm::vec3{2.0f, -1.0f, 1.0f}));
+	DrawSimpleFigure();
+	cauce->popMM();
+	cauce->pushMM();
+	cauce->compMM(glm::scale(glm::vec3{sqrt(2.0), sqrt(2.0), 1.0f}));
+	cauce->compMM(glm::rotate(static_cast<float>(3*M_PI/4.0f), glm::vec3{0.0f, 0.0f, 1.0f}));
+	DrawSimpleFigure();
+	cauce->popMM();
+	cauce->pushMM();
+	cauce->compMM(glm::translate(glm::vec3{-1.5f, -0.5f, 0.0f}));
+	DrawSimpleFigure();
+	cauce->popMM();
+}
 ```
 
 ## Ejercicio 22
 
+Escribe el código OpenGL de una función (llamada Tronco) que dibuje la figura que aparece a aquí. El código dibujará el polígono relleno de color azul claro, y las aristas que aparecen de color azul oscuro (ten en cuenta que no todas las aristas del polígono relleno aparecen).
+
+![](./resources/img134.png)
+### Solución
+
+```c++
+void DrawTrunk()
+{
+	const std::vector<glm::vec2> vertices =
+	{
+		{0.0, 0.0}, {1.0, 0.0}, {1.0, 1.0}, {2.0, 2.0}, 
+		{1.5, 2.5}, {0.5, 1.5}, {0.0, 3.0}, {-0.5, 3}, {0.0, 1.5}
+	};
+	const std::vector<glm::uvec3> indices =
+	{
+		{0, 1, 2}, {2, 3, 4}, {2, 4, 5}, {2, 5, 8}, {5, 6, 8}, {6, 7, 8}, {0, 2, 8}
+	};
+	const std::vector<glm::uvec2> edges =
+	{
+		{1, 2}, {2, 3}, {4, 5}, {5, 6}, {7, 8}, {8, 0}
+	};
+	if (trunk == nullptr)
+	{
+		trunk = new VertexArrayObject(1, 
+					new AttribBufferObject(cauce->ind_atrib_posiciones, vertices));
+		trunk->add(new IndexBufferObject(indices));
+	}
+	if (trunk_edges == nullptr)
+	{
+		trunk_edges = new VertexArrayObject(1, 
+						new AttribBufferObject(cauce->ind_atrib_posiciones, vertices));
+		trunk_edges->add(new IndexBufferObject(GL_UNSIGNED_INT, 2*edges.size(), edges.data()));
+	}
+	cauce->resetMM();
+	cauce->compMM(glm::translate(glm::vec3{-0.5f, -0.5f, 0.0f}));
+	cauce->compMM(glm::scale(glm::vec3{0.25f, 0.25f, 1.0f}));
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	cauce->usePlainColor(true);
+	cauce->setColor({0.0, 0.0, 1.0});
+	trunk->draw(GL_TRIANGLES);
+	cauce->setColor({0.0, 0.0, 0.0});
+	trunk_edges->draw(GL_LINES);
+}
+```
 ## Ejercicio 23
 
+Escribe una función `Arbol` la cual, mediante múltiples llamadas a `Tronco` del ejercicio anterior, dibuje el árbol que aparece en la figura de abajo. Diseña el código usando recursividad, de forma que el número de niveles sea un parámetro modificable en dicho código
+
+![](./resources/img136.png)
+### Solución
+
+```c++
+void DrawTree(unsigned int depth)
+{
+	assert(glGetError() == GL_NO_ERROR);
+	assert(0 < depth);
+	DrawTrunk();
+	if (depth > 1)
+	{
+		cauce->pushMM();
+		cauce->compMM(glm::translate(glm::vec3{-0.5f, 3.0f, 0.0f}));
+		cauce->compMM(glm::scale(glm::vec3{0.5f, 0.5f, 1.0f}));
+		DrawTree(depth - 1);
+		cauce->popMM();
+		cauce->pushMM();
+		cauce->compMM(glm::translate(glm::vec3{1.5f, 2.5f, 0.0f}));
+		cauce->compMM(glm::rotate(glm::radians(-45.0f), glm::vec3{0.0f, 0.0f, 1.0f}));
+		cauce->compMM(glm::scale(glm::vec3{0.707f, 0.707f, 1.0f}));
+		DrawTree(depth - 1);
+		cauce->popMM();
+	}
+}
+```
 ## Ejercicio 24
 
+Supón que dispones de dos funciones para dibujar dos mallas u objetos simples: `Semiesfera` y `Cilindro`. La semiesfera (en coordenadas maestras) tiene radio unidad, centro en el origen y el eje vertical en el eje $Y$. Igualmente el cilindro tiene radio y altura unidad, el centro de la base está en el origen, y su eje es el eje $Y$.
+
+![](./resources/img137.png)
+
+Con estas dos primitivas queremos escribir el código que visualiza la figura `Android`, usando la plantilla de código de prácticas. Para ello:
+- Diseña el grafo de escena (tipo PHIGS) correspondiente, ten en cuenta que hay objetos compuestos que se pueden instanciar más de una vez (cada brazo o pierna se puede construir con un objeto compuesto de dos semiesferas en los extremos de un cilindro).
+- Escribe el código OpenGL para visualizarlo, usando una clase llamada `Android`, derivada de `NodoGrafoEscena`.
+### Solución
+
+```c++
+ExtremidadAndroid::ExtremidadAndroid()
+{
+	NodoGrafoEscena *semiesfera_superior = new NodoGrafoEscena();
+	semiesfera_superior->agregar(glm::translate(glm::vec3(0.0, 3.0, 0.0)));
+	semiesfera_superior->agregar(new SemiSphere(30, 30));
+	
+	NodoGrafoEscena *tronco = new NodoGrafoEscena();
+	tronco->agregar(glm::scale(glm::vec3(1.0, 3.0, 1.0)));
+	tronco->agregar(new Cilinder(30, 30));
+	
+	NodoGrafoEscena *semiesfera_inferior = new NodoGrafoEscena();
+	semiesfera_inferior->agregar(glm::rotate(glm::pi<float>(), glm::vec3(0.0, 0.0, 1.0)));
+	semiesfera_inferior->agregar(new SemiSphere(30, 30));
+	
+	agregar(semiesfera_superior);
+	agregar(tronco);
+	agregar(semiesfera_inferior);
+	ponerColor({0.0f, 1.0f, 0.0f});
+}
+
+CabezaAndroid::CabezaAndroid()
+{
+	NodoGrafoEscena *ojo_izquierdo = new NodoGrafoEscena();
+	ojo_izquierdo->agregar(glm::translate(glm::vec3(-0.35, 0.5, 0.75)));
+	ojo_izquierdo->agregar(glm::scale(glm::vec3(0.1, 0.1, 0.1)));
+	ojo_izquierdo->agregar(new Sphere(30, 30));
+	ojo_izquierdo->ponerColor({0.0f, 0.0f, 0.0f});
+	
+	NodoGrafoEscena *ojo_derecho = new NodoGrafoEscena();
+	ojo_derecho->agregar(glm::translate(glm::vec3(0.35, 0.5, 0.75)));
+	ojo_derecho->agregar(glm::scale(glm::vec3(0.1, 0.1, 0.1)));
+	ojo_derecho->agregar(new Sphere(30, 30));
+	ojo_derecho->ponerColor({0.0f, 0.0f, 0.0f});
+	
+	NodoGrafoEscena *cabeza = new NodoGrafoEscena();
+	cabeza->agregar(new SemiSphere(30, 30));
+	cabeza->ponerColor({0.0f, 1.0f, 0.0f});
+	
+	NodoGrafoEscena *antena_derecha = new NodoGrafoEscena();
+	antena_derecha->agregar(glm::translate(glm::vec3(0.35, 0.95, 0.0)));
+	antena_derecha->agregar(glm::rotate(glm::pi<float>()/-6.0f, glm::vec3(0.0, 0.0, 1.0)));
+	antena_derecha->agregar(glm::scale(glm::vec3(0.05, 0.5, 0.05)));
+	antena_derecha->agregar(new Cilinder(30, 30));
+	antena_derecha->ponerColor({0.0f, 1.0f, 0.0f});
+	
+	NodoGrafoEscena *antena_izquierda = new NodoGrafoEscena();
+	antena_izquierda->agregar(glm::translate(glm::vec3(-0.35, 0.95, 0.0)));
+	antena_izquierda->agregar(glm::rotate(glm::pi<float>()/6.0f, glm::vec3(0.0, 0.0, 1.0)));
+	antena_izquierda->agregar(glm::scale(glm::vec3(0.05, 0.5, 0.05)));
+	antena_izquierda->agregar(new Cilinder(30, 30));
+	antena_izquierda->ponerColor({0.0f, 1.0f, 0.0f});
+	
+	agregar(ojo_izquierdo);
+	agregar(ojo_derecho);
+	agregar(cabeza);
+	agregar(antena_derecha);
+	agregar(antena_izquierda);
+}
+
+Android::Android()
+{
+	NodoGrafoEscena *brazo_izquierdo = new NodoGrafoEscena();
+	brazo_izquierdo->agregar(glm::translate(glm::vec3(-1.45, 0.5, 0.0)));
+	brazo_izquierdo->agregar(glm::scale(glm::vec3(0.35, 0.35, 0.35)));
+	brazo_izquierdo->agregar(new ExtremidadAndroid());
+	
+	NodoGrafoEscena *brazo_derecho = new NodoGrafoEscena();
+	brazo_derecho->agregar(glm::translate(glm::vec3(1.45, 0.5, 0.0)));
+	brazo_derecho->agregar(glm::scale(glm::vec3(0.35, 0.35, 0.35)));
+	brazo_derecho->agregar(new ExtremidadAndroid());
+	
+	NodoGrafoEscena *tronco = new NodoGrafoEscena();
+	tronco->agregar(glm::scale(glm::vec3(1.0, 2.0, 1.0)));
+	tronco->ponerColor({0.0, 1.0, 0.0});
+	tronco->agregar(new Cilinder(30, 30));
+	
+	NodoGrafoEscena *cabeza = new NodoGrafoEscena();
+	cabeza->agregar(glm::translate(glm::vec3(0.0, 2.1, 0.0)));
+	cabeza->ponerColor({0.0, 1.0, 0.0});
+	cabeza->agregar(new CabezaAndroid());
+	
+	NodoGrafoEscena *pierna_izquierda = new NodoGrafoEscena();
+	pierna_izquierda->agregar(glm::translate(glm::vec3(-0.5, -1.0, 0.0)));
+	pierna_izquierda->agregar(glm::scale(glm::vec3(0.35, 0.35, 0.35)));
+	pierna_izquierda->agregar(new ExtremidadAndroid());
+	
+	NodoGrafoEscena *pierna_derecha = new NodoGrafoEscena();
+	pierna_derecha->agregar(glm::translate(glm::vec3(0.5, -1.0, 0.0)));
+	pierna_derecha->agregar(glm::scale(glm::vec3(0.35, 0.35, 0.35)));
+	pierna_derecha->agregar(new ExtremidadAndroid());
+	  
+	agregar(brazo_izquierdo);
+	agregar(brazo_derecho);
+	agregar(tronco);
+	agregar(cabeza);
+	agregar(pierna_izquierda);
+	agregar(pierna_derecha);
+}
+```
 ## Ejercicio 25
+
+Escribe una segunda versión del grafo de escena del ejercicio anterior, de forma que las transformaciones estén parametrizadas por dos valores reales ($\alpha$ y $\beta$) que expresan el ángulo de rotación del brazo izquierdo y derecho (respectivamente), en torno al eje que pasa por los centros de las dos semiesferas superiores de los brazos.
+
+Asimismo, habrá otro parámetro ($\gamma$) que es el ángulo de rotación de la cabeza (completa: con los ojos y antenas) entorno al eje vertical que pasa por su centro (cuando estos ángulo valen 0, el androide está en reposo y tiene exactamente la forma de la figura del ejercicio anterior).
+
+Escribe el código de una nueva clase (`AndroidParam`, derivada de `NodoGrafoEscena`) para visualizar el androide parametrizado de esta forma.
+### Solución
+
+```c++
+Android::Android(const float alpha, const float beta, const float gamma)
+{
+	NodoGrafoEscena *brazo_izquierdo = new NodoGrafoEscena();
+	brazo_izquierdo->agregar(glm::translate(glm::vec3(-1.45, 1.0, 0.0)));
+	unsigned int id_brazo_izq = brazo_izquierdo->agregar(
+		glm::rotate(alpha, glm::vec3(1.0, 0.0, 0.0))
+	);
+	brazo_izquierdo->agregar(glm::scale(glm::vec3(-0.35, -0.35, 0.35)));
+	brazo_izquierdo->agregar(new ExtremidadAndroid());
+	
+	rotacion_brazo_izquierdo = brazo_izquierdo->leerPtrMatriz(id_brazo_izq);
+	
+	NodoGrafoEscena *brazo_derecho = new NodoGrafoEscena();
+	brazo_derecho->agregar(glm::translate(glm::vec3(1.45, 1.0, 0.0)));
+	unsigned int id_brazo_drch = brazo_derecho->agregar(
+		glm::rotate(beta, glm::vec3(1.0, 0.0, 0.0))
+	);
+	brazo_derecho->agregar(glm::scale(glm::vec3(-0.35, -0.35, 0.35)));
+	brazo_derecho->agregar(new ExtremidadAndroid());
+	
+	rotacion_brazo_derecho = brazo_derecho->leerPtrMatriz(id_brazo_drch);
+	. . .
+	
+	NodoGrafoEscena *cabeza = new NodoGrafoEscena();
+	cabeza->agregar(glm::translate(glm::vec3(0.0, 2.1, 0.0)));
+	unsigned id_cabeza = cabeza->agregar(glm::rotate(gamma, glm::vec3(0.0, 1.0, 0.0)));
+	cabeza->ponerColor({0.0, 1.0, 0.0});
+	cabeza->agregar(new CabezaAndroid());
+	
+	rotacion_cabeza = cabeza->leerPtrMatriz(id_cabeza);
+	. . .
+}
+
+unsigned Android::leerNumParametros() const
+{
+	return 3;
+}
+
+void Android::actualizarEstadoParametro(const unsigned iParam, const float t_sec)
+{
+	assert(iParam < leerNumParametros());
+	
+	float min = -1.0f, max = 1.0f;
+	float a = (min + max)/2, b = (max - min)/2;
+	float n = 0.25;
+	
+	switch (iParam)
+	{
+	case 0:
+	*rotacion_brazo_izquierdo = glm::rotate(
+		static_cast<float>(a + b*sin(2*M_PI*n*t_sec)), glm::vec3(1.0, 0.0, 0.0)
+	);
+	break;
+	case 1:
+	*rotacion_brazo_derecho = glm::rotate(
+		static_cast<float>(a + b*sin(2*M_PI*n*t_sec)), glm::vec3(1.0, 0.0, 0.0)
+	);
+	break;
+	case 2:
+	*rotacion_cabeza = glm::rotate(
+		static_cast<float>(a + b*sin(2*M_PI*n*t_sec)), glm::vec3(0.0, 1.0, 0.0)
+	);
+	break;
+	}
+}
+```
 
 # Tema 3
 
@@ -640,20 +1160,25 @@ Repite el problema anterior, pero ahora para esta vista:
 ![](./resources/img101.png)
 ### Solución
 
-
+De nuevo tenemos que nuestro punto de atención será
+$$\dot{a} = (0, 0.5, 0)$$
+Por otro lado,  el vector normal al plano de visión debe encontrarse en sentido contrario al que le otorgamos en el ejercicio anterior, de forma que el eje $X$ apareza hacia la derecha y el eje $Z$ hacia la izquierda. Así
+$$\vec{n} = (\sqrt{3}, -\sqrt{3}, \sqrt{3})$$
+Finalmente, para el _view-up vector_, que debe ser perpendicular al plano que forman los ejes $X$ y $Z$ (observamos que este plano está rotado $\pi/4$ en sentido antihorario) podemos tomar
+$$u = (-\frac{\sqrt{2}}{2}, \frac{\sqrt{2}}{2}, 0)$$
 ## Ejercicio 3
 
 Escribe el código para calcular los vectores de coordenadas $x_{ec}$, $y_{ec}$, $z_{ec}$ y $o_{ec}$ que definen el marco de vista a partir de los vectores de coordenadas $a$, $u$ y $n$ (todos estos vectores de coordenadas son de tipo `vec3`).
 ### Solución
 
 ```c++
-glm::mat4 lookAT(const glm::vec3 & a, const glm::vec3 & u, const glm::vec3 & n)
+mat4 lookAT(const vec3 & a, const vec3 & u, const vec3 & n)
 {
-	glm::vec3 oec = a - n;
-	glm::vec3 zec = n/glm::normalize(n);
-	glm::vec3 xec = glm::cross(u, n)/glm::normalize(glm::cross(u, n));
-	glm::vec3 yec = glm::cross(zec, xec);
-	return glm::mat4{xec, yec, zec, -oec};
+	vec3 oec = a - n;
+	vec3 zec = n/normalize(n);
+	vec3 xec = cross(u, n)/normalize(cross(u, n));
+	vec3 yec = cross(zec, xec);
+	return mat4{xec, yec, zec, -oec};
 }
 ```
 
@@ -701,13 +1226,37 @@ Queremos construir la matriz de proyeccion perspectiva $Q$ de forma que se cumpl
 Con estos requerimientos, indica como calcular los valores $l$, $r$, $t$, $b$, $n$ y $f$ (para obtener la matriz $Q$ de proyección), en función de $s$ y $(c_x, c_y, c_z)$.
 ### Solución
 
-
+Con los requerimientos que nos imponen deducimos que se trata de una proyección ortográfica. Además, considerando que
+$$\|o_{ec} - c\| = s + 2$$
+ya que buscamos que el valor de $n$ sea el mayor posible y el de $f$ el menor posible, esto se verifica cuando 
+$$- n = c_z + \frac{s}{2} \hspace{2cm} -f = c_z - \frac{s}{2}$$
+Por otro lado
+$$l = c_x - \frac{s}{2} \hspace{1cm} r = c_x + \frac{s}{2} \hspace{1cm} t = c_y + \frac{s}{2} \hspace{1cm} b = c_y - \frac{s}{2}$$
 ## Ejercicio 6
 
+Repite el ejercicio anterior, con exactamente los mismos requerimientos y suposiciones, excepto que ahora la escena, en lugar de estar contenida en un cubo de lado $s$ unidades, está contenida en una esfera de radio $s$ unidades (con centro igualmente en $c$).
+### Solución
+
+Análogamente buscamos inscribir la esfera en un cubo de dimensiones
+$$-n = c_z + s \hspace{1cm} -f = c_z - s \hspace{1cm} l = c_x - s \hspace{1cm} r = c_x + s \hspace{1cm} t = c_y + s \hspace{1cm} b = c_y - s$$
 ## Ejercicio 7
+
+Repite el problema anterior, con exactamente los mismos requerimientos y suposiciones, excepto que ahora, en lugar de suponer que el viewport es cuadrado, sabemos que tiene $w$ columnas de pixels y $h$ filas de pixels, y no podemos suponer que $w = h$.
+### Solución
+
+La solución es muy similar a la del ejercicio anterior pero ahora debemos tener en cuenta el _aspect-ratio_ del viewport, para ello tomamos
+$$-n = c_z + s \hspace{1cm} -f = c_z - s \hspace{1cm} l = c_x - \frac{w}{h}s \hspace{1cm} r = c_x + \frac{w}{h}s \hspace{1cm} t = c_y + \frac{h}{w}s \hspace{1cm} b = c_y - \frac{h}{w}s$$
 
 ## Ejercicio 8
 
+Repite el ejercicio 5, con exactamente los mismos requerimientos y suposiciones, excepto que ahora se nos da un ángulo $\beta$ en grados que debe ser la apertura de campo vertical de la proyección perspectiva. Para ello, ahora tenemos libertad para situar al observador en la línea paralela al eje $Z$ que pasa por $c$, de forma que la apertura de campo vertical sea exactamente $\beta$.
+
+Indica como calcular la coordenada $Z$ que debemos usar ahora para $o_{ec}$ (la $X$ y la $Y$ son las mismas que antes), de forma que se cumpla lo dicho, también indica como debemos de calcular ahora los valores de $l$, $r$, $t$, $b$, $n$ y $f$ (todo ello en función de $\beta$, $s$ y $c = (c_x , c_y , c_z )$).
+### Solución
+
+Sabemos que la apertura vertical de $\beta$ está contenido entre $0$ y $180º$, de modo que como tenemos que $o_{ec}$ está en la recta paralela al eje $Z$ que pasa por $c$ tenemos que
+$$\tan\left(\frac{\beta}{2}\right) = \frac{\frac{s}{\sqrt{2}}}{(c_z - c_z')}$$
+El resto de los parámetros es igual, pero los factores que dependan de $c_z$ hay que expresarlos en fucnión de $\beta$.
 ## Ejercicio 9
 
 Suponemos que visualizamos una esfera de radio unidad centrada en el origen. Se ilumina con una fuente de luz puntual situada en el punto $p = (0, 2, 0)$. El observador está situado en $o = (2, 0, 0)$. En estas condiciones:
@@ -717,9 +1266,10 @@ Suponemos que visualizamos una esfera de radio unidad centrada en el origen. Se 
 
 Sabemos que en un material puramente difuso, la densidad de fotones que inciden en el entorno de $p$ es proporcional al valor de $\cos(\alpha)$ donde $\alpha$ es el ángulo que forman los vectores $n_p$ y $l_i$. Por tanto, el brillo será máximo cuando $\cos(\alpha) = 1$ lo que equivale a que $n_p \cdot l_i = 0$, esto es $n_p = l_i$, que ocurre exactamente en el punto $p' = (0, 1, 0)$, el cual no es visible para el observador.
 
-Por otro lado, si consideramos un material puramente pseudo-especular
-
-
+Por otro lado, si consideramos un material puramente pseudo-especular el brillo será máximo cuando el vector $r_i$ apunte hacia el observador ($r_i = v$), esto es, cuando el ángulo $\beta = 0$ y $\cos \beta = 1$. Esto ocurre exactamente en el punto $p' = (\frac{\sqrt{2}}{2}, \frac{\sqrt{2}}{2}, 0)$, luego
+$$\vec{l}_i = p - p' = (0, 2, 0) - \left(\frac{\sqrt{2}}{2}, \frac{\sqrt{2}}{2}, 0\right) = \left(-\frac{\sqrt{2}}{2}, 2 - \frac{\sqrt{2}}{2}, 0\right)$$
+$$\vec{v} = o - p' = (2, 0, 0) - \left(\frac{\sqrt{2}}{2}, \frac{\sqrt{2}}{2}, 0\right) = \left(2 - \frac{\sqrt{2}}{2}, -\frac{\sqrt{2}}{2}, 0\right)$$
+y dicho punto si es visble para el observador.
 ## Ejercicio 10
 
 Supongamos que se desea crear una malla indexada para un cubo, de forma que deseamos aplicar un textura que incluya las caras de un dado. Para ello disponemos de una imagen de textura que tiene una relación de aspecto $4:3$. La imagen aparece aquí:
@@ -834,11 +1384,20 @@ Supongamos que queremos visualizar una secuencia de frames, en los cuales la cá
 
 La función acepta como parámetro un valor real $t$, que es el tiempo en segundos transcurrido desde el inicio de la animación. Suponemos que la animación dura $s$ segundos en total.
 
-En ese tiempo el observador de cámara se desplaza con un movimiento uniforme desde un punto de coordenadas de mundo $O_0$ (para $t = 0$) hasta un punto destino $O_1$ (para $t = 1$). Además el punto de atención de la cámara también se desplaza desde $a_0$ hasta $a_1$ . Durante toda la animación, el vector $VUP$ es $(0, 1, 0)$. Escribe el pseudo-código de la citada función.
+En ese tiempo el observador de cámara se desplaza con un movimiento uniforme desde un punto de coordenadas de mundo $O_0$ (para $t = 0$) hasta un punto destino $O_1$ (para $t = 1$). Además el punto de atención de la cámara también se desplaza desde $a_0$ hasta $a_1$. Durante toda la animación, el vector $VUP$ es $(0, 1, 0)$. Escribe el pseudo-código de la citada función.
 ### Solución
 
 ```c++
+glm::mat4 shiftCamera(const float t, const float s)
+{
+	assert(t < s);
+	const vec3 ot = (1 - t/s) * initial_o + t/s * final_o;
+	const vec3 at = (1 - t/s) * initial_a + t/s * final_a;
+	
+	const new_n = ot - at;
 
+	return lookAt(ot, at, {0.0, 1.0, 0.0});
+}
 ```
 
 ## Ejercicio 2
@@ -854,27 +1413,72 @@ Ten en cuenta que habrá intersección si y solo si se cumplen cada una de estas
 1. El rayo interseca con el plano que contiene al triángulo, es decir, existe $t > 0$ tal que el punto $p_t = o + td$ está en dicho plano. Equivale a decir que el vector $p_t − v_0$ es perpendicular a la normal al plano.
 2. El punto $p_t$ citado arriba está dentro del triángulo. Es decir, hay dos valores reales no negativos $a$ y $b$ (con $0 \leq a + b \leq 1$) tales que el vector $p_t − v_0$ es igual a $a(v_1 − v_0) + b(v_2 − v_0$).
 
- > Alos tres valores $a$, $b$ y $c = 1 − b − a$ se les llama coordenadas baricéntricas de $p_t$ en el triángulo, se usan en Ray-Tracing.
+ > A los tres valores $a$, $b$ y $c = 1 − b − a$ se les llama coordenadas baricéntricas de $p_t$ en el triángulo, se usan en Ray-Tracing.
 
 ### Solución
 
-```c++
+En primer lugar, observamos que **no** habrá intersección con el plano que contiene al triángulo si el vector de dirección $\vec{d}$ es ortogonal al vector normal al plano $\vec{n}_\Pi$, esto es, si
+$$\vec{d} \cdot \vec{n}_\Pi = 0$$
+Por otro lado, sí que habrá intersección con dicho plano si
+$$p_t = p + t \vec{d} \in \Pi = v_0 + L \{ (v_1 - v_0), (v_2 - v_0)\}$$
+Buscamos calcular las coordenadas de $p_t$ con respecto al plano $\Pi$, es decir, buscamos $a, \, b \in \mathbb{R}$ tal que 
+$$p_t - v_0 = a(v_1 - v_0) + b(v_2 - v_0)$$
+Es decir
+$$\begin{align} p_t^1 - v_0^1 = & a(v_1^1 - v_0^1) + b(v_2^1 - v_0^1) \\ p_t^2 - v_0^2 = & a(v_1^2 - v_0^2) + b(v_2^2 - v_0^2) \end{align}$$
+Luego
+$$a = \frac{p_t¹ - v_0^1 - b(v_2^1 - v_0^1)}{v_1^1 - v_0^1} \; \Longrightarrow \; b = \frac{(p_t^2 - v_0^2)(v_1^1 - v_0^1) - (v_1^2 - v_0^2)(p_t^1 - v_0^1)}{(v_2^2 - v_0^2)(v_1^1 - v_0^1) - (v_2^1 - v_0^1)(v_1^1 - v_0^1)}$$
 
+Además, para que $p_t$ pertenezca al triángulo tendremos que poner la condición adicional de que $0 \leq a + b \leq 1$. Por tanto, $t > 0$ debe verificar
+$$(p_t - v_0) \cdot \vec{n}_\Pi = 0 \; \iff \; (o + t\vec{d} - v_0) \cdot \vec{n}_\Pi = 0 \; \iff \; (o^1 + t d^1 - v_0^1, o^2 + t d^2 - v_0^2, o^3 + t d^3 - v_0^3) \cdot (n_\pi^1, n_\pi^2, n_\pi^3) = 0 \; \iff$$
+$$\iff \; (o^1 + t d^1 - v_0^1)n_\pi^1 + (o^2 + td^2 - v_0^2)n_\pi^2 + (o^3 + td^3 - v_0^3)n_\pi^3 = 0 \; \iff \; t = \frac{(v_0^1 - o^1)n_\pi^1 + (v_0^2 - o^2)n_\pi^2 + (v_0^3 - o^3)n_\pi^3}{n_\pi^1 d^1 + n_\pi^2d^2 + n_\pi^3d^3}$$
+
+
+```c++
+bool intersect(const vec3 o, const vec3 d, const vec3 v0, const vec3 v1, const vec3 v2)
+{
+	const vec3 u = v1 - v0;
+	const vec3 v = v2 - v0;
+	const vec3 n = normalize(cross(u, v));
+	if (dot(d, n) == 0)
+		return false;
+	
+	double t = dot(v0 - o, n)/dot(d, n);
+	if (t < 0)
+		return false;
+	
+	vec3 pt = o + t*d;
+	double b = . . .
+	double a = . . .
+	if (a < 0 or b < 0 or a + b < 0 or a + b > 1)
+		return false;
+	
+	return true;
+}
 ```
 
 ## Ejercicio 3
 
 Para implementar la selección usando intersecciones es necesario calcular el rayo que tiene como origen el observador y pasa por centro del pixel donde se ha hecho click. Escribe el pseudo-código del algoritmo que calcula el rayo a partir de las coordenadas del pixel donde se ha hecho click:
-- Tenemos una vista perspectiva, y conocemos los 6 valores $l$, $r$, $t$, $b$, $n$, $f$ usados para construir la matriz de proyección.
-- También conocemos el marco de coordenadas de vista, es decir, las tuplas $x_{ec}$ , $y_{ec}$ y $o_{ec}$ con los versores y la tupla $\dot{o}_{ec}$ con el punto origen (todos en coordenadas del mundo).
+- Tenemos una vista perspectiva, y conocemos los $6$ valores $l$, $r$, $t$, $b$, $n$, $f$ usados para construir la matriz de proyección.
+- También conocemos el marco de coordenadas de vista, es decir, las tuplas $x_{ec}$ , $y_{ec}$ y $z_{ec}$ con los versores y la tupla $\dot{o}_{ec}$ con el punto origen (todos en coordenadas del mundo).
 - El viewport tiene $w$ columnas y $f$ filas de pixels. Se ha hecho click en el pixel de coordenadas enteras $x_p$ e $y_p$.
 
 El algoritmo debe producir como salida las tuplas $o$ y $d$ (normalizado) que definen el rayo.
-
 ### Solución
 
-```c++
+En primer lugar, calcularemos el centro del píxel en el que se ha hecho click, cuyas coordenadas son $(x_p, y_p)$. Ya que el viewport tiene $w$ columnas y $f$ filas cada pixel ocupa 
+$$\Delta_x = \frac{r - l}{w} \hspace{1cm} \Delta_y = \frac{t - b}{f}$$
 
+Por tanto las coordenadas del centro del pixel son
+$$p_x = l + x_p \cdot \frac{\Delta_x}{2} \hspace{1cm} p_y = b + y_p \cdot \frac{\Delta_y}{2} \hspace{1cm} p_z = -n$$
+
+```c++
+pair<vec3, vec3> rayCasting(vec3 o, vector<vec3> axis, vector<float> projection_parameters, int x_p, int y_p)
+{
+	const vec3 pixel_center = {l + x_p * delta_x/2, b + y_p * delta_y/2};
+	const vec3 d = pixel_center - o;
+	return {o, normalize(d)};
+}
 ```
 
 # Tema 5
@@ -888,9 +1492,29 @@ Además sabemos que un disco de radio $r$ tiene como centro el punto de coordena
 Con estos datos de entrada, diseña un algoritmo para calcular si hay intersección entre el rayo y el disco.
 
 Ten en cuenta que habrá intersección si y solo si se cumplen cada una de estas dos condiciones:
-1. El rayo interseca con el plano que contiene al triángulo, es decir, existe $t > 0$ tal que el punto $p_t = o + td$ está en dicho plano. Equivale a decir que el vector $p_t − v_0$ es perpendicular a la normal al plano $n$.
+1. El rayo interseca con el plano que contiene al disco, es decir, existe $t > 0$ tal que el punto $p_t = o + td$ está en dicho plano. Equivale a decir que el vector $p_t − c$ es perpendicular a la normal al plano $n$.
 2. El punto $p_t$ citado arriba está dentro del disco, es decir, su distancia a $c$ es inferior al radio.
+### Solución
 
+El rayo interseca el plano que contiene al disco si y sólo si existe $t > 0$ tal que
+$$\begin{align} \langle p_t - c, n \rangle = & \langle o + td - c, n \rangle = \begin{pmatrix} o_x + td_x - c_x & o_y + td_y - c_y & o_z + td_z - c_z\end{pmatrix} \cdot \begin{pmatrix} n_x \\ n_y \\ n_z \end{pmatrix} = \\ = & (o_x + td_x - c_x)\cdot n_x + (o_y + td_y - c_y)\cdot n_y + (o_z + td_z - c_z)\cdot n_z = 0\end{align}$$
+Por tanto
+$$t = \frac{(c_x - o_x) \cdot n_x + (c_y - o_y) \cdot n_y + (c_z - o_z) \cdot n_z}{d_x \cdot n_x + d_y \cdot n_y + d_z \cdot n_z} = \frac{\langle c - o, n \rangle}{\langle d, n \rangle}$$
+Además, el punto $p_t$ debe estar dentro del disco, por tanto $\|p_t - c\| \leq r$.
+
+```c++
+bool intersectDisc(const vec3 o, const vec3 d, const vec3 c, const float r)
+{
+	const float t = dot(c - o, n)/dot(d, n);
+	if (t < 0)
+	{
+		return false; // La intersección está detras del origen del rayo
+	}
+	const vec3 p_t = o + t*d;
+	// Si el punto de intersección se encuentra dentro del disco hay intersección con él
+	return length(p_t - c) <= r ? true : false;
+}
+```
 ## Ejercicio 2
 
 Diseña un algoritmo para calcular la primera intersección entre un rayo (con oriden en $o$ y vector $d$, normalizado) y una esfera de radio unidad y centro en el origen, si hay alguna.
@@ -899,11 +1523,117 @@ Ten en cuenta que un punto cualquiera $p$ está en esfera si y solo sí el módu
 $$F(p) = p \cdot p − 1$$
 
 Describe como podría usarse ese mismo algoritmo para calcular la intersección con una esfera con centro y radio arbitrarios (este problema puede reducirse al anterior si el rayo se traslada a un espacio de coordenadas donde la esfera tiene centro en el origen y radio unidad).
+### Solución
+
+Procedemos mediante un razonamiento análogo al utilizado en el ejercicio anterior, en este caso el rayo interseca la esfera si y sólo si existe $t > 0$ tal que
+$$\|p_t\| = 1 \iff \|p_t\|^2 = \langle p_t, p_t \rangle = 1 \iff \langle o + td, o + td \rangle = \begin{pmatrix} o_x + td_x & o_y + td_y & o_z + td_z\end{pmatrix} \cdot \begin{pmatrix} o_x + td_x \\ o_y + td_y \\ o_z + td_z\end{pmatrix} = 1$$
+Desarrollamos el producto escalar
+$$(o_x + td_x)^2 + (o_y + td_y)^2 + (o_z + td_z)^2 = 1 \; \iff \; (o_x^2 + t^2 d_x^2 + 2t o_x d_x) + (o_y^2 + t^2 d_y^2 + 2t o_y d_y) + (o_z^2 + t^2 d_z^2 + 2t o_z d_z) = 1$$
+Agrupamos los términos en función de $t$
+$$(d_x^2 + d_y^2 + d_z^2)t^2 + 2(o_x d_x + o_y d_y + o_z d_z) t + (o_x^2 + o_y^2 + o_z^2) = 1 \; \iff \; \|d\|^2t^2 + 2\langle o, d \rangle + \|o\|^2 - 1 = 0$$
+Despejando $t$ llegamos a que
+$$t = \frac{-\langle o, d \rangle \pm \sqrt{\langle o, d \rangle^2 - 4\|d\|^2 (\|o\|^2 - 1)}}{2\|d\|^2}$$
+Generalizando los cálculos llegamos a
+
+```c++
+bool intersectSphere(const vec3 o, const vec3 d, const vec3 c, const float r, vec3 & p_t)
+{
+	const float delta = pow(dot(o - c, d), 2) - 4*pow(length(d), 2)*(pow(length(o - c), 2) - r^2);
+	if (delta < 0)
+	{
+		return false; // No hay intersección en los reales
+	}
+	const float t_1 = (-dot(o - c, d) + sqrt(delta))/(2*pow(length(d), 2));
+	const float t_2 = (-dot(o - c, d) - sqrt(delta))/(2*pow(length(d), 2));
+	if (t_1 > 0)
+	{
+		p_t = o + t_1*d;
+	}
+	else if (t_2 > 0)
+	{
+		p_t = o + t_2*d;
+	}
+	else
+	{
+		return false;
+	}
+	return true;
+}
+```
 
 ## Ejercicio 3
 
-Describe como podemos definir el campo escalar cuyos ceros son los puntos en un cilindro con altura unidad y radio unidad (sin considerar los discos que forman la base ni la tapa).
-
-Usando esa definición diseña el algoritmo para calcular la intersección rayo-cilindro.
+Describe como podemos definir el campo escalar cuyos ceros son los puntos en un cilindro con altura unidad y radio unidad (sin considerar los discos que forman la base ni la tapa). Usando esa definición diseña el algoritmo para calcular la intersección rayo-cilindro.
 
 Describe asimismo el campo escalar y el algoritmo correspondientes a un cono de altura unidad y radio de la base unidad (sin considerar el disco de la base).
+### Solución
+
+En primer lugar, podemos expresar el cilindro con altura y radio unidad mediante el siguiente conjunto
+$$\{ (x, y, z) \in \mathbb{R}^2 \colon x^2 + z^2 = 1, \; 0 \leq y \leq 1 \}$$
+Por tanto, habrá intersección con dicho cilindro si existe $t > 0$ tal que
+$$ (o_x + td_x)^2 + (o_z + td_z)^2 = 1 \; \iff \; (d_x^2 + d_z^2)t^2 + (o_xd_x + o_zd_z)t + (o_x^2 + o_z)^2 = 1$$
+Despejando $t$ llegamos a que
+$$t = \frac{- \langle o.xz, d.xz \rangle \pm \sqrt{\langle o.xz, d.xz \rangle^2 - 4\|d.xz\|^2(\|o.xz\|^2 - 1)}}{2\|d.xz\|^2}$$
+
+```c++
+bool intersectCilinder(const vec3 o, const vec3 d, vec3 & p_t)
+{
+	const float delta = pow(dot(o.xz, d.xz), 2) - 4*dot(d.xz, d.xz)*(dot(o.xz, o.xz) - 1);
+	if (delta < 0)
+	{
+		return false; // No hay intersección en los reales
+	}
+	const float t_1 = (-dot(o.xz, d.xz) + sqrt(delta))/(2*dot(d.xz, d.xz));
+	const float t_2 = = (-dot(o.xz, d.xz) - sqrt(delta))/(2*dot(d.xz, d.xz));
+	if (t_1 > 0)
+	{
+		p_t = o + t_1*d;
+		return 0 <= p_t.y && p_t.y <= 1 ? true : false; 
+	}
+	else if (t_2 > 0)
+	{
+		p_t = o + t_2*d;
+		return 0 <= p_t.y && p_t.y <= 1 ? true : false;
+	}
+	else
+	{
+		return false;
+	}
+}
+```
+
+Análogamente, podemos expresar el cono de altura y radio unidad mediante el conjunto
+$$\{ (x, y, z) \in \mathbb{R}^3 \colon x^2 - y^2 + z^2 = 0, \; 0 \leq y \leq 1 \}$$
+Por tanto, habrá intersección con dicho cilindro si existe $t > 0$ tal que
+$$(o_x + td_x)^2 - (o_y + td_y)^2 + (o_z + td_z)^2 = 0 \; \iff \; (d_x^2 - d_y^2+ d_z^2)t^2 + (o_xd_x - o_y d_y+ o_zd_z)t + (o_x^2 - o_y^2+ o_z)^2 = 0$$
+Despejando $t$ llegamos a que
+$$t = \frac{- (o_xd_x - o_yd_y + o_zd_z) \pm \sqrt{(o_xd_x - o_yd_y + o_zd_z)^2 - 4(d_x^2 - d_y^2 + d_z^2)(o_x^2 - o_y^2 + o_z^2)}}{2(d_x^2 - d_y^2 + d_z^2)}$$
+
+```c++
+bool intersectCone(const vec3 o, const vec3 d, vec3 & p_t)
+{
+	const float delta = pow(o.x*d.x -o.y*d.y + o.z*d.z, 2) 
+			- 4*(pow(d.x, 2) - pow(d.y, 2) + pow(d.z, 2)*(pow(o.x, 2) - pow(o.y, 2) + pow(o.z, 2)));
+	if (delta < 0)
+	{
+		return false; // No hay intersección en los reales
+	}
+	const float t_1 = (-(o.x*d.x - o.y*d_y + o.z*d.z) + sqrt(delta))/(2*(pow(d.x, 2) - pow(d.y, 2) + pow(d.z, 2)));
+	const float t_2 = = (-o.x*d.x - o.y*d_y + o.z*d.z) - sqrt(delta))/(2*(pow(d.x, 2) - pow(d.y, 2) + pow(d.z, 2)));
+	if (t_1 > 0)
+	{
+		p_t = o + t_1*d;
+		return 0 <= p_t.y && p_t.y <= 1 ? true : false; 
+	}
+	else if (t_2 > 0)
+	{
+		p_t = o + t_2*d;
+		return 0 <= p_t.y && p_t.y <= 1 ? true : false;
+	}
+	else
+	{
+		return false;
+	}
+}
+```
+

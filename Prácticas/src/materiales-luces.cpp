@@ -3,7 +3,7 @@
  * Titulación: DGIIM
  * Email: miguelangelmc@correo.ugr.es
  * DNI: 20070272
- **/
+**/
 
 // *********************************************************************
 // **
@@ -119,16 +119,16 @@ TexturaXY::TexturaXY(const std::string &nom) : Textura(nom)
 TexturaXZ::TexturaXZ(const std::string &nom) : Textura(nom)
 {
    modo_gen_ct = mgct_coords_objeto;
-   //coefs_s[0] = 1.0f / 2.0f;
-   //coefs_s[1] = 0.0f;
-   //coefs_s[2] = 0.0f;
-   //coefs_s[3] = 0.5f;
-   //coefs_t[0] = 0.0f;
-   //coefs_t[1] = 0.0f;
-   //coefs_t[2] = 1.0f / 2.0f;
-   //coefs_t[3] = 0.5f;
-   coefs_t[1] = 0.0;
-   coefs_t[2] = 1.0;
+   coefs_s[0] = 1.0f / 2.0f;
+   coefs_s[1] = 0.0f;
+   coefs_s[2] = 0.0f;
+   coefs_s[3] = 0.5f;
+   coefs_t[0] = 0.0f;
+   coefs_t[1] = 0.0f;
+   coefs_t[2] = 1.0f / 2.0f;
+   coefs_t[3] = 0.5f;
+   //coefs_t[1] = 0.0;
+   //coefs_t[2] = 1.0;
 }
 
 // Crea un material usando un color plano y los coeficientes de las componentes
