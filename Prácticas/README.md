@@ -1,7 +1,5 @@
 # Trombón
 
-![](./doc/resources/trombone.gif)
-
 ## Introducción
 
 Este proyecto tiene como objetivo principal la visualización y animación de un trombón utilizando técnicas de informática gráfica. 
